@@ -46,6 +46,12 @@ cd backend  && uv run ruff check . && uv run ruff format --check . && uv run myp
 cd apps/web && npm run lint && npm run typecheck && npm test && npm run build
 ```
 
+End-to-end tests start the API and web app themselves (Postgres must be running). See [e2e/README.md](e2e/README.md):
+
+```sh
+cd e2e && npm install && npx playwright install chromium && npm test
+```
+
 When an API route changes, refresh the shared types so the web app's client stays in step:
 
 ```sh
