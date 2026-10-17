@@ -9,6 +9,8 @@ import "@fontsource/figtree/700.css";
 import "@fontsource/figtree/800.css";
 import "@fontsource/syne/700.css";
 import "@fontsource/syne/800.css";
+import "@clew/design-tokens/tokens.css";
+import "@clew/design-tokens/base.css";
 import "./styles.css";
 
 const root = document.getElementById("root");
