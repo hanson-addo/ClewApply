@@ -1,0 +1,30 @@
+name: Design tokens
+
+on:
+  pull_request:
+    paths:
+      - 'packages/design-tokens/**'
+      - '.github/workflows/design-tokens.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/design-tokens/**'
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: packages/design-tokens
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Generated files are up to date
+        run: npm run check
+      - name: Contrast and token tests
+        run: npm test
