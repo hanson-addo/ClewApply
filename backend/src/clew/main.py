@@ -10,11 +10,14 @@ from clew.config import get_settings
 
 def create_app() -> FastAPI:
     settings = get_settings()
+    is_local = settings.env == "local"
     app = FastAPI(
         title="Clew API",
         version=__version__,
-        # Interactive docs only for local development.
-        docs_url="/docs" if settings.env == "local" else None,
+        # Interactive docs and the public schema only for local development.
+        # `python -m clew.openapi` calls app.openapi() directly, so it still works.
+        docs_url="/docs" if is_local else None,
+        openapi_url="/openapi.json" if is_local else None,
         redoc_url=None,
     )
     app.add_middleware(

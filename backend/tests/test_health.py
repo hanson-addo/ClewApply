@@ -46,5 +46,6 @@ async def test_docs_hidden_outside_local(monkeypatch: pytest.MonkeyPatch) -> Non
         app = create_app()
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
             assert (await c.get("/docs")).status_code == 404
+            assert (await c.get("/openapi.json")).status_code == 404
     finally:
         get_settings.cache_clear()
