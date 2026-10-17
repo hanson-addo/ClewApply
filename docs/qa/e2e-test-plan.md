@@ -18,9 +18,9 @@ Rules that apply to every test:
 - **Made-up data only.** Fixtures use invented people ("Riley Test", `riley+e2e@example.test`). No real resumes or personal data, per CLAUDE.md.
 - **No calls to real third-party sites.** USAJobs and Greenhouse/Lever/Ashby are replaced by recorded fixture responses served from a local stub. LinkedIn, Indeed and ZipRecruiter are never contacted.
 - **No third-party passwords anywhere**, including fixtures and test logs.
-- **Each test makes its own user** through a test-only seeding endpoint (enabled only when `APP_ENV=test`), so tests run in parallel and never depend on each other.
+- **Each test makes its own user** through a test-only seeding endpoint (enabled only when `CLEW_ENV=test`), so tests run in parallel and never depend on each other.
 - **Stable selectors.** Tests find elements by role and accessible name first, `data-testid` second, never by CSS class or text that marketing may change.
-- **Auth in tests.** Login is Clerk. Tests run against a Clerk development instance using Clerk's Playwright testing helpers (`@clerk/testing`, testing tokens to get past bot protection) and test emails such as `riley+clerk_test@example.test` with the fixed test code, so no real inbox is needed. Google and LinkedIn sign-in are checked by hand weekly, since automating third-party consent screens is fragile.
+- **Auth in tests.** Login is Clerk. Tests run against a Clerk development instance using Clerk's Playwright testing helpers (`@clerk/testing`, testing tokens to get past bot protection) and test emails such as `riley+clerk_test@example.test` with Clerk's fixed one-time code (`424242`), so no mailbox is needed and no email is actually sent. Google and LinkedIn sign-in are checked by hand weekly, since automating third-party consent screens is fragile.
 
 ## 2. Environments and test data
 
@@ -29,7 +29,7 @@ Rules that apply to every test:
 | App under test | `docker compose up` (web, api, postgres, redis, worker, job-source stub) |
 | Base URL | `http://localhost:5173` (web), `http://localhost:8000` (api) |
 | Job fixtures | `e2e/fixtures/jobs/`: 40 USAJobs results, 3 Greenhouse boards, 1 Lever, 1 Ashby, with 8 planted duplicate pairs and 2 near-misses that must *not* merge |
-| Resume fixtures | `e2e/fixtures/resumes/`: `clean.pdf`, `clean.docx`, `two-column.pdf`, `scanned-image.pdf`, `empty.pdf`, `huge-11mb.pdf`, `fake-pdf.exe`, `eicar.pdf` (antivirus test string) |
+| Resume fixtures | `e2e/fixtures/resumes/`: `clean.pdf`, `clean.docx`, `two-column.pdf`, `scanned-image.pdf`, `empty.pdf`, `huge-11mb.pdf`, `exactly-10mb.pdf`, `10mb-plus-1.pdf`, `fake-pdf.exe`, `eicar.pdf` (antivirus test string) |
 | Expected parse | `e2e/fixtures/resumes/*.expected.json` in JSON Resume shape |
 
 Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly and blocks release if red. **P2** nightly, tracked but doesn't block.
@@ -40,21 +40,21 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 
 | ID | P | Case | Expected |
 | --- | --- | --- | --- |
-| AUTH-01 | P0 | New user signs up with email magic link | Link arrives in the test mailbox; clicking it lands on Onboarding step 1; a `users` row exists with `plan = free` |
-| AUTH-02 | P0 | Returning user signs in with magic link | Lands on Job feed |
+| AUTH-01 | P0 | New user signs up with a `+clerk_test` email and the fixed one-time code | Lands on Onboarding step 1; a `users` row exists with `plan = free` |
+| AUTH-02 | P0 | Returning user signs in with a `+clerk_test` email and the fixed code | Lands on Job feed |
 | AUTH-03 | P0 | Passkey registration offered after first login, then sign in with passkey | Uses Playwright's virtual WebAuthn authenticator; second sign-in needs no email |
 | AUTH-04 | P1 | Continue with Google (manual weekly check) | Account created; name and email filled |
 | AUTH-05 | P1 | Continue with LinkedIn (manual weekly check) | Name, headline and photo pre-filled in the profile |
-| AUTH-06 | P0 | Session cookies | Access and refresh cookies are `HttpOnly`, `Secure`, `SameSite=Lax`; nothing auth-related in `localStorage` or `sessionStorage` |
-| AUTH-07 | P1 | Access token expires (clock moved 16 min) | Next request refreshes silently; user stays signed in |
+| AUTH-06 | P0 | Session cookies, checked against Clerk's cookie model | `__client` (on Clerk's own domain) is `HttpOnly` and `Secure`. `__session` (on our domain) is `Secure` and `SameSite=Lax` and expires in 60 seconds or less; it is not HttpOnly because Clerk's SDK reads it. No Clerk or app tokens in `localStorage` or `sessionStorage`. Needs Security's agreement, since threat model R3 (#33) assumes HttpOnly app cookies |
+| AUTH-07 | P1 | Session token refresh: stay idle on a page for 3 minutes, then act | The `__session` token value has changed at least once (Clerk refreshes it about every 60 seconds); the action succeeds and the user stays signed in. Also: the API rejects a captured `__session` token older than its expiry |
 | AUTH-08 | P0 | Sign out | Cookies cleared; Back button shows sign-in, not cached pages |
 | AUTH-09 | P1 | "Sign out everywhere" from Settings | A second browser context is signed out on its next request |
 | AUTH-10 | P0 | Signed-out user opens `/jobs`, `/profile`, `/applications` | Redirected to sign-in, then back to the page they asked for |
 | AUTH-11 | P0 | User A tries to read user B's profile, application or resume by ID | API returns 404; UI shows not-found. Covers the row-level security promise |
-| AUTH-12 | P1 | Expired or reused magic link | Clear error and a "send a new link" button |
+| AUTH-12 | P1 | Wrong one-time code entered | Clear error and a "send a new code" button |
 | AUTH-13 | P1 | Sign-in rate limit (10 bad attempts) | Further attempts blocked with a friendly message |
 | AUTH-14 | P0 | Sign-in page copy | Shows "Clew never asks for your passwords" (or approved wording); no field asks for a job-site password |
-| AUTH-15 | P2 | Re-authentication before data export or account deletion | Prompts for passkey or a fresh link first |
+| AUTH-15 | P2 | Re-authentication before data export or account deletion | Prompts for a passkey or a fresh one-time code first |
 
 ### 3.2 Resume upload and onboarding
 
@@ -64,7 +64,8 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | UP-02 | P0 | Upload `clean.docx` | Same as UP-01 |
 | UP-03 | P1 | Upload `two-column.pdf` | Fields parse; any low-confidence field shows a "Check this" flag |
 | UP-04 | P1 | Upload `scanned-image.pdf` | Either parses via OCR or says it couldn't read the file and offers manual entry; never a blank profile with no message |
-| UP-05 | P0 | Upload `huge-11mb.pdf` | Rejected before upload finishes with the size limit stated |
+| UP-05 | P0 | Upload `huge-11mb.pdf` | Rejected with HTTP 413 and "Files must be 10 MB or smaller" |
+| UP-05b | P0 | 10 MB boundary: upload `exactly-10mb.pdf` (10,485,760 bytes) and `10mb-plus-1.pdf` (10,485,761 bytes) | The first is accepted; the second gets HTTP 413 and "Files must be 10 MB or smaller" |
 | UP-06 | P0 | Upload `fake-pdf.exe` renamed to `.pdf` | Rejected by content type check, not just extension |
 | UP-07 | P0 | Upload `eicar.pdf` | Rejected by malware scan; nothing stored; audit log entry written |
 | UP-08 | P1 | Upload `empty.pdf` | Friendly error, offer manual entry |
@@ -118,6 +119,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | --- | --- | --- | --- |
 | TRK-01 | P0 | Board columns | Saved, Applied, Interview, Offer, Closed. Closed holds both Rejected and Withdrawn cards, each with its own label |
 | TRK-01b | P0 | Mark one card Rejected and another Withdrawn | Both land in Closed with the right label; the API stores them as separate statuses |
+| TRK-01c | P1 | Reopen a Withdrawn card (move it back to Applied) | Leaves Closed, loses the Withdrawn label, keeps its notes, resume version and original `applied_at`; survives reload |
 | TRK-02 | P0 | Move a card Saved → Applied → Interview by drag and drop | Status saved; survives reload; `applied_at` set on first move to Applied |
 | TRK-03 | P0 | Move a card with keyboard only | Same result as TRK-02 (accessibility) |
 | TRK-04 | P0 | Card shows the resume version sent | Matches the variant chosen in FEED-14, even after the profile changes later |
@@ -144,7 +146,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 
 `journey.spec.ts` runs these steps as one user and is the release gate:
 
-1. Sign up with a magic link.
+1. Sign up with a `+clerk_test` email and the fixed one-time code.
 2. Upload `clean.pdf`; fix one "Check this" field; finish onboarding.
 3. Feed shows deduplicated, ranked jobs; open the top job's detail panel.
 4. Save that job; dismiss another.
@@ -172,10 +174,9 @@ Not built yet; listed so field maps get test hooks from the start.
 ## 7. What QA needs from the developer scaffold
 
 - `docker compose` that starts the whole app with a job-source stub.
-- `APP_ENV=test` seeding endpoint (never enabled in production; a test checks the endpoint 404s without it) and Clerk development-instance keys in CI secrets.
-- A test mailbox (for example Mailpit) for magic links.
+- `CLEW_ENV=test` seeding endpoint (never enabled in production; a test checks the endpoint 404s without it) and Clerk development-instance keys in CI secrets.
 - `data-testid` on job cards, board columns and profile sections.
-- A way to move the server clock in test mode (token expiry, job expiry).
+- A way to move the server clock in test mode (job expiry). Not used for sign-in, since Clerk refreshes its token in the browser.
 
 ## 8. Open questions
 
