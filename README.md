@@ -39,6 +39,8 @@ npm install
 npm run dev                            # Web app on http://localhost:5173
 ```
 
+Sign-in needs a Clerk development instance. The one-time setup is in [docs/setup/clerk.md](docs/setup/clerk.md). Without it, the app still runs, but signed-in pages say sign-in isn't set up.
+
 Checks that CI runs on every pull request:
 
 ```sh
