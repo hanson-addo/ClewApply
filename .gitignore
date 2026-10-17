@@ -4,7 +4,15 @@
 !.env.example
 *.pem
 *.key
+*.p12
+*.pfx
+credentials*.json
+service-account*.json
 secrets/
+
+# Local database dumps
+*.sqlite
+*.dump
 
 # Python
 __pycache__/
@@ -32,8 +40,8 @@ pnpm-debug.log*
 
 # Browser add-on builds
 apps/extension/dist/
-*.zip
-*.crx
+apps/extension/*.zip
+apps/extension/*.crx
 
 # Editors and OS
 .vscode/*

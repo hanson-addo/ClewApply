@@ -17,11 +17,11 @@ Each role works in its own thread of the "maze apply" project.
 
 ## How a change gets in
 
-1. Work on a branch named `<role>/<short-topic>`, never on `main`.
+1. Work on a branch, never on `main`. Name it `<role>/<short-topic>`, or use the `claude/...` branch a Claude session was given.
 2. Open a pull request using the template. Link the backlog item it closes.
-3. Reviewer and Security both review. The author never approves their own PR.
+3. Reviewer and Security each post a PR review whose first line is `Verdict: approve` or `Verdict: changes requested`. All Claude roles post through one GitHub account, and GitHub won't let an account approve its own PR, so this written verdict is the approval. The author never gives their own verdict.
 4. All checks must pass.
-5. The owner (hanson-addo) merges. Nobody pushes directly to `main`.
+5. The owner (hanson-addo) merges only when Reviewer and Security have both posted `Verdict: approve`. Nobody pushes directly to `main`.
 
 ## Product rules (non-negotiable)
 
