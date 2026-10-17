@@ -75,6 +75,7 @@ async def test_upload_pdf(api: AsyncClient, store: MemoryStore, db: AsyncSession
     row = await db.scalar(select(Resume).where(Resume.id == uuid.UUID(body["id"])))
     assert row is not None
     assert store.objects[row.file_key] == (FAKE_PDF, PDF)
+    assert row.scan_status == "pending"
     # The storage key is random: no user id or file name in it.
     assert "Jordan" not in row.file_key
     assert str(row.user_id) not in row.file_key

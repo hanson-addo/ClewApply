@@ -32,6 +32,7 @@ def upgrade() -> None:
         sa.Column("content_type", sa.String(length=100), nullable=False),
         sa.Column("size_bytes", sa.BigInteger(), nullable=False),
         sa.Column("sha256", sa.String(length=64), nullable=False),
+        sa.Column("scan_status", sa.String(length=16), server_default="pending", nullable=False),
         sa.Column(
             "created_at",
             sa.DateTime(timezone=True),
