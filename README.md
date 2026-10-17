@@ -25,7 +25,7 @@ docs/            Specs, threat model, test plans
 You need Docker, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
 
 ```sh
-docker compose up -d postgres          # Postgres with pgvector on localhost:5432
+docker compose up -d                   # Postgres with pgvector (5432) and Redis (6379), local only
 
 cd backend
 cp .env.example .env
@@ -38,6 +38,8 @@ cp .env.example .env.local
 npm install
 npm run dev                            # Web app on http://localhost:5173
 ```
+
+Sign-in needs a Clerk development instance. The one-time setup is in [docs/setup/clerk.md](docs/setup/clerk.md). Without it, the app still runs, but signed-in pages say sign-in isn't set up.
 
 Checks that CI runs on every pull request:
 
