@@ -1,0 +1,8 @@
+version: 2
+updates:
+  # Keep third-party GitHub Actions patched. Add pip and npm entries
+  # when backend/ and apps/ land.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
