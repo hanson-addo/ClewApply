@@ -97,7 +97,7 @@ These apply to every screen. Component-level details are in [components.md](comp
 8. **Focus.** Visible focus ring on everything (from `base.css`). Dialogs and drawers trap focus, close on Escape, and return focus to the button that opened them.
 9. **Motion.** All animation respects `prefers-reduced-motion`. Nothing flashes or autoplays.
 10. **Forms.** Errors appear next to the field in text, are linked with `aria-describedby`, and the field gets `aria-invalid="true"`. On submit, focus moves to an error summary at the top that links to each field.
-11. **Sensitive answers** (work authorization, veteran, disability, EEO) are their own fieldset with a legend explaining they are encrypted and only filled when the user says so.
+11. **Sensitive answers** (work authorization, veteran, disability, EEO) are their own fieldset with a legend explaining they are encrypted and only filled when the user says so. Spec: [SensitiveFieldset](components.md#sensitivefieldset).
 
 ## Accessibility test checklist (for QA)
 

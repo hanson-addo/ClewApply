@@ -74,6 +74,15 @@ type TextFieldProps = { label: string; hint?: string; error?: string } & React.I
 - Groups sit in a `<fieldset>` with a `<legend>` (Feed filters: "Work type", "Sources").
 - In the Sync Center, each change row has a checkbox labeled with the field name: "Include headline change".
 
+## SensitiveFieldset
+
+Work authorization, veteran status, disability and EEO answers.
+
+- A `<fieldset>` with a `<legend>` and a short note: "Encrypted separately. Clew only fills these when you say so."
+- Inputs use `autocomplete="off"` so the browser doesn't save them.
+- Saved values are masked by default ("Answered"), with a "Show" toggle button (`aria-pressed`, label "Show veteran status") that reveals the value until the user leaves the section.
+- Values never appear in toasts, the live region, error summaries or page titles. Announce "Saved" rather than the answer.
+
 ## Select
 
 - Native `<select>` styled like TextField, with a custom chevron icon (`aria-hidden`). Use native so phones get their own picker.
@@ -142,6 +151,7 @@ The core trust moment: the user sees exactly what will change on a site and appr
 - **Tokens:** row `bg-surface`, divider `border-subtle`. Old value `text-secondary` with a strikethrough is not enough on its own: each side has a visible label ("Now", "New").
 - **Desktop:** before and after side by side. **Phone:** stacked, "Now" above "New".
 - **Screen reader:** the checkbox label reads "Include headline: now 'Backend Engineer', new 'Senior Backend Engineer, Python'". Long values are truncated visually with a "Show all" button (`aria-expanded`), never cut off for screen readers.
+- **Sensitive fields:** when a change touches a sensitive answer (work authorization, veteran, disability, EEO), the row shows "Updated" instead of the old and new values, in both the Sync Center and the add-on panel. The checkbox label reads "Include veteran status (updated)".
 - Primary button below the list states the count: "Fill 3 approved changes". The add-on never presses the site's own Save button; the panel tells the user "Now press Save on LinkedIn".
 
 ## ConnectionCard and site list
