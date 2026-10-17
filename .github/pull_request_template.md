@@ -15,5 +15,5 @@ After:
 - [ ] Tests added or updated
 - [ ] No secrets, real personal data, or third-party passwords anywhere in the change
 - [ ] Logs don't include profile content, resume text or tokens
-- [ ] Reviewer approved
-- [ ] Security approved
+- [ ] Reviewer posted `Verdict: approve`
+- [ ] Security posted `Verdict: approve`

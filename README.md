@@ -68,7 +68,7 @@ cd apps/web && npm run gen:api
 
 ## How changes get in
 
-Every change goes on a branch and becomes a pull request. A reviewer checks it for bugs and quality, security must approve it, automated checks must pass, and the owner merges it. Nothing is pushed straight to `main`. See [CLAUDE.md](CLAUDE.md) for the full team rules.
+Every change goes on a branch and becomes a pull request. A reviewer checks it for bugs and quality, security must sign off with a written verdict, automated checks must pass, and the owner merges it. Nothing is pushed straight to `main`. See [CLAUDE.md](CLAUDE.md) for the full team rules.
 
 ## License
 
