@@ -1,48 +1,218 @@
 /* Brand colors, type and spacing come from @clew/design-tokens (imported in main.tsx). */
 
-.shell {
-  max-width: 40rem;
-  margin: 0 auto;
-  padding: var(--clew-space-12) var(--clew-space-4);
-}
+/* --- Logo ------------------------------------------------------------------------------ */
 
-.brand {
-  display: flex;
+.clew-logo {
+  display: inline-flex;
   align-items: center;
-  gap: var(--clew-space-2);
+  gap: var(--clew-space-3);
 }
 
-.wordmark {
+.clew-wordmark {
   font-family: var(--clew-font-family-display);
   font-weight: var(--clew-font-weight-heavy);
   font-size: var(--clew-font-size-2xl);
+  letter-spacing: -0.5px;
 }
 
-h1 {
+.clew-logo-onDark .clew-wordmark {
+  color: var(--clew-text-on-inverse);
+}
+
+/* --- Sign in --------------------------------------------------------------------------- */
+
+.signin {
+  min-height: 100vh;
+  display: flex;
+  flex-wrap: wrap;
+  background: var(--clew-bg-inverse);
+  color: var(--clew-text-on-inverse);
+}
+
+/* Phone: form first, then the story and maze below it (design README, layouts table). */
+.signin-panel {
+  order: -1;
+  flex: 1 1 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--clew-space-10) var(--clew-space-4);
+  background: var(--clew-color-ink-50);
+  color: var(--clew-text-primary);
+}
+
+.signin-story {
+  flex: 999 1 560px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-6);
+  padding: var(--clew-space-10) var(--clew-space-4) var(--clew-space-8);
+}
+
+/* On phones the form comes first, so the logo moves up into it. */
+.signin-panel-logo .clew-wordmark {
+  font-size: var(--clew-font-size-xl);
+}
+
+.signin-story > .clew-logo {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .signin-panel-logo {
+    display: none;
+  }
+
+  .signin-story > .clew-logo {
+    display: inline-flex;
+  }
+
+  .signin-panel {
+    order: 0;
+    padding: var(--clew-space-10) var(--clew-space-8);
+  }
+
+  .signin-story {
+    padding: var(--clew-space-10);
+  }
+}
+
+.signin-hero {
+  margin: 0;
   font-size: var(--clew-font-size-hero);
-  margin: var(--clew-space-8) 0 var(--clew-space-4);
+  line-height: 0.98;
+  max-width: 40rem;
 }
 
-.lede {
+.signin-accent {
+  color: var(--clew-color-coral-500);
+}
+
+.signin-lede {
+  margin: 0;
+  max-width: 35rem;
+  font-size: var(--clew-font-size-lg);
+  color: var(--clew-text-on-inverse-muted);
+}
+
+.maze-art {
+  width: 100%;
+  height: auto;
+  max-width: 56rem;
+}
+
+.signin-panel-inner {
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-5);
+}
+
+.signin-badge {
+  align-self: flex-start;
+  padding: var(--clew-space-1) var(--clew-space-3);
+  border-radius: var(--clew-radius-pill);
+  background: var(--clew-bg-inverse);
+  color: var(--clew-text-on-inverse);
+  font-size: var(--clew-font-size-xs);
+  font-weight: var(--clew-font-weight-bold);
+  letter-spacing: var(--clew-font-letter-spacing-caps);
+  text-transform: uppercase;
+}
+
+.signin-title {
+  margin: 0;
+  font-size: var(--clew-font-size-3xl);
+}
+
+.signin-promise {
+  margin: 0;
+  font-size: var(--clew-font-size-sm);
+  color: var(--clew-text-secondary);
+}
+
+/* --- Signed-in shell ------------------------------------------------------------------- */
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clew-space-4);
+  padding: var(--clew-space-3) var(--clew-space-4);
+  background: var(--clew-bg-inverse);
+  border-bottom: 1px solid var(--clew-bg-inverse-raised);
+  color: var(--clew-text-on-inverse);
+}
+
+.app-header-home {
+  color: inherit;
+  text-decoration: none;
+}
+
+.app-header-account {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-3);
+  min-width: 0;
+}
+
+.app-header-email {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--clew-font-size-sm);
+  color: var(--clew-text-on-inverse-muted);
+}
+
+@media (max-width: 30rem) {
+  .app-header-email {
+    display: none;
+  }
+}
+
+.button {
+  min-height: 44px;
+  padding: 0 var(--clew-space-5);
+  border-radius: var(--clew-radius-md);
+  font: inherit;
+  font-weight: var(--clew-font-weight-bold);
+  cursor: pointer;
+}
+
+.button-inverse-outline {
+  background: transparent;
+  color: var(--clew-text-on-inverse);
+  border: 2px solid var(--clew-border-inverse);
+}
+
+.button-inverse-outline:hover {
+  border-color: var(--clew-text-on-inverse);
+}
+
+.home,
+.setup-needed,
+.clew-loading {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--clew-space-10) var(--clew-space-4);
+}
+
+.home h1,
+.setup-needed h1 {
+  font-size: var(--clew-font-size-3xl);
+  margin: 0 0 var(--clew-space-4);
+}
+
+.home-lede {
   font-size: var(--clew-font-size-lg);
   color: var(--clew-text-secondary);
 }
 
-.status {
-  display: inline-block;
-  padding: var(--clew-space-1) var(--clew-space-3);
-  border-radius: var(--clew-radius-pill);
-  font-size: var(--clew-font-size-sm);
-  background: var(--clew-status-info-bg);
-  color: var(--clew-status-info-fg);
-}
-
-.status-online {
-  background: var(--clew-status-success-bg);
-  color: var(--clew-status-success-fg);
-}
-
-.status-offline {
+.home-error {
+  padding: var(--clew-space-3) var(--clew-space-4);
+  border-radius: var(--clew-radius-md);
   background: var(--clew-status-danger-bg);
   color: var(--clew-status-danger-fg);
 }

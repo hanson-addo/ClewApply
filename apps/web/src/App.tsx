@@ -1,29 +1,46 @@
-import { Logo } from "./Logo";
-import { useApiStatus, type ApiStatus } from "./useApiStatus";
+import { ClerkProvider } from "@clerk/react";
+import { Navigate, Route, Routes, useNavigate } from "react-router";
 
-const statusText: Record<ApiStatus, string> = {
-  checking: "Checking the Clew service…",
-  online: "Clew service is up",
-  offline: "Clew service is unreachable",
-};
+import { clerkAppearance } from "./auth/clerkAppearance";
+import { RequireSignIn } from "./auth/RequireSignIn";
+import { config } from "./config";
+import { HomePage } from "./pages/HomePage";
+import { SetupNeededPage } from "./pages/SetupNeededPage";
+import { SignInPage } from "./pages/SignInPage";
 
-export function App() {
-  const status = useApiStatus();
-
+export function AppRoutes() {
   return (
-    <main className="shell">
-      <header className="brand">
-        <Logo />
-        <span className="wordmark">Clew</span>
-      </header>
-      <h1>One profile and one job feed for every site you job hunt on.</h1>
-      <p className="lede">
-        Update your resume once. Clew fills it into each job site for you to approve, and gathers
-        jobs from everywhere into one ranked list.
-      </p>
-      <p className={`status status-${status}`} role="status">
-        {statusText[status]}
-      </p>
-    </main>
+    <Routes>
+      <Route path="/sign-in/*" element={<SignInPage mode="sign-in" />} />
+      <Route path="/sign-up/*" element={<SignInPage mode="sign-up" />} />
+      <Route
+        path="/"
+        element={
+          <RequireSignIn>
+            <HomePage />
+          </RequireSignIn>
+        }
+      />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
+/** Must render inside a router: Clerk navigates with react-router so pages don't reload. */
+export function App({ publishableKey = config.clerkPublishableKey }: { publishableKey?: string }) {
+  const navigate = useNavigate();
+  if (!publishableKey) return <SetupNeededPage />;
+  return (
+    <ClerkProvider
+      publishableKey={publishableKey}
+      routerPush={(to) => navigate(to)}
+      routerReplace={(to) => navigate(to, { replace: true })}
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      afterSignOutUrl="/sign-in"
+      appearance={clerkAppearance}
+    >
+      <AppRoutes />
+    </ClerkProvider>
   );
 }

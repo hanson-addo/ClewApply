@@ -2,14 +2,14 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test } from "@playwright/test";
 
 // X-01 and X-02 from the test plan. Add each new screen to SCREENS as it lands.
-const SCREENS = [{ name: "landing", path: "/" }];
+const SCREENS = [{ name: "setup-needed", path: "/" }];
 
 for (const screen of SCREENS) {
   test(`${screen.name}: no serious or critical accessibility issues (X-01) @phone`, async ({
     page,
   }) => {
     await page.goto(screen.path);
-    await expect(page.getByRole("status")).not.toHaveText(/Checking/);
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     const { violations } = await new AxeBuilder({ page }).analyze();
     const blocking = violations

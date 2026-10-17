@@ -1,39 +1,32 @@
 import { expect, test } from "@playwright/test";
 
-// The scaffold has one screen: the landing page with a live API status line.
-// Sign-in (AUTH-*) and later journeys get their own spec files as they land.
+// CI builds the web app without a Clerk key, so every route shows the
+// "sign-in isn't set up" page. Signed-in journeys (AUTH-*, X-06 on the home
+// page) need a Clerk dev instance and get their own spec once QA has keys.
 
-test.describe("landing page", () => {
-  test("shows the Clew brand and says the service is up", async ({ page }) => {
+test.describe("app without a Clerk key", () => {
+  test("shows the Clew brand and says sign-in isn't set up", async ({ page }) => {
     await page.goto("/");
 
     await expect(page).toHaveTitle(/Clew/);
-    await expect(page.getByRole("img", { name: "Clew" })).toBeVisible();
+    // The mark is decorative; the wordmark carries the name.
+    await expect(page.getByText("clew", { exact: true })).toBeVisible();
     await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-      "One profile and one job feed for every site you job hunt on.",
+      "Sign-in isn't set up yet",
     );
-    await expect(page.getByRole("status")).toHaveText("Clew service is up");
   });
 
-  test("says the service is unreachable when the API is down (X-06)", async ({ page }) => {
-    await page.route("**/health", (route) => route.abort("connectionrefused"));
-    await page.goto("/");
+  test("shows the same page on the sign-in route", async ({ page }) => {
+    await page.goto("/sign-in");
 
-    await expect(page.getByRole("status")).toHaveText("Clew service is unreachable");
-  });
-
-  test("says the service is unreachable when the API errors (X-06)", async ({ page }) => {
-    await page.route("**/health", (route) =>
-      route.fulfill({ status: 500, contentType: "application/json", body: "{}" }),
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "Sign-in isn't set up yet",
     );
-    await page.goto("/");
-
-    await expect(page.getByRole("status")).toHaveText("Clew service is unreachable");
   });
 
   test("keeps nothing in browser storage (AUTH-06)", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("status")).toHaveText("Clew service is up");
+    await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 
     const stored = await page.evaluate(() => ({
       local: Object.keys(window.localStorage),
