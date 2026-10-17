@@ -1,0 +1,48 @@
+/* Brand colors, type and spacing come from @clew/design-tokens (imported in main.tsx). */
+
+.shell {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--clew-space-12) var(--clew-space-4);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-2);
+}
+
+.wordmark {
+  font-family: var(--clew-font-family-display);
+  font-weight: var(--clew-font-weight-heavy);
+  font-size: var(--clew-font-size-2xl);
+}
+
+h1 {
+  font-size: var(--clew-font-size-hero);
+  margin: var(--clew-space-8) 0 var(--clew-space-4);
+}
+
+.lede {
+  font-size: var(--clew-font-size-lg);
+  color: var(--clew-text-secondary);
+}
+
+.status {
+  display: inline-block;
+  padding: var(--clew-space-1) var(--clew-space-3);
+  border-radius: var(--clew-radius-pill);
+  font-size: var(--clew-font-size-sm);
+  background: var(--clew-status-info-bg);
+  color: var(--clew-status-info-fg);
+}
+
+.status-online {
+  background: var(--clew-status-success-bg);
+  color: var(--clew-status-success-fg);
+}
+
+.status-offline {
+  background: var(--clew-status-danger-bg);
+  color: var(--clew-status-danger-fg);
+}
