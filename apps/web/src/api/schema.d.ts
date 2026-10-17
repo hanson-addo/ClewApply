@@ -157,6 +157,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description The account has no email address (detail: email_required) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     ready_ready_get: {

@@ -124,6 +124,9 @@
           },
           "401": {
             "description": "Not signed in"
+          },
+          "403": {
+            "description": "The account has no email address (detail: email_required)"
           }
         },
         "security": [

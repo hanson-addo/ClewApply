@@ -16,7 +16,13 @@ class Me(BaseModel):
     plan: str
 
 
-@router.get("/me", responses={401: {"description": "Not signed in"}})
+@router.get(
+    "/me",
+    responses={
+        401: {"description": "Not signed in"},
+        403: {"description": "The account has no email address (detail: email_required)"},
+    },
+)
 async def me(user: CurrentUser) -> Me:
     """Who is signed in. The first call after sign-up creates the Clew account."""
     return Me(id=user.id, email=user.email, plan=user.plan)

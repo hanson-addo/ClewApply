@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import json
 import logging
@@ -93,9 +94,26 @@ async def test_deleted_user_is_rejected(api: AsyncClient, db: AsyncSession) -> N
     assert (await api.get("/me", headers=bearer(make_token(KEY, sub=sub)))).status_code == 401
 
 
-async def test_first_sign_in_without_email_claim_is_rejected(api: AsyncClient) -> None:
+async def test_first_sign_in_without_email_claim_is_403(api: AsyncClient) -> None:
     token = make_token(KEY, sub="user_test_no_email", email=None)
+    response = await api.get("/me", headers=bearer(token))
+    assert response.status_code == 403
+    assert response.json() == {"detail": "email_required"}
+
+
+async def test_deleted_user_email_is_not_rewritten(api: AsyncClient, db: AsyncSession) -> None:
+    sub = "user_test_deleted_no_sync"
+    await api.get("/me", headers=bearer(make_token(KEY, sub=sub, email="gone@example.test")))
+    await db.execute(
+        update(User).where(User.auth_provider_id == sub).values(deleted_at=datetime.now(UTC))
+    )
+    await db.commit()
+    token = make_token(KEY, sub=sub, email="new@example.test")
     assert (await api.get("/me", headers=bearer(token))).status_code == 401
+    db.expire_all()
+    user = await db.scalar(select(User).where(User.auth_provider_id == sub))
+    assert user is not None
+    assert user.email == "gone@example.test"
 
 
 @pytest.mark.parametrize(
@@ -151,8 +169,17 @@ async def test_valid_token_passes() -> None:
         ({"azp": None}, "wrong_authorized_party"),
         ({"kid": "kid_unknown"}, "unknown_key"),
         ({"nbf": 2_000_000_000}, "invalid"),
+        ({"sts": "pending"}, "session_not_active"),
     ],
-    ids=["expired", "wrong-issuer", "wrong-azp", "no-azp", "unknown-kid", "not-yet-valid"],
+    ids=[
+        "expired",
+        "wrong-issuer",
+        "wrong-azp",
+        "no-azp",
+        "unknown-kid",
+        "not-yet-valid",
+        "pending-session",
+    ],
 )
 async def test_bad_tokens_are_rejected(token_kwargs: dict[str, Any], reason: str) -> None:
     with pytest.raises(InvalidToken) as exc:
@@ -220,6 +247,80 @@ async def test_unknown_kid_does_not_refetch_too_often() -> None:
         with pytest.raises(InvalidToken):
             await cache.get_key("kid_junk")
     assert calls == 1
+
+
+async def test_active_session_status_passes() -> None:
+    claims = await verifier(KEY).verify(make_token(KEY, sts="active"))
+    assert claims.subject == "user_test_riley"
+
+
+async def test_concurrent_unknown_kids_cause_one_fetch() -> None:
+    calls = 0
+
+    async def fetch() -> Mapping[str, Any]:
+        nonlocal calls
+        calls += 1
+        await asyncio.sleep(0.01)  # let every request pile up on the lock
+        return {"keys": [KEY.jwk()]}
+
+    cache = JwksCache(fetch, clock=lambda: 0.0)
+    results = await asyncio.gather(
+        *(cache.get_key(f"kid_junk_{i}") for i in range(20)), return_exceptions=True
+    )
+    assert all(isinstance(r, InvalidToken) for r in results)
+    assert calls == 1
+
+
+async def test_concurrent_requests_on_stale_cache_cause_one_fetch() -> None:
+    calls = 0
+    now = [0.0]
+
+    async def fetch() -> Mapping[str, Any]:
+        nonlocal calls
+        calls += 1
+        await asyncio.sleep(0.01)
+        return {"keys": [KEY.jwk()]}
+
+    cache = JwksCache(fetch, clock=lambda: now[0])
+    await cache.get_key(KEY.kid)
+    now[0] = 2 * 60 * 60.0
+    await asyncio.gather(*(cache.get_key(KEY.kid) for _ in range(20)))
+    assert calls == 2
+
+
+async def test_failed_refresh_backs_off() -> None:
+    calls = 0
+    now = [0.0]
+    up = [True]
+
+    async def fetch() -> Mapping[str, Any]:
+        nonlocal calls
+        calls += 1
+        if not up[0]:
+            raise httpx.ConnectError("down")
+        return {"keys": [KEY.jwk()]}
+
+    cache = JwksCache(fetch, clock=lambda: now[0])
+    await cache.get_key(KEY.kid)
+    up[0] = False
+    now[0] = 2 * 60 * 60.0  # stale: the next request tries once and fails
+    await asyncio.gather(*(cache.get_key(KEY.kid) for _ in range(20)))
+    assert calls == 2
+    now[0] += 10  # still inside the back-off window: no new attempt
+    await cache.get_key(KEY.kid)
+    assert calls == 2
+    now[0] += 30  # back-off over: try again
+    await cache.get_key(KEY.kid)
+    assert calls == 3
+
+
+@pytest.mark.parametrize("body", [[], "keys", {"keys": "nope"}, {"keys": ["x", 1]}])
+async def test_malformed_jwks_is_a_failed_refresh(body: Any) -> None:
+    async def fetch() -> Any:
+        return body
+
+    with pytest.raises(SignInUnavailable):
+        await JwksCache(fetch).get_key(KEY.kid)
 
 
 async def test_unreachable_clerk_with_no_keys_is_unavailable() -> None:
