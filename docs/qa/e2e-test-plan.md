@@ -20,7 +20,7 @@ Rules that apply to every test:
 - **No third-party passwords anywhere**, including fixtures and test logs.
 - **Each test makes its own user** through a test-only seeding endpoint (enabled only when `APP_ENV=test`), so tests run in parallel and never depend on each other.
 - **Stable selectors.** Tests find elements by role and accessible name first, `data-testid` second, never by CSS class or text that marketing may change.
-- **Auth in tests.** The managed auth provider is swapped for a test issuer that mints tokens for seeded users, so tests don't depend on the provider's uptime. One nightly test exercises the real provider's sandbox.
+- **Auth in tests.** Login is Clerk. Tests run against a Clerk development instance using Clerk's Playwright testing helpers (`@clerk/testing`, testing tokens to get past bot protection) and test emails such as `riley+clerk_test@example.test` with the fixed test code, so no real inbox is needed. Google and LinkedIn sign-in are checked by hand weekly, since automating third-party consent screens is fragile.
 
 ## 2. Environments and test data
 
@@ -43,8 +43,8 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | AUTH-01 | P0 | New user signs up with email magic link | Link arrives in the test mailbox; clicking it lands on Onboarding step 1; a `users` row exists with `plan = free` |
 | AUTH-02 | P0 | Returning user signs in with magic link | Lands on Job feed |
 | AUTH-03 | P0 | Passkey registration offered after first login, then sign in with passkey | Uses Playwright's virtual WebAuthn authenticator; second sign-in needs no email |
-| AUTH-04 | P1 | Continue with Google (test OIDC issuer) | Account created; name and email filled |
-| AUTH-05 | P1 | Continue with LinkedIn (test OIDC issuer) | Name, headline and photo pre-filled in the profile |
+| AUTH-04 | P1 | Continue with Google (manual weekly check) | Account created; name and email filled |
+| AUTH-05 | P1 | Continue with LinkedIn (manual weekly check) | Name, headline and photo pre-filled in the profile |
 | AUTH-06 | P0 | Session cookies | Access and refresh cookies are `HttpOnly`, `Secure`, `SameSite=Lax`; nothing auth-related in `localStorage` or `sessionStorage` |
 | AUTH-07 | P1 | Access token expires (clock moved 16 min) | Next request refreshes silently; user stays signed in |
 | AUTH-08 | P0 | Sign out | Cookies cleared; Back button shows sign-in, not cached pages |
@@ -170,7 +170,7 @@ Not built yet; listed so field maps get test hooks from the start.
 ## 7. What QA needs from the developer scaffold
 
 - `docker compose` that starts the whole app with a job-source stub.
-- `APP_ENV=test` seeding endpoint and test auth issuer (never enabled in production; a test checks the endpoint 404s without it).
+- `APP_ENV=test` seeding endpoint (never enabled in production; a test checks the endpoint 404s without it) and Clerk development-instance keys in CI secrets.
 - A test mailbox (for example Mailpit) for magic links.
 - `data-testid` on job cards, board columns and profile sections.
 - A way to move the server clock in test mode (token expiry, job expiry).
@@ -179,4 +179,3 @@ Not built yet; listed so field maps get test hooks from the start.
 
 - Which file types and size limit for resumes? This plan assumes PDF and DOCX up to 10 MB.
 - Does the tracker's "closed" column merge Rejected and Withdrawn, or keep them separate?
-- Which test auth approach does the chosen provider support (Clerk, Auth0 or Supabase)?
