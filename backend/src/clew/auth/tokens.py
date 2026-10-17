@@ -62,47 +62,67 @@ def http_jwks_fetcher(url: str, timeout: float = 5.0) -> JwksFetcher:
 
 
 class JwksCache:
-    """Keeps Clerk's public keys in memory and refreshes them when stale or rotated."""
+    """Keeps Clerk's public keys in memory and refreshes them when stale or rotated.
+
+    At most one fetch runs at a time, and any attempt, successful or not, starts a
+    JWKS_MIN_REFETCH_SECONDS back-off. A burst of requests with junk key ids, or Clerk being
+    slow or down, therefore costs at most one fetch per back-off window.
+    """
 
     def __init__(self, fetch: JwksFetcher, clock: Callable[[], float] = time.monotonic) -> None:
         self._fetch = fetch
         self._clock = clock
         self._keys: dict[str, PyJWK] = {}
         self._fetched_at: float | None = None
+        self._last_attempt_at: float | None = None
         self._lock = asyncio.Lock()
 
     async def get_key(self, kid: str) -> PyJWK:
-        now = self._clock()
-        stale = self._fetched_at is None or now - self._fetched_at > JWKS_MAX_AGE_SECONDS
-        may_refetch = self._fetched_at is None or now - self._fetched_at > JWKS_MIN_REFETCH_SECONDS
-        if stale or (kid not in self._keys and may_refetch):
-            await self._refresh()
+        # With no keys yet, wait for any fetch already in flight rather than failing early.
+        if not self._keys or self._needs_refresh(kid):
+            await self._refresh(kid)
+        if not self._keys:
+            raise SignInUnavailable("no signing keys available")
         key = self._keys.get(kid)
         if key is None:
             raise InvalidToken("unknown_key")
         return key
 
-    async def _refresh(self) -> None:
+    def _needs_refresh(self, kid: str) -> bool:
+        now = self._clock()
+        if (
+            self._last_attempt_at is not None
+            and now - self._last_attempt_at < JWKS_MIN_REFETCH_SECONDS
+        ):
+            return False
+        if self._fetched_at is None or now - self._fetched_at > JWKS_MAX_AGE_SECONDS:
+            return True
+        return kid not in self._keys
+
+    async def _refresh(self, kid: str) -> None:
         async with self._lock:
+            # Another request may have refreshed while this one waited for the lock.
+            if not self._needs_refresh(kid):
+                return
+            self._last_attempt_at = self._clock()
             try:
                 data = await self._fetch()
             except (httpx.HTTPError, ValueError) as exc:
-                if self._keys:
-                    # Keep serving with the keys we have; Clerk may be briefly unreachable.
-                    logger.warning("jwks_refresh_failed", extra={"error": type(exc).__name__})
-                    return
-                raise SignInUnavailable("could not fetch signing keys") from exc
+                # Keep serving with any keys we have; Clerk may be briefly unreachable.
+                logger.warning("jwks_refresh_failed", extra={"error": type(exc).__name__})
+                return
             keys: dict[str, PyJWK] = {}
             for entry in data.get("keys", []):
-                kid = entry.get("kid")
-                if not kid or entry.get("kty") != "RSA":
+                entry_kid = entry.get("kid")
+                if not entry_kid or entry.get("kty") != "RSA":
                     continue
                 try:
-                    keys[kid] = PyJWK(entry, algorithm="RS256")
+                    keys[entry_kid] = PyJWK(entry, algorithm="RS256")
                 except jwt.PyJWTError:
                     continue
-            self._keys = keys
-            self._fetched_at = self._clock()
+            if keys:
+                self._keys = keys
+                self._fetched_at = self._clock()
 
 
 class TokenVerifier:
@@ -138,6 +158,10 @@ class TokenVerifier:
             raise InvalidToken("wrong_issuer") from exc
         except jwt.PyJWTError as exc:
             raise InvalidToken("invalid") from exc
+
+        # Clerk marks sessions with unfinished sign-in tasks as "pending"; only active ones count.
+        if claims.get("sts", "active") != "active":
+            raise InvalidToken("session_not_active")
 
         azp = claims.get("azp")
         if azp not in self._authorized_parties:

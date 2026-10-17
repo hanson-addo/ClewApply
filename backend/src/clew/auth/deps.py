@@ -26,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 bearer = HTTPBearer(auto_error=False, description="Clerk session token")
 
+EMAIL_REQUIRED = "email_required"
+
 UNAUTHORIZED = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Sign in to continue.",
@@ -67,11 +69,14 @@ async def get_current_user(
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> User:
     user = await session.scalar(select(User).where(User.auth_provider_id == claims.subject))
+    if user is not None and user.deleted_at is not None:
+        raise UNAUTHORIZED
     if user is None:
         if claims.email is None:
-            # The Clerk session token needs an "email" claim (see backend/README setup).
+            # The Clerk session token needs an "email" claim (docs/setup/clerk.md). A distinct
+            # 403 lets the web app ask for an email address instead of looping to sign-in.
             logger.warning("auth_rejected", extra={"reason": "missing_email_claim"})
-            raise UNAUTHORIZED
+            raise HTTPException(status.HTTP_403_FORBIDDEN, detail=EMAIL_REQUIRED)
         # First sign-in creates the account. ON CONFLICT covers two first requests racing.
         await session.execute(
             insert(User)
@@ -87,9 +92,6 @@ async def get_current_user(
         await session.execute(update(User).where(User.id == user.id).values(email=claims.email))
         await session.commit()
         await session.refresh(user)
-
-    if user.deleted_at is not None:
-        raise UNAUTHORIZED
     return user
 
 

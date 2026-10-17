@@ -35,7 +35,7 @@ From **Configure → API keys**:
 
 The publishable key is designed to be public, since it ships in the web app, but it still lives in env files rather than code.
 
-The **Secret key** (`sk_test_…`) isn't needed by Clew yet. QA's end-to-end tests will need it later as a GitHub Actions secret named `CLERK_SECRET_KEY`. Add it under **Settings → Secrets and variables → Actions** when QA asks, and nowhere else.
+The **Secret key** (`sk_test_…`) isn't needed by Clew yet. QA's end-to-end tests will need it later as a GitHub Actions secret named `CLERK_SECRET_KEY`. Add it under **Settings → Secrets and variables → Actions** when QA asks, and nowhere else. Use the development instance's key only, never the production one, and only in workflows that don't run for pull requests from forks.
 
 ## 4. Before launch (production instance)
 
