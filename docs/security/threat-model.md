@@ -133,16 +133,16 @@ Each risk has an ID so PR reviews can cite it ("touches R4"). Likelihood (L) and
 
 ## 6. Automated scanning in CI
 
-Recommended set. Each item should be a required check once branch protection is on.
+Each item should be a required check once branch protection is on. `security.yml` also runs weekly, so new advisories against unchanged lock files still show up.
 
 | Check | Tool | When to add | Cost on a private repo |
 | --- | --- | --- | --- |
-| Secrets | Gitleaks (already in PR #1) | Now | Free for personal accounts |
-| GitHub Actions updates | Dependabot version updates for `github-actions` (added in this PR) | Now | Free |
-| Python dependencies | `pip-audit` against the lock file, plus Dependabot for `pip` | First backend PR | Free |
-| JS dependencies | `npm audit --audit-level=high`, plus Dependabot for `npm` | First web app or add-on PR | Free |
-| Static analysis | Semgrep OSS with the `p/python`, `p/typescript`, `p/react` and `p/secrets` rule packs; `ruff` with the `S` (bandit) rules for Python | First code PR | Free |
-| Workflow hardening | `zizmor` or `actionlint` on `.github/workflows/` | Now or with the next workflow change | Free |
+| Secrets | Gitleaks (`secret-scan.yml`) | In place | Free for personal accounts |
+| GitHub Actions | Every action pinned to a full commit SHA; Dependabot for `github-actions` keeps the pins current | In place | Free |
+| Python dependencies | `pip-audit --strict --require-hashes` on the exported `uv.lock`, plus Dependabot for `uv` | In place (`security.yml`) | Free |
+| JS dependencies | `npm audit --audit-level=high` for `apps/web`, plus Dependabot for `npm`. Add the add-on when it lands | In place (`security.yml`) | Free |
+| Static analysis | Semgrep OSS with `p/python`, `p/typescript`, `p/react`, `p/secrets` and `p/github-actions` (WARNING and ERROR rules block); `ruff` `S` (bandit) rules in `ci.yml` | In place (`security.yml`) | Free |
+| Workflow hardening | `actionlint` (with shellcheck) on `.github/workflows/` | In place (`security.yml`) | Free |
 | Container images | Trivy scan of built images | First Dockerfile | Free |
 | Add-on manifest check | A small test that fails if the manifest gains `<all_urls>` or a new permission | First add-on PR | Free |
 
