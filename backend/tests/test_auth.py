@@ -314,6 +314,15 @@ async def test_failed_refresh_backs_off() -> None:
     assert calls == 3
 
 
+@pytest.mark.parametrize("body", [[], "keys", {"keys": "nope"}, {"keys": ["x", 1]}])
+async def test_malformed_jwks_is_a_failed_refresh(body: Any) -> None:
+    async def fetch() -> Any:
+        return body
+
+    with pytest.raises(SignInUnavailable):
+        await JwksCache(fetch).get_key(KEY.kid)
+
+
 async def test_unreachable_clerk_with_no_keys_is_unavailable() -> None:
     async def fetch() -> Mapping[str, Any]:
         raise httpx.ConnectError("down")

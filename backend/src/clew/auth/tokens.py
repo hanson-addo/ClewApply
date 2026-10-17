@@ -111,13 +111,19 @@ class JwksCache:
                 # Keep serving with any keys we have; Clerk may be briefly unreachable.
                 logger.warning("jwks_refresh_failed", extra={"error": type(exc).__name__})
                 return
+            raw_keys = data.get("keys") if isinstance(data, Mapping) else None
+            if not isinstance(raw_keys, list):
+                logger.warning("jwks_refresh_failed", extra={"error": "bad_shape"})
+                return
             keys: dict[str, PyJWK] = {}
-            for entry in data.get("keys", []):
+            for entry in raw_keys:
+                if not isinstance(entry, Mapping):
+                    continue
                 entry_kid = entry.get("kid")
                 if not entry_kid or entry.get("kty") != "RSA":
                     continue
                 try:
-                    keys[entry_kid] = PyJWK(entry, algorithm="RS256")
+                    keys[entry_kid] = PyJWK(dict(entry), algorithm="RS256")
                 except jwt.PyJWTError:
                     continue
             if keys:
