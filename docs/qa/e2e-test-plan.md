@@ -72,6 +72,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | UP-10 | P0 | Resume file download link | Is a signed URL that stops working after it expires; another user's session can't open it |
 | UP-11 | P1 | Leave onboarding mid-way and come back | Resumes at the same step with uploaded data kept |
 | UP-12 | P2 | Skip upload, enter profile by hand | Allowed; profile saved |
+| UP-13 | P1 | Upload a `.txt`, `.rtf` or image file | Rejected with "PDF or Word only" |
 
 ### 3.3 Master profile and versions
 
@@ -115,7 +116,8 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 
 | ID | P | Case | Expected |
 | --- | --- | --- | --- |
-| TRK-01 | P0 | Board columns | Saved, Applied, Interview, Offer, Rejected/closed |
+| TRK-01 | P0 | Board columns | Saved, Applied, Interview, Offer, Closed. Closed holds both Rejected and Withdrawn cards, each with its own label |
+| TRK-01b | P0 | Mark one card Rejected and another Withdrawn | Both land in Closed with the right label; the API stores them as separate statuses |
 | TRK-02 | P0 | Move a card Saved → Applied → Interview by drag and drop | Status saved; survives reload; `applied_at` set on first move to Applied |
 | TRK-03 | P0 | Move a card with keyboard only | Same result as TRK-02 (accessibility) |
 | TRK-04 | P0 | Card shows the resume version sent | Matches the variant chosen in FEED-14, even after the profile changes later |
@@ -177,5 +179,4 @@ Not built yet; listed so field maps get test hooks from the start.
 
 ## 8. Open questions
 
-- Which file types and size limit for resumes? This plan assumes PDF and DOCX up to 10 MB.
-- Does the tracker's "closed" column merge Rejected and Withdrawn, or keep them separate?
+None right now. Decided by the PM on Oct 17, 2026: resumes are PDF or Word up to 10 MB; Rejected and Withdrawn are separate statuses shown together in one Closed column. Backlog: issue #34.
