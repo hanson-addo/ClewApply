@@ -1,0 +1,20 @@
+{
+  "name": "@clew/design-tokens",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Clew colors, type, spacing and accessibility rules for the web app and the browser add-on.",
+  "type": "module",
+  "exports": {
+    ".": "./tokens.ts",
+    "./tokens.css": "./tokens.css",
+    "./base.css": "./base.css"
+  },
+  "scripts": {
+    "build": "node build.mjs",
+    "check": "node build.mjs --check",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
