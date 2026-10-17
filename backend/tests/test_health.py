@@ -41,6 +41,8 @@ async def test_ready_reports_unavailable_database() -> None:
 
 async def test_docs_hidden_outside_local(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CLEW_ENV", "production")
+    monkeypatch.setenv("CLEW_CLERK_ISSUER", "https://clew-test.clerk.accounts.dev")
+    monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
     get_settings.cache_clear()
     try:
         app = create_app()

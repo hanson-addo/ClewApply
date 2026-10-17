@@ -20,6 +20,30 @@
         "title": "Health",
         "type": "object"
       },
+      "Me": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "plan": {
+            "title": "Plan",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "plan"
+        ],
+        "title": "Me",
+        "type": "object"
+      },
       "Readiness": {
         "properties": {
           "database": {
@@ -45,6 +69,13 @@
         ],
         "title": "Readiness",
         "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "description": "Clerk session token",
+        "scheme": "bearer",
+        "type": "http"
       }
     }
   },
@@ -73,6 +104,39 @@
         "summary": "Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/me": {
+      "get": {
+        "description": "Who is signed in. The first call after sign-up creates the Clew account.",
+        "operationId": "me_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Me"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "The account has no email address (detail: email_required)"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Me",
+        "tags": [
+          "account"
         ]
       }
     },

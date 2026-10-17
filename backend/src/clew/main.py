@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from clew import __version__
-from clew.api import health
+from clew.api import health, me
 from clew.config import get_settings
 
 
@@ -28,6 +28,7 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type"],
     )
     app.include_router(health.router)
+    app.include_router(me.router)
     return app
 
 

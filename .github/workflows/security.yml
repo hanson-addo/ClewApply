@@ -38,18 +38,22 @@ jobs:
           uvx pip-audit@2.10.1 --strict --disable-pip --require-hashes -r "$RUNNER_TEMP/requirements.txt"
 
   web-deps:
-    name: Web dependencies (npm audit)
+    name: JS dependencies (npm audit, ${{ matrix.dir }})
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [apps/web, e2e]
     defaults:
       run:
-        working-directory: apps/web
+        working-directory: ${{ matrix.dir }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           persist-credentials: false
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
-          node-version-file: apps/web/.nvmrc
+          node-version-file: ${{ matrix.dir }}/.nvmrc
       - name: Audit the lock file (fails on high or critical)
         run: npm audit --audit-level=high
 

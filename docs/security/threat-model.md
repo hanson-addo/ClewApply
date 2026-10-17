@@ -140,7 +140,7 @@ Each item should be a required check once branch protection is on. `security.yml
 | Secrets | Gitleaks (`secret-scan.yml`) | In place | Free for personal accounts |
 | GitHub Actions | Every action pinned to a full commit SHA; Dependabot for `github-actions` keeps the pins current | In place | Free |
 | Python dependencies | `pip-audit --strict --require-hashes` on the exported `uv.lock`, plus Dependabot for `uv` | In place (`security.yml`) | Free |
-| JS dependencies | `npm audit --audit-level=high` for `apps/web`, plus Dependabot for `npm`. Add the add-on when it lands | In place (`security.yml`) | Free |
+| JS dependencies | `npm audit --audit-level=high` for `apps/web` and `e2e`, plus Dependabot for `npm`. Add the add-on when it lands | In place (`security.yml`) | Free |
 | Static analysis | Semgrep OSS with `p/python`, `p/typescript`, `p/react`, `p/secrets` and `p/github-actions` (WARNING and ERROR rules block); `ruff` `S` (bandit) rules in `ci.yml` | In place (`security.yml`) | Free |
 | Workflow hardening | `actionlint` (with shellcheck) on `.github/workflows/` | In place (`security.yml`) | Free |
 | Container images | Trivy scan of built images | First Dockerfile | Free |
