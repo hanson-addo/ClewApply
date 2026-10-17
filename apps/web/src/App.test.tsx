@@ -98,6 +98,22 @@ describe("signed-in pages", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent(/needs an email address/i);
   });
 
+  it("show the generic error for a 403 that isn't about email", async () => {
+    clerkState.isSignedIn = true;
+    fetchMock.mockResolvedValue(Response.json({ detail: "account_suspended" }, { status: 403 }));
+    renderAt("/");
+    expect(await screen.findByRole("alert")).toHaveTextContent(/couldn't load your account/i);
+  });
+
+  it("say sign-in is unavailable when the API can't check sign-ins", async () => {
+    clerkState.isSignedIn = true;
+    fetchMock.mockResolvedValue(
+      Response.json({ detail: "Sign-in is temporarily unavailable." }, { status: 503 }),
+    );
+    renderAt("/");
+    expect(await screen.findByRole("alert")).toHaveTextContent(/temporarily unavailable/i);
+  });
+
   it("sign out from the header", async () => {
     clerkState.isSignedIn = true;
     fetchMock.mockResolvedValue(

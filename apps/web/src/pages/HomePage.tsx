@@ -9,7 +9,17 @@ type State =
   | { status: "loading" }
   | { status: "ready"; me: Me }
   | { status: "email-required" }
+  | { status: "unavailable" }
   | { status: "error" };
+
+/** The API's error body is `{ detail: string }`; match on it, not just the status code. */
+function errorDetail(error: unknown): string | undefined {
+  if (typeof error === "object" && error !== null && "detail" in error) {
+    const { detail } = error as { detail: unknown };
+    return typeof detail === "string" ? detail : undefined;
+  }
+  return undefined;
+}
 
 /** Signed-in landing page. The first visit also creates the Clew account (GET /me). */
 export function HomePage() {
@@ -21,10 +31,12 @@ export function HomePage() {
     let cancelled = false;
     api
       .GET("/me")
-      .then(({ data, response }) => {
+      .then(({ data, error, response }) => {
         if (cancelled) return;
         if (data) setState({ status: "ready", me: data });
-        else if (response.status === 403) setState({ status: "email-required" });
+        else if (response.status === 403 && errorDetail(error) === "email_required")
+          setState({ status: "email-required" });
+        else if (response.status === 503) setState({ status: "unavailable" });
         else setState({ status: "error" });
       })
       .catch(() => {
@@ -46,6 +58,11 @@ export function HomePage() {
         {state.status === "error" && (
           <p role="alert" className="home-error">
             We couldn&apos;t load your account. Check your connection and refresh the page.
+          </p>
+        )}
+        {state.status === "unavailable" && (
+          <p role="alert" className="home-error">
+            Sign-in is temporarily unavailable. Please try again in a few minutes.
           </p>
         )}
         {state.status === "email-required" && (
