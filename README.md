@@ -25,7 +25,7 @@ docs/            Specs, threat model, test plans
 You need Docker, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
 
 ```sh
-docker compose up -d postgres          # Postgres with pgvector on localhost:5432
+docker compose up -d                   # Postgres with pgvector (5432) and Redis (6379), local only
 
 cd backend
 cp .env.example .env

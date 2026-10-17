@@ -6,6 +6,7 @@ from alembic import context
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import create_async_engine
 
+import clew.models  # noqa: F401  (registers every table on Base.metadata)
 from clew.config import get_settings
 from clew.db.base import Base
 
