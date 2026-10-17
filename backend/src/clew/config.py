@@ -7,7 +7,7 @@ missing CLEW_DATABASE_URL stops startup instead of falling back to defaults.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import field_validator, model_validator
+from pydantic import SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     # carry it as "iss", and its public keys are fetched from <issuer>/.well-known/jwks.json.
     # Required in production; without it, local/test runs answer signed-in routes with 503.
     clerk_issuer: str | None = None
+    # S3-compatible object storage for resume files (MinIO locally, see docker-compose.yml).
+    # Without a bucket, the resume routes answer 503. Leave the endpoint unset for AWS S3.
+    s3_bucket: str | None = None
+    s3_endpoint_url: str | None = None
+    s3_region: str = "us-east-1"
+    s3_access_key_id: str | None = None
+    s3_secret_access_key: SecretStr | None = None
 
     @field_validator("cors_origins")
     @classmethod
@@ -38,6 +45,11 @@ class Settings(BaseSettings):
         if not issuer.startswith("https://"):
             raise ValueError("CLEW_CLERK_ISSUER must be an https:// URL")
         return issuer.rstrip("/")
+
+    @field_validator("s3_bucket", "s3_endpoint_url", "s3_access_key_id")
+    @classmethod
+    def blank_is_unset(cls, value: str | None) -> str | None:
+        return value or None
 
     @model_validator(mode="after")
     def production_needs_sign_in(self) -> "Settings":
