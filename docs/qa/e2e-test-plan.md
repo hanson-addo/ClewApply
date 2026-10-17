@@ -29,7 +29,7 @@ Rules that apply to every test:
 | App under test | `docker compose up` (web, api, postgres, redis, worker, job-source stub) |
 | Base URL | `http://localhost:5173` (web), `http://localhost:8000` (api) |
 | Job fixtures | `e2e/fixtures/jobs/`: 40 USAJobs results, 3 Greenhouse boards, 1 Lever, 1 Ashby, with 8 planted duplicate pairs and 2 near-misses that must *not* merge |
-| Resume fixtures | `e2e/fixtures/resumes/`: `clean.pdf`, `clean.docx`, `two-column.pdf`, `scanned-image.pdf`, `empty.pdf`, `huge-11mb.pdf`, `exactly-10mb.pdf`, `10mb-plus-1.pdf`, `fake-pdf.exe`, `eicar.pdf` (antivirus test string) |
+| Resume fixtures | `e2e/fixtures/resumes/`: `clean.pdf`, `clean.docx`, `two-column.pdf`, `scanned-image.pdf`, `empty.pdf`, `huge-11mb.pdf`, `exactly-10mb.pdf`, `10mb-plus-1.pdf`, `fake-pdf.exe`. The EICAR antivirus test file is never committed; UP-07 writes it to a temp file at test time so it can't trip GitHub, laptop or CI scanners |
 | Expected parse | `e2e/fixtures/resumes/*.expected.json` in JSON Resume shape |
 
 Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly and blocks release if red. **P2** nightly, tracked but doesn't block.
@@ -50,7 +50,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | AUTH-08 | P0 | Sign out | Cookies cleared; Back button shows sign-in, not cached pages |
 | AUTH-09 | P1 | "Sign out everywhere" from Settings | A second browser context is signed out on its next request |
 | AUTH-10 | P0 | Signed-out user opens `/jobs`, `/profile`, `/applications` | Redirected to sign-in, then back to the page they asked for |
-| AUTH-11 | P0 | User A tries to read user B's profile, application or resume by ID | API returns 404; UI shows not-found. Covers the row-level security promise |
+| AUTH-11 | P0 | Cross-user access, applied as a pattern: user A tries to read, change or delete user B's records by ID on **every** per-user endpoint (profile, versions, resume files, applications, connections, sensitive answers), with a new case added as each endpoint lands | API returns 404; UI shows not-found. Covers the row-level security promise and threat model R1 |
 | AUTH-12 | P1 | Wrong one-time code entered | Clear error and a "send a new code" button |
 | AUTH-13 | P1 | Sign-in rate limit (10 bad attempts) | Further attempts blocked with a friendly message |
 | AUTH-14 | P0 | Sign-in page copy | Shows "Clew never asks for your passwords" (or approved wording); no field asks for a job-site password |
@@ -67,7 +67,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | UP-05 | P0 | Upload `huge-11mb.pdf` | Rejected with HTTP 413 and "Files must be 10 MB or smaller" |
 | UP-05b | P0 | 10 MB boundary: upload `exactly-10mb.pdf` (10,485,760 bytes) and `10mb-plus-1.pdf` (10,485,761 bytes) | The first is accepted; the second gets HTTP 413 and "Files must be 10 MB or smaller" |
 | UP-06 | P0 | Upload `fake-pdf.exe` renamed to `.pdf` | Rejected by content type check, not just extension |
-| UP-07 | P0 | Upload `eicar.pdf` | Rejected by malware scan; nothing stored; audit log entry written |
+| UP-07 | P0 | Upload an EICAR test file generated at test time | Rejected by malware scan; nothing stored; audit log entry written |
 | UP-08 | P1 | Upload `empty.pdf` | Friendly error, offer manual entry |
 | UP-09 | P0 | User edits a flagged field and finishes onboarding | Lands on Job feed; profile version 1 saved with the edit |
 | UP-10 | P0 | Resume file download link | Is a signed URL that stops working after it expires; another user's session can't open it |
@@ -138,7 +138,7 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | X-04 | P0 | Security headers on the web app | CSP set, HSTS set, no inline script allowed |
 | X-05 | P0 | CSRF | A state-changing request without the CSRF token is rejected |
 | X-06 | P1 | API error (stub returns 500) | Friendly error with retry; no stack trace shown |
-| X-07 | P0 | Logs during the full run | A scan of api and worker logs finds none of the fixture resume text, profile fields or tokens |
+| X-07 | P0 | Logs during the full run | A scan of api and worker logs finds none of the fixture resume text, resume file names, profile fields, sensitive-answer values or tokens |
 | X-08 | P1 | Brand | Clew logo and colors on sign-in and top bar match the mockups (visual diff) |
 | X-09 | P2 | Easter egg | The Theseus line exists in the backend package `__init__.py` and does not appear in any built web or add-on bundle |
 
@@ -174,7 +174,8 @@ Not built yet; listed so field maps get test hooks from the start.
 ## 7. What QA needs from the developer scaffold
 
 - `docker compose` that starts the whole app with a job-source stub.
-- `CLEW_ENV=test` seeding endpoint (never enabled in production; a test checks the endpoint 404s without it) and Clerk development-instance keys in CI secrets.
+- A seeding endpoint that is only registered when `CLEW_ENV=test` (not registered and then checked per call); a test confirms it 404s when `CLEW_ENV=production`.
+- Clerk development-instance keys only, stored as CI secrets and not exposed to `pull_request` jobs from forks.
 - `data-testid` on job cards, board columns and profile sections.
 - A way to move the server clock in test mode (job expiry). Not used for sign-in, since Clerk refreshes its token in the browser.
 
