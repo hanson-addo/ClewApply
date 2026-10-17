@@ -20,6 +20,39 @@ backend/         Python 3.12, FastAPI, SQLAlchemy, Alembic
 docs/            Specs, threat model, test plans
 ```
 
+## Run it locally
+
+You need Docker, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
+
+```sh
+docker compose up -d postgres          # Postgres with pgvector on localhost:5432
+
+cd backend
+cp .env.example .env
+uv sync
+uv run alembic upgrade head
+uv run uvicorn clew.main:app --reload  # API on http://localhost:8000 (docs at /docs)
+
+cd ../apps/web
+cp .env.example .env.local
+npm install
+npm run dev                            # Web app on http://localhost:5173
+```
+
+Checks that CI runs on every pull request:
+
+```sh
+cd backend  && uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest
+cd apps/web && npm run lint && npm run typecheck && npm test && npm run build
+```
+
+When an API route changes, refresh the shared types so the web app's client stays in step:
+
+```sh
+cd backend  && uv run python -m clew.openapi > openapi.json
+cd apps/web && npm run gen:api
+```
+
 ## Stack
 
 | Layer | Choice |
