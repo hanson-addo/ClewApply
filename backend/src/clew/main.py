@@ -4,8 +4,10 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from clew import __version__
-from clew.api import health, me
+from clew.api import health, me, resumes
 from clew.config import get_settings
+from clew.limits import BodySizeLimit
+from clew.resumes.files import MAX_RESUME_BYTES
 
 
 def create_app() -> FastAPI:
@@ -20,6 +22,11 @@ def create_app() -> FastAPI:
         openapi_url="/openapi.json" if is_local else None,
         redoc_url=None,
     )
+    # Room for the multipart wrapping around a 10 MB file; the route checks the file exactly.
+    # Added before CORS so CORS stays outermost and a 413 still carries CORS headers.
+    app.add_middleware(
+        BodySizeLimit, path_prefix="/resumes", max_bytes=MAX_RESUME_BYTES + 64 * 1024
+    )
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
@@ -29,6 +36,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(me.router)
+    app.include_router(resumes.router)
     return app
 
 
