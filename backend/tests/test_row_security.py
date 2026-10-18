@@ -6,6 +6,7 @@ from types import SimpleNamespace
 
 import pytest
 from sqlalchemy import func, select, text, update
+from sqlalchemy.engine import make_url
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
@@ -125,7 +126,8 @@ async def test_every_per_user_table_has_row_security(db: AsyncSession) -> None:
         text(
             """
             SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity,
-                   EXISTS (SELECT FROM pg_policies p WHERE p.tablename = c.relname)
+                   EXISTS (SELECT FROM pg_policies p
+                            WHERE p.schemaname = 'public' AND p.tablename = c.relname)
               FROM pg_class c
               JOIN pg_namespace n ON n.oid = c.relnamespace AND n.nspname = 'public'
              WHERE c.relkind = 'r'
@@ -153,6 +155,29 @@ async def test_owner_role_is_flagged(test_database: str) -> None:
         assert await app_role_problems(owner) != []
     finally:
         await owner.dispose()
+
+
+async def test_member_of_owner_role_is_flagged(test_database: str, db: AsyncSession) -> None:
+    owner_role = await db.scalar(
+        text(
+            "SELECT tableowner FROM pg_tables WHERE schemaname = 'public' AND tablename = 'resumes'"
+        )
+    )
+    member = f"clew_owner_member_{uuid.uuid4().hex[:8]}"
+    await db.execute(text(f"CREATE ROLE {member} LOGIN PASSWORD 'member' NOSUPERUSER"))
+    await db.execute(text(f'GRANT "{owner_role}" TO {member}'))
+    await db.commit()
+    engine = create_async_engine(
+        make_url(test_database)
+        .set(username=member, password="member")  # noqa: S106 - throwaway test role
+        .render_as_string(hide_password=False)
+    )
+    try:
+        assert "owns tables or is a member of their owner" in await app_role_problems(engine)
+    finally:
+        await engine.dispose()
+        await db.execute(text(f"DROP ROLE {member}"))
+        await db.commit()
 
 
 async def test_production_refuses_to_start_as_the_owner(

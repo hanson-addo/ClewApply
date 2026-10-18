@@ -19,7 +19,8 @@ CURRENT_USER_ID = "NULLIF(current_setting('app.user_id', true), '')::uuid"
 
 def create_app_role() -> None:
     # Roles are shared by every database on the server, so create it only once. NOLOGIN here;
-    # the login role the API uses is a member of it (see docs/setup/database.md).
+    # the deploy then gives clew_app itself a login and password, and the API logs in as it
+    # (see docs/setup/database.md).
     op.execute(
         f"""
         DO $$

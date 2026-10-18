@@ -9,7 +9,7 @@ Clew's API never connects to Postgres as the role that owns the tables. Two role
 
 Per-user tables (`resumes` today; profiles, applications and sensitive answers as they're added) have row-level security turned on. A row is visible only when its `user_id` matches `app.user_id`, which the API sets for each transaction from the signed-in user. If a route forgets its own `WHERE user_id = ...`, the database still returns only that user's rows (threat model R1).
 
-`users` itself has no row policy: sign-in has to find an account by its Clerk id before anyone is bound.
+`users` itself has no row policy yet: sign-in has to find an account by its Clerk id before anyone is bound. Until it gets one (planned before launch, with sign-in moved into a `SECURITY DEFINER` function), `users` stays thin. Profile content, resume text and sensitive answers always go in their own per-user tables, never as columns on `users`.
 
 ## Adding a per-user table
 
@@ -26,6 +26,8 @@ docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD
 ```
 
 ## Production (Render)
+
+The first migration creates the `clew_app` role, so the owner role needs `CREATEROLE`. If it doesn't have it, that migration fails with a clear error and nothing is half-applied.
 
 Do this once, as the database owner, after the first migration has run:
 
