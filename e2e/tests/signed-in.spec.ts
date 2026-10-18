@@ -99,6 +99,7 @@ test.describe("signed in", () => {
     await page.goto("/");
     await expectSignInPage(page);
     await page.goBack();
+    await expectSignInPage(page);
     await expect(welcome(page)).toHaveCount(0);
   });
 

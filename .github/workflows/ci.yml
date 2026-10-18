@@ -97,11 +97,6 @@ jobs:
     env:
       CLEW_ENV: test
       CLEW_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
-      # Clerk development-instance keys for the signed-in specs. Only this repository's own
-      # branches get them (never pull requests from forks); without them those specs skip.
-      CLERK_PUBLISHABLE_KEY: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLERK_PUBLISHABLE_KEY || '' }}
-      CLERK_SECRET_KEY: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLERK_SECRET_KEY || '' }}
-      CLEW_CLERK_ISSUER: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLEW_CLERK_ISSUER || '' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
@@ -129,19 +124,15 @@ jobs:
           npx playwright install --with-deps chromium
       - run: npm run typecheck
         working-directory: e2e
-      - name: Say whether the signed-in specs will run
-        # Prints only "set" or "missing", never a value.
-        run: |
-          for name in CLERK_PUBLISHABLE_KEY CLERK_SECRET_KEY CLEW_CLERK_ISSUER; do
-            if [ -n "${!name}" ]; then echo "$name: set"; else echo "$name: missing"; fi
-          done
-          echo "Event: $GITHUB_EVENT_NAME, same-repo branch: $SAME_REPO"
-          echo "Repository secret CLERK_SECRET_KEY exists: $HAS_REPO_SECRET"
-        env:
-          SAME_REPO: ${{ github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository }}
-          HAS_REPO_SECRET: ${{ secrets.CLERK_SECRET_KEY != '' }}
       - run: npm test
         working-directory: e2e
+        env:
+          # Clerk development-instance keys for the signed-in specs, given only to this step.
+          # Only this repository's own branches get them (never pull requests from forks);
+          # without them those specs skip.
+          CLERK_PUBLISHABLE_KEY: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLERK_PUBLISHABLE_KEY || '' }}
+          CLERK_SECRET_KEY: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLERK_SECRET_KEY || '' }}
+          CLEW_CLERK_ISSUER: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.CLEW_CLERK_ISSUER || '' }}
       - name: Keep the report when tests fail
         if: failure()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2

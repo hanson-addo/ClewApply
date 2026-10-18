@@ -25,7 +25,7 @@ The config starts the API on port 8000 (with `CLEW_ENV=test`) and the web app on
 | `CLERK_SECRET_KEY` | Development secret key (`sk_test_…`). Never a production key |
 | `CLEW_CLERK_ISSUER` | The instance's Frontend API URL |
 
-In CI they come from GitHub Actions secrets, and only for this repository's own branches. Locally, export them in your shell; never commit them. The tests create Clerk users named `e2e-…+clerk_test@example.com` (Clerk's test addresses, which use the fixed code 424242 and get no real email), and the teardown deletes them.
+In CI they come from GitHub Actions secrets, and only for this repository's own branches. Locally, export them in your shell; never commit them. The tests create Clerk users named `e2e-<run id>-…+clerk_test@example.com` (Clerk's test addresses, which use the fixed code 424242 and get no real email), and the teardown deletes only the current run's users, so runs that overlap on the shared instance never delete each other's.
 
 The config also serves a second build without a Clerk key on port 4174, so the "sign-in isn't set up" page stays tested.
 

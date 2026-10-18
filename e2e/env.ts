@@ -15,8 +15,20 @@ export const hasClerk = Boolean(
   process.env.CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY && process.env.CLEW_CLERK_ISSUER,
 );
 
-/** Every Clerk user these tests create starts with this, so teardown deletes only its own. */
-export const TEST_USER_PREFIX = "e2e-";
+/**
+ * One id per test run, shared by setup, teardown and every worker. On GitHub Actions it is the
+ * run id and attempt; locally a random one. The config loads this file first, so workers
+ * inherit the value through the environment.
+ */
+process.env.CLEW_E2E_RUN_ID ??= process.env.GITHUB_RUN_ID
+  ? `${process.env.GITHUB_RUN_ID}-${process.env.GITHUB_RUN_ATTEMPT ?? "1"}`
+  : `local${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+
+/**
+ * Every Clerk user this run creates starts with this, so teardown deletes only this run's users
+ * and never those of another run sharing the development instance.
+ */
+export const TEST_USER_PREFIX = `e2e-${process.env.CLEW_E2E_RUN_ID}-`;
 
 /**
  * A fresh Clerk test address. "+clerk_test" addresses never get real email; a development
