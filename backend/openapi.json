@@ -531,6 +531,44 @@
         "title": "Me",
         "type": "object"
       },
+      "ParseStatus": {
+        "enum": [
+          "pending",
+          "running",
+          "done",
+          "failed"
+        ],
+        "title": "ParseStatus",
+        "type": "string"
+      },
+      "ParsedResume": {
+        "properties": {
+          "check": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Check",
+            "type": "array"
+          },
+          "confidence": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "title": "Confidence",
+            "type": "object"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileData"
+          }
+        },
+        "required": [
+          "profile",
+          "confidence",
+          "check"
+        ],
+        "title": "ParsedResume",
+        "type": "object"
+      },
       "ProfileData": {
         "additionalProperties": false,
         "description": "A whole profile. Every section is optional, so a half-filled profile can be saved.",
@@ -995,6 +1033,45 @@
           "created_at"
         ],
         "title": "ResumeOut",
+        "type": "object"
+      },
+      "ResumeParseOut": {
+        "properties": {
+          "message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Message"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ParsedResume"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ParseStatus"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "updated_at"
+        ],
+        "title": "ResumeParseOut",
         "type": "object"
       },
       "Skill": {
@@ -1611,7 +1688,7 @@
     },
     "/resumes": {
       "post": {
-        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,\nand the file is virus-scanned before it is stored.",
+        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,\nand the file is virus-scanned before it is stored. Reading it into a draft profile starts\nstraight away; follow it with GET /resumes/{id}/parse.",
         "operationId": "upload_resume_resumes_post",
         "requestBody": {
           "content": {
@@ -1717,6 +1794,120 @@
           }
         ],
         "summary": "Download Resume",
+        "tags": [
+          "resumes"
+        ]
+      }
+    },
+    "/resumes/{resume_id}/parse": {
+      "get": {
+        "description": "Where reading the resume has got to, and the draft profile once it's done.",
+        "operationId": "get_parse_resumes__resume_id__parse_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resume_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Resume Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeParseOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such resume for this user, or it hasn't been read yet"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Parse",
+        "tags": [
+          "resumes"
+        ]
+      },
+      "post": {
+        "description": "Reads the resume again after a failure. A parse that is in progress or done is\nreturned as it is.",
+        "operationId": "restart_parse_resumes__resume_id__parse_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "resume_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Resume Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResumeParseOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such resume for this user"
+          },
+          "409": {
+            "description": "The file hasn't passed the virus check"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Another resume is being read, or the daily limit is reached"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Restart Parse",
         "tags": [
           "resumes"
         ]

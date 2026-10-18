@@ -1,0 +1,33 @@
+{
+  "basics": {
+    "name": "Riley Okafor-Lind",
+    "email": "riley.ol@example.test",
+    "url": "https://github.example.test/rileyol"
+  },
+  "education": [
+    {
+      "institution": "Bayview Example University",
+      "studyType": "B.A.",
+      "area": "Economics",
+      "endDate": "2027-05",
+      "score": "3.7"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Rent Tracker",
+      "description": "A web app that charts rent prices from public city data.",
+      "startDate": "2026",
+      "keywords": ["React", "Python"]
+    }
+  ],
+  "work": [
+    {
+      "name": "Campus Library",
+      "position": "Student Assistant",
+      "startDate": "2024-09",
+      "highlights": ["Helped 30+ students a week find research sources."]
+    }
+  ],
+  "skills": [{"name": "Excel"}, {"name": "Python"}, {"name": "Tableau"}]
+}

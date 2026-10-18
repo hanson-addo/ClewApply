@@ -24,6 +24,8 @@ class StorageUnavailable(Exception):
 class ObjectStore(Protocol):
     async def put(self, key: str, data: bytes, content_type: str) -> None: ...
 
+    async def get(self, key: str, max_bytes: int) -> bytes: ...
+
     def download_url(
         self, key: str, *, filename: str, content_type: str, expires_in: int
     ) -> str: ...
@@ -47,6 +49,25 @@ class S3ObjectStore:
             # The key is random and the error carries no file content, so both are safe to log.
             logger.error("storage_put_failed", extra={"error": type(exc).__name__})
             raise StorageUnavailable from exc
+
+    async def get(self, key: str, max_bytes: int) -> bytes:
+        def read() -> bytes:
+            body = self._client.get_object(Bucket=self._bucket, Key=key)["Body"]
+            try:
+                return body.read(max_bytes + 1)
+            finally:
+                body.close()
+
+        try:
+            data = await asyncio.to_thread(read)
+        except (BotoCoreError, ClientError) as exc:
+            logger.error("storage_get_failed", extra={"error": type(exc).__name__})
+            raise StorageUnavailable from exc
+        if len(data) > max_bytes:
+            # Uploads are capped, so a bigger object means something wrote it outside the API.
+            logger.error("storage_object_too_large")
+            raise StorageUnavailable
+        return data
 
     def download_url(self, key: str, *, filename: str, content_type: str, expires_in: int) -> str:
         # Signing is local (no network call). "attachment" makes browsers download the file

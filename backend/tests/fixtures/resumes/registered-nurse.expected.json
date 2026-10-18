@@ -1,0 +1,43 @@
+{
+  "basics": {
+    "name": "Morgan Ellison",
+    "label": "Registered Nurse",
+    "email": "morgan.ellison@example.test",
+    "phone": "555-014-7788",
+    "location": {"city": "Columbus", "region": "Ohio", "countryCode": "US"}
+  },
+  "work": [
+    {
+      "name": "Riverbend Example Hospital",
+      "position": "ICU Staff Nurse",
+      "location": "Columbus, OH",
+      "startDate": "2020-08",
+      "highlights": [
+        "Care for 2–3 critical patients per shift in a 24-bed ICU.",
+        "Charge nurse on weekends."
+      ]
+    },
+    {
+      "name": "Grove Street Example Clinic",
+      "position": "Med-Surg Nurse",
+      "startDate": "2018",
+      "endDate": "2020"
+    }
+  ],
+  "certificates": [
+    {"name": "Registered Nurse", "issuer": "Ohio Board of Nursing", "date": "2018"},
+    {"name": "BLS and ACLS", "issuer": "American Heart Example Association", "date": "2024"}
+  ],
+  "education": [
+    {
+      "institution": "Example Valley College",
+      "studyType": "Bachelor of Science",
+      "area": "Nursing",
+      "endDate": "2018"
+    }
+  ],
+  "languages": [
+    {"language": "English", "fluency": "Native"},
+    {"language": "Spanish", "fluency": "Conversational"}
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "basics": {
+    "name": "Dana Whitfield",
+    "label": "Logistics Coordinator",
+    "email": "dana.whitfield@example.test",
+    "phone": "555 019 4410",
+    "location": {"city": "Mesa", "region": "AZ", "postalCode": "85201", "countryCode": "US"}
+  },
+  "work": [
+    {
+      "name": "Sunfield Example Distribution",
+      "position": "Warehouse Shift Supervisor",
+      "startDate": "2019",
+      "endDate": "2025",
+      "highlights": [
+        "Ran a 22-person night shift shipping 9,000 orders a night.",
+        "Cut picking errors by 40% with a new bin labeling system."
+      ]
+    }
+  ],
+  "volunteer": [
+    {
+      "organization": "Mesa Example Food Bank",
+      "position": "Volunteer Driver",
+      "startDate": "2022"
+    }
+  ],
+  "certificates": [
+    {"name": "OSHA 30-Hour General Industry", "date": "2021"},
+    {"name": "Forklift Operator", "date": "2019"}
+  ]
+}

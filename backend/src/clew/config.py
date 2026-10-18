@@ -35,6 +35,12 @@ class Settings(BaseSettings):
     clamav_host: str | None = None
     clamav_port: int = 3310
     clamav_timeout_seconds: float = 30.0
+    # Redis for background jobs (resume parsing). Without it, parsing reports "unavailable".
+    redis_url: str | None = None
+    # LLM that turns resume text into a profile. Without a key, parsing reports "unavailable".
+    anthropic_api_key: SecretStr | None = None
+    parser_model: str = "claude-haiku-5-5"
+    parser_timeout_seconds: float = 60.0
 
     @field_validator("cors_origins")
     @classmethod
@@ -54,11 +60,21 @@ class Settings(BaseSettings):
         return issuer.rstrip("/")
 
     @field_validator(
-        "migrations_database_url", "s3_bucket", "s3_endpoint_url", "s3_access_key_id", "clamav_host"
+        "migrations_database_url",
+        "s3_bucket",
+        "s3_endpoint_url",
+        "s3_access_key_id",
+        "clamav_host",
+        "redis_url",
     )
     @classmethod
     def blank_is_unset(cls, value: str | None) -> str | None:
         return value or None
+
+    @field_validator("anthropic_api_key", mode="before")
+    @classmethod
+    def blank_secret_is_unset(cls, value: object) -> object:
+        return None if value == "" else value
 
     @model_validator(mode="after")
     def production_needs_sign_in(self) -> "Settings":

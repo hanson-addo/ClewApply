@@ -74,3 +74,8 @@ def test_listed_cors_origins_are_kept(monkeypatch: pytest.MonkeyPatch) -> None:
     production_env(monkeypatch)
     settings = Settings(_env_file=None)
     assert settings.cors_origins == ["https://clewapply.com"]
+
+
+def test_blank_anthropic_key_is_unset(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLEW_ANTHROPIC_API_KEY", "")
+    assert Settings(env="test", database_url="postgresql+asyncpg://x/y").anthropic_api_key is None

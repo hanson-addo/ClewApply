@@ -141,7 +141,8 @@ export interface paths {
         /**
          * Upload Resume
          * @description Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,
-         *     and the file is virus-scanned before it is stored.
+         *     and the file is virus-scanned before it is stored. Reading it into a draft profile starts
+         *     straight away; follow it with GET /resumes/{id}/parse.
          */
         post: operations["upload_resume_resumes_post"];
         delete?: never;
@@ -164,6 +165,31 @@ export interface paths {
         get: operations["download_resume_resumes__resume_id__download_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/resumes/{resume_id}/parse": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Parse
+         * @description Where reading the resume has got to, and the draft profile once it's done.
+         */
+        get: operations["get_parse_resumes__resume_id__parse_get"];
+        put?: never;
+        /**
+         * Restart Parse
+         * @description Reads the resume again after a failure. A parse that is in progress or done is
+         *     returned as it is.
+         */
+        post: operations["restart_parse_resumes__resume_id__parse_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -310,6 +336,21 @@ export interface components {
             id: string;
             /** Plan */
             plan: string;
+        };
+        /**
+         * ParseStatus
+         * @enum {string}
+         */
+        ParseStatus: "pending" | "running" | "done" | "failed";
+        /** ParsedResume */
+        ParsedResume: {
+            /** Check */
+            check: string[];
+            /** Confidence */
+            confidence: {
+                [key: string]: number;
+            };
+            profile: components["schemas"]["ProfileData"];
         };
         /**
          * ProfileData
@@ -487,6 +528,18 @@ export interface components {
             id: string;
             /** Size Bytes */
             size_bytes: number;
+        };
+        /** ResumeParseOut */
+        ResumeParseOut: {
+            /** Message */
+            message?: string | null;
+            result?: components["schemas"]["ParsedResume"] | null;
+            status: components["schemas"]["ParseStatus"];
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
         };
         /** Skill */
         Skill: {
@@ -936,6 +989,110 @@ export interface operations {
             };
             /** @description File storage is not set up */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_parse_resumes__resume_id__parse_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resume_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeParseOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such resume for this user, or it hasn't been read yet */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restart_parse_resumes__resume_id__parse_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                resume_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResumeParseOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such resume for this user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The file hasn't passed the virus check */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+            /** @description Another resume is being read, or the daily limit is reached */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

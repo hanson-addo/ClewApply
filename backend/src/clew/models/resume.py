@@ -3,7 +3,7 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import BigInteger, DateTime, ForeignKey, String, func, text
+from sqlalchemy import BigInteger, DateTime, ForeignKey, String, UniqueConstraint, func, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -12,6 +12,8 @@ from clew.db.base import Base
 
 class Resume(Base):
     __tablename__ = "resumes"
+    # Lets rows that belong to a resume point at (resume, user) together.
+    __table_args__ = (UniqueConstraint("id", "user_id", name="uq_resumes_id_user_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")
