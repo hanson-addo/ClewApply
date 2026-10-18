@@ -3,15 +3,17 @@
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncEngine
 
+# pg_has_role(..., 'MEMBER') includes the role itself and every role it can inherit from or
+# SET ROLE to, since membership carries that role's rights.
 ROLE_FACTS = text(
     """
-    SELECT r.rolsuper, r.rolbypassrls,
+    SELECT coalesce(bool_or(r.rolsuper), false),
+           coalesce(bool_or(r.rolbypassrls), false),
            (SELECT count(*) FROM pg_tables t
              WHERE t.schemaname = 'public'
-               -- Membership in the owner role counts: it carries the owner's rights.
-               AND pg_has_role(current_user, t.tableowner, 'USAGE')) AS owned_tables
+               AND pg_has_role(current_user, t.tableowner, 'MEMBER')) AS owned_tables
       FROM pg_roles r
-     WHERE r.rolname = current_user
+     WHERE pg_has_role(current_user, r.oid, 'MEMBER')
     """
 )
 
@@ -22,9 +24,9 @@ async def app_role_problems(engine: AsyncEngine) -> list[str]:
         is_super, bypasses_rls, owned_tables = (await conn.execute(ROLE_FACTS)).one()
     problems = []
     if is_super:
-        problems.append("is a superuser")
+        problems.append("is or can become a superuser")
     if bypasses_rls:
-        problems.append("has BYPASSRLS")
+        problems.append("has or can assume BYPASSRLS")
     if owned_tables:
         problems.append("owns tables or is a member of their owner")
     return problems

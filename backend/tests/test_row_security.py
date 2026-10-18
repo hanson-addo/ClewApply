@@ -157,26 +157,60 @@ async def test_owner_role_is_flagged(test_database: str) -> None:
         await owner.dispose()
 
 
-async def test_member_of_owner_role_is_flagged(test_database: str, db: AsyncSession) -> None:
+@pytest.fixture
+async def throwaway_role(test_database: str, db: AsyncSession) -> AsyncIterator[str]:
+    """A plain login role (no superuser, no BYPASSRLS, owns nothing), dropped afterwards."""
+    name = f"clew_test_role_{uuid.uuid4().hex[:8]}"
+    await db.execute(text(f"CREATE ROLE {name} LOGIN PASSWORD 'throwaway' NOSUPERUSER"))
+    await db.commit()
+    yield name
+    await db.execute(text(f"DROP ROLE {name}"))
+    await db.commit()
+
+
+async def problems_for(test_database: str, role: str) -> list[str]:
+    engine = create_async_engine(
+        make_url(test_database)
+        .set(username=role, password="throwaway")  # noqa: S106 - throwaway test role
+        .render_as_string(hide_password=False)
+    )
+    try:
+        return await app_role_problems(engine)
+    finally:
+        await engine.dispose()
+
+
+async def test_plain_role_passes(test_database: str, throwaway_role: str) -> None:
+    assert await problems_for(test_database, throwaway_role) == []
+
+
+async def test_member_of_owner_role_is_flagged(
+    test_database: str, db: AsyncSession, throwaway_role: str
+) -> None:
     owner_role = await db.scalar(
         text(
             "SELECT tableowner FROM pg_tables WHERE schemaname = 'public' AND tablename = 'resumes'"
         )
     )
-    member = f"clew_owner_member_{uuid.uuid4().hex[:8]}"
-    await db.execute(text(f"CREATE ROLE {member} LOGIN PASSWORD 'member' NOSUPERUSER"))
-    await db.execute(text(f'GRANT "{owner_role}" TO {member}'))
+    await db.execute(text(f'GRANT "{owner_role}" TO {throwaway_role}'))
     await db.commit()
-    engine = create_async_engine(
-        make_url(test_database)
-        .set(username=member, password="member")  # noqa: S106 - throwaway test role
-        .render_as_string(hide_password=False)
-    )
+    problems = await problems_for(test_database, throwaway_role)
+    assert "owns tables or is a member of their owner" in problems
+
+
+async def test_member_of_bypassrls_role_is_flagged(
+    test_database: str, db: AsyncSession, throwaway_role: str
+) -> None:
+    bypasser = f"clew_test_bypass_{uuid.uuid4().hex[:8]}"
+    await db.execute(text(f"CREATE ROLE {bypasser} NOLOGIN BYPASSRLS"))
+    await db.execute(text(f"GRANT {bypasser} TO {throwaway_role}"))
+    await db.commit()
     try:
-        assert "owns tables or is a member of their owner" in await app_role_problems(engine)
+        problems = await problems_for(test_database, throwaway_role)
+        assert "has or can assume BYPASSRLS" in problems
     finally:
-        await engine.dispose()
-        await db.execute(text(f"DROP ROLE {member}"))
+        await db.execute(text(f"REVOKE {bypasser} FROM {throwaway_role}"))
+        await db.execute(text(f"DROP ROLE {bypasser}"))
         await db.commit()
 
 
