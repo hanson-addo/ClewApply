@@ -295,7 +295,7 @@
     },
     "/resumes": {
       "post": {
-        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content.",
+        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,\nand the file is virus-scanned before it is stored.",
         "operationId": "upload_resume_resumes_post",
         "requestBody": {
           "content": {
@@ -328,17 +328,10 @@
             "description": "The file is not a PDF or DOCX"
           },
           "422": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "description": "Validation Error"
+            "description": "The virus scan found something; the file was not kept"
           },
           "503": {
-            "description": "File storage is unavailable"
+            "description": "File storage or virus scanning is unavailable"
           }
         },
         "security": [
@@ -384,6 +377,9 @@
           },
           "404": {
             "description": "No such resume for this user"
+          },
+          "409": {
+            "description": "The file hasn't passed the virus check"
           },
           "422": {
             "content": {

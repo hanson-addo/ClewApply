@@ -26,8 +26,9 @@ class Resume(Base):
     content_type: Mapped[str] = mapped_column(String(100), nullable=False)
     size_bytes: Mapped[int] = mapped_column(BigInteger, nullable=False)
     sha256: Mapped[str] = mapped_column(String(64), nullable=False)
-    # Malware scan result (#29). Until the scanner lands every file stays "pending". Nothing may
-    # parse the file or share it beyond its owner unless this is "clean" (threat model R7).
+    # Virus scan result: "clean" once ClamAV passes it (uploads are scanned before storing).
+    # Rows from before scanning stay "pending". Nothing may download, parse or share a file
+    # unless this is "clean" (threat model R7).
     scan_status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="pending")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()

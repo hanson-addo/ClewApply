@@ -25,7 +25,7 @@ docs/            Specs, threat model, test plans
 You need Docker, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
 
 ```sh
-docker compose up -d                   # Postgres (5432), MinIO file storage (9000) and Redis (6379), local only
+docker compose up -d                   # Postgres, MinIO file storage, ClamAV virus scanner and Redis, local only
 
 cd backend
 cp .env.example .env
@@ -38,6 +38,8 @@ cp .env.example .env.local
 npm install
 npm run dev                            # Web app on http://localhost:5173
 ```
+
+The virus scanner downloads its signatures the first time it starts, which takes a few minutes. Resume uploads answer "try again" until it's ready.
 
 The API logs in to Postgres as `clew_app`, a role that row-level security applies to, and migrations run as `clew`, the owner. A new Docker volume creates `clew_app` for you. If your volume is older than that, run `uv run alembic upgrade head` and then this once: `docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"`. Details are in [docs/setup/database.md](docs/setup/database.md).
 

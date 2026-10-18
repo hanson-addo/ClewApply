@@ -75,7 +75,8 @@ export interface paths {
         put?: never;
         /**
          * Upload Resume
-         * @description Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content.
+         * @description Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,
+         *     and the file is virus-scanned before it is stored.
          */
         post: operations["upload_resume_resumes_post"];
         delete?: never;
@@ -330,16 +331,14 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description Validation Error */
+            /** @description The virus scan found something; the file was not kept */
             422: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
+                content?: never;
             };
-            /** @description File storage is unavailable */
+            /** @description File storage or virus scanning is unavailable */
             503: {
                 headers: {
                     [name: string]: unknown;
@@ -377,6 +376,13 @@ export interface operations {
             };
             /** @description No such resume for this user */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The file hasn't passed the virus check */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

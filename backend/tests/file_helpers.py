@@ -27,3 +27,8 @@ def plain_zip() -> bytes:
     with zipfile.ZipFile(buffer, "w") as package:
         package.writestr("notes.txt", "not a resume")
     return buffer.getvalue()
+
+
+# The standard EICAR antivirus test string: harmless, but every scanner reports it. Built at
+# runtime so the source file itself doesn't set off antivirus on a developer's machine.
+EICAR = ("X5O!P%@AP[4\\PZX54(P^)7CC)7}$" + "EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*").encode()
