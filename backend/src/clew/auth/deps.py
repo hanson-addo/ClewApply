@@ -68,6 +68,8 @@ async def get_current_user(
     claims: Annotated[SessionClaims, Depends(get_session_claims)],
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> User:
+    # `users` has no row-level policy (sign-in has to find the account before anyone is bound),
+    # so every query on it must filter by the signed-in user itself. See docs/setup/database.md.
     user = await session.scalar(select(User).where(User.auth_provider_id == claims.subject))
     if user is not None and user.deleted_at is not None:
         raise UNAUTHORIZED

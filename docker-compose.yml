@@ -37,6 +37,15 @@ services:
       mc anonymous set none local/clew-resumes
       "
 
+  # Virus scanner for uploads. The first start downloads virus signatures, which takes a few
+  # minutes; uploads answer 503 until it's ready.
+  clamav:
+    image: clamav/clamav:1.4
+    ports:
+      - "127.0.0.1:3310:3310"
+    volumes:
+      - clew-clamav:/var/lib/clamav
+
   redis:
     image: redis:7-alpine
     ports:
@@ -45,3 +54,4 @@ services:
 volumes:
   clew-pg:
   clew-minio:
+  clew-clamav:

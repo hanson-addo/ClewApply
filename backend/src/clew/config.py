@@ -31,6 +31,10 @@ class Settings(BaseSettings):
     s3_region: str = "us-east-1"
     s3_access_key_id: str | None = None
     s3_secret_access_key: SecretStr | None = None
+    # ClamAV daemon (clamd) that scans every upload. Without it, uploads answer 503.
+    clamav_host: str | None = None
+    clamav_port: int = 3310
+    clamav_timeout_seconds: float = 30.0
 
     @field_validator("cors_origins")
     @classmethod
@@ -49,7 +53,9 @@ class Settings(BaseSettings):
             raise ValueError("CLEW_CLERK_ISSUER must be an https:// URL")
         return issuer.rstrip("/")
 
-    @field_validator("migrations_database_url", "s3_bucket", "s3_endpoint_url", "s3_access_key_id")
+    @field_validator(
+        "migrations_database_url", "s3_bucket", "s3_endpoint_url", "s3_access_key_id", "clamav_host"
+    )
     @classmethod
     def blank_is_unset(cls, value: str | None) -> str | None:
         return value or None

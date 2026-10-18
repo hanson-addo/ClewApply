@@ -12,9 +12,10 @@ from clew.auth.deps import get_token_verifier
 from clew.main import create_app
 from clew.models import Resume
 from clew.resumes.files import DOCX, MAX_RESUME_BYTES, PDF, detect_resume_type, safe_filename
+from clew.scanning import ScannerUnavailable, ScanVerdict, get_malware_scanner
 from clew.storage import S3ObjectStore, StorageUnavailable, get_object_store, s3_client
 from tests.auth_helpers import SigningKey, make_token
-from tests.file_helpers import FAKE_PDF, docx, pdf_of_size, plain_zip
+from tests.file_helpers import EICAR, FAKE_PDF, docx, pdf_of_size, plain_zip
 from tests.test_auth import verifier
 
 KEY = SigningKey("kid_resumes")
@@ -34,17 +35,37 @@ class MemoryStore:
         return f"https://storage.test/{key}?filename={filename}&expires={expires_in}"
 
 
+class FakeScanner:
+    """Flags the EICAR test string, like ClamAV does."""
+
+    def __init__(self) -> None:
+        self.down = False
+        self.scanned = 0
+
+    async def scan(self, data: bytes) -> ScanVerdict:
+        self.scanned += 1
+        if self.down:
+            raise ScannerUnavailable
+        return ScanVerdict.INFECTED if EICAR in data else ScanVerdict.CLEAN
+
+
 @pytest.fixture
 def store() -> MemoryStore:
     return MemoryStore()
 
 
 @pytest.fixture
-async def api(store: MemoryStore) -> AsyncIterator[AsyncClient]:
+def scanner() -> FakeScanner:
+    return FakeScanner()
+
+
+@pytest.fixture
+async def api(store: MemoryStore, scanner: FakeScanner) -> AsyncIterator[AsyncClient]:
     app = create_app()
     test_verifier = verifier(KEY)
     app.dependency_overrides[get_token_verifier] = lambda: test_verifier
     app.dependency_overrides[get_object_store] = lambda: store
+    app.dependency_overrides[get_malware_scanner] = lambda: scanner
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
 
@@ -75,7 +96,7 @@ async def test_upload_pdf(api: AsyncClient, store: MemoryStore, db: AsyncSession
     row = await db.scalar(select(Resume).where(Resume.id == uuid.UUID(body["id"])))
     assert row is not None
     assert store.objects[row.file_key] == (FAKE_PDF, PDF)
-    assert row.scan_status == "pending"
+    assert row.scan_status == "clean"
     # The storage key is random: no user id or file name in it.
     assert "Jordan" not in row.file_key
     assert str(row.user_id) not in row.file_key
@@ -188,11 +209,60 @@ async def test_storage_not_configured_is_503() -> None:
     test_verifier = verifier(KEY)
     app.dependency_overrides[get_token_verifier] = lambda: test_verifier
     app.dependency_overrides[get_object_store] = lambda: None
+    app.dependency_overrides[get_malware_scanner] = FakeScanner
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         response = await c.post(
             "/resumes", headers=as_user("user_up_nostore"), files=upload("r.pdf", FAKE_PDF)
         )
     assert response.status_code == 503
+
+
+# --- virus scan ----------------------------------------------------------------------------
+
+
+async def test_infected_file_is_rejected_and_not_kept(
+    api: AsyncClient, store: MemoryStore, db: AsyncSession
+) -> None:
+    infected = FAKE_PDF + EICAR
+    response = await api.post(
+        "/resumes", headers=as_user("user_scan_eicar"), files=upload("eicar.pdf", infected)
+    )
+    assert response.status_code == 422
+    assert response.json()["detail"] == "We couldn't accept this file. Please try a different copy."
+    assert store.objects == {}
+    assert "eicar.pdf" not in (await db.scalars(select(Resume.filename))).all()
+
+
+async def test_scanner_down_is_503_and_nothing_kept(
+    api: AsyncClient, store: MemoryStore, scanner: FakeScanner
+) -> None:
+    scanner.down = True
+    response = await api.post(
+        "/resumes", headers=as_user("user_scan_down"), files=upload("r.pdf", FAKE_PDF)
+    )
+    assert response.status_code == 503
+    assert store.objects == {}
+
+
+async def test_scanner_not_configured_is_503(store: MemoryStore) -> None:
+    app = create_app()
+    test_verifier = verifier(KEY)
+    app.dependency_overrides[get_token_verifier] = lambda: test_verifier
+    app.dependency_overrides[get_object_store] = lambda: store
+    app.dependency_overrides[get_malware_scanner] = lambda: None
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
+        response = await c.post(
+            "/resumes", headers=as_user("user_scan_none"), files=upload("r.pdf", FAKE_PDF)
+        )
+    assert response.status_code == 503
+    assert store.objects == {}
+
+
+async def test_wrong_type_is_rejected_before_scanning(
+    api: AsyncClient, scanner: FakeScanner
+) -> None:
+    await api.post("/resumes", headers=as_user("user_scan_type"), files=upload("a.txt", b"hi"))
+    assert scanner.scanned == 0
 
 
 # --- download ------------------------------------------------------------------------------
@@ -234,6 +304,16 @@ async def test_deleted_resume_is_not_found(api: AsyncClient, db: AsyncSession) -
     await db.commit()
     response = await api.get(f"/resumes/{resume_id}/download", headers=as_user("user_dl_deleted"))
     assert response.status_code == 404
+
+
+async def test_unscanned_resume_cannot_be_downloaded(api: AsyncClient, db: AsyncSession) -> None:
+    resume_id = await uploaded(api, "user_dl_pending")
+    await db.execute(
+        update(Resume).where(Resume.id == uuid.UUID(resume_id)).values(scan_status="pending")
+    )
+    await db.commit()
+    response = await api.get(f"/resumes/{resume_id}/download", headers=as_user("user_dl_pending"))
+    assert response.status_code == 409
 
 
 async def test_download_needs_sign_in(api: AsyncClient) -> None:
