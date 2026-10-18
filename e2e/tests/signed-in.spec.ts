@@ -3,7 +3,7 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { API_URL, hasClerk, testEmail } from "../env";
-import { createTestUser, enterEmailCode, signInAsNewUser } from "./clerk-helpers";
+import { createTestUser, enterEmailCode, fillNameIfAsked, signInAsNewUser } from "./clerk-helpers";
 
 // Sign-in journeys against the Clerk development instance (test plan §3.1). They need the
 // CLERK_* and CLEW_CLERK_ISSUER secrets; without them every test here is skipped.
@@ -56,6 +56,8 @@ test.describe("sign up and sign in", () => {
   }) => {
     const email = testEmail("signup");
     await page.goto("/sign-up");
+    await expect(emailField(page)).toBeVisible();
+    await fillNameIfAsked(page);
     await emailField(page).fill(email);
     await continueButton(page).click();
     const me = page.waitForResponse((r) => r.url() === `${API_URL}/me` && r.ok());
