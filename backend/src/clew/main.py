@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from clew import __version__
-from clew.api import health, me, resumes
+from clew.api import health, me, profile, resumes
 from clew.config import get_settings
 from clew.db.role_check import app_role_problems
 from clew.db.session import get_engine
@@ -47,6 +47,12 @@ def create_app() -> FastAPI:
         BodySizeLimit, path_prefix="/resumes", max_bytes=MAX_RESUME_BYTES + 64 * 1024
     )
     app.add_middleware(
+        BodySizeLimit,
+        path_prefix="/profile",
+        max_bytes=profile.MAX_PROFILE_BYTES,
+        message=profile.TOO_LARGE,
+    )
+    app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=True,
@@ -55,6 +61,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(me.router)
+    app.include_router(profile.router)
     app.include_router(resumes.router)
     return app
 

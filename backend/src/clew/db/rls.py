@@ -43,9 +43,12 @@ def revoke_app_access(table: str) -> None:
     op.execute(f"REVOKE ALL ON {table} FROM {APP_ROLE}")
 
 
-def enable_user_rls(table: str) -> None:
-    """Rows of `table` are visible and writable only for the user bound to the transaction."""
-    grant_app_access(table)
+def enable_user_rls(table: str, privileges: str = "SELECT, INSERT, UPDATE, DELETE") -> None:
+    """Rows of `table` are visible and writable only for the user bound to the transaction.
+
+    Pass fewer `privileges` for append-only tables (for example "SELECT, INSERT").
+    """
+    grant_app_access(table, privileges)
     op.execute(f"ALTER TABLE {table} ENABLE ROW LEVEL SECURITY")
     # FORCE applies the policy to the table owner too; only superusers skip it.
     op.execute(f"ALTER TABLE {table} FORCE ROW LEVEL SECURITY")

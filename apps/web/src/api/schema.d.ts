@@ -44,6 +44,71 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/profile": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Profile
+         * @description The current version of the signed-in user's profile.
+         */
+        get: operations["get_profile_profile_get"];
+        /**
+         * Save Profile
+         * @description Save the whole profile as a new version. Saving data identical to the current version
+         *     adds nothing and returns the current version.
+         */
+        put: operations["save_profile_profile_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/profile/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Versions
+         * @description Saved versions, newest first. Empty before the first save.
+         */
+        get: operations["list_versions_profile_versions_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/profile/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Version
+         * @description One saved version, exactly as it was saved.
+         */
+        get: operations["get_version_profile_versions__version_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/ready": {
         parameters: {
             query?: never;
@@ -109,10 +174,53 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** Award */
+        Award: {
+            /** Awarder */
+            awarder?: string | null;
+            /** Date */
+            date?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Title */
+            title?: string | null;
+        };
+        /** Basics */
+        Basics: {
+            /** Email */
+            email?: string | null;
+            /** Label */
+            label?: string | null;
+            location?: components["schemas"]["Location"] | null;
+            /** Name */
+            name?: string | null;
+            /** Phone */
+            phone?: string | null;
+            /**
+             * Profiles
+             * @default []
+             */
+            profiles: components["schemas"]["SocialProfile"][];
+            /** Summary */
+            summary?: string | null;
+            /** Url */
+            url?: string | null;
+        };
         /** Body_upload_resume_resumes_post */
         Body_upload_resume_resumes_post: {
             /** File */
             file: string;
+        };
+        /** Certificate */
+        Certificate: {
+            /** Date */
+            date?: string | null;
+            /** Issuer */
+            issuer?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Url */
+            url?: string | null;
         };
         /** DownloadLink */
         DownloadLink: {
@@ -123,6 +231,28 @@ export interface components {
             expires_at: string;
             /** Url */
             url: string;
+        };
+        /** Education */
+        Education: {
+            /** Area */
+            area?: string | null;
+            /**
+             * Courses
+             * @default []
+             */
+            courses: string[];
+            /** Enddate */
+            endDate?: string | null;
+            /** Institution */
+            institution?: string | null;
+            /** Score */
+            score?: string | null;
+            /** Startdate */
+            startDate?: string | null;
+            /** Studytype */
+            studyType?: string | null;
+            /** Url */
+            url?: string | null;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -139,6 +269,36 @@ export interface components {
             /** Version */
             version: string;
         };
+        /** Interest */
+        Interest: {
+            /**
+             * Keywords
+             * @default []
+             */
+            keywords: string[];
+            /** Name */
+            name?: string | null;
+        };
+        /** Language */
+        Language: {
+            /** Fluency */
+            fluency?: string | null;
+            /** Language */
+            language?: string | null;
+        };
+        /** Location */
+        Location: {
+            /** Address */
+            address?: string | null;
+            /** City */
+            city?: string | null;
+            /** Countrycode */
+            countryCode?: string | null;
+            /** Postalcode */
+            postalCode?: string | null;
+            /** Region */
+            region?: string | null;
+        };
         /** Me */
         Me: {
             /** Email */
@@ -150,6 +310,151 @@ export interface components {
             id: string;
             /** Plan */
             plan: string;
+        };
+        /**
+         * ProfileData
+         * @description A whole profile. Every section is optional, so a half-filled profile can be saved.
+         */
+        ProfileData: {
+            /**
+             * Awards
+             * @default []
+             */
+            awards: components["schemas"]["Award"][];
+            basics?: components["schemas"]["Basics"];
+            /**
+             * Certificates
+             * @default []
+             */
+            certificates: components["schemas"]["Certificate"][];
+            /**
+             * Education
+             * @default []
+             */
+            education: components["schemas"]["Education"][];
+            /**
+             * Interests
+             * @default []
+             */
+            interests: components["schemas"]["Interest"][];
+            /**
+             * Languages
+             * @default []
+             */
+            languages: components["schemas"]["Language"][];
+            /**
+             * Projects
+             * @default []
+             */
+            projects: components["schemas"]["Project"][];
+            /**
+             * Publications
+             * @default []
+             */
+            publications: components["schemas"]["Publication"][];
+            /**
+             * Skills
+             * @default []
+             */
+            skills: components["schemas"]["Skill"][];
+            /**
+             * Volunteer
+             * @default []
+             */
+            volunteer: components["schemas"]["Volunteer"][];
+            /**
+             * Work
+             * @default []
+             */
+            work: components["schemas"]["Work"][];
+        };
+        /** ProfileSave */
+        ProfileSave: {
+            /** Base Version Id */
+            base_version_id?: string | null;
+            /** Change Summary */
+            change_summary?: string | null;
+            data: components["schemas"]["ProfileData"];
+        };
+        /** ProfileVersionOut */
+        ProfileVersionOut: {
+            /** Change Summary */
+            change_summary: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            data: components["schemas"]["ProfileData"];
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Current */
+            is_current: boolean;
+        };
+        /** ProfileVersionSummary */
+        ProfileVersionSummary: {
+            /** Change Summary */
+            change_summary: string | null;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Is Current */
+            is_current: boolean;
+        };
+        /** Project */
+        Project: {
+            /** Description */
+            description?: string | null;
+            /** Enddate */
+            endDate?: string | null;
+            /** Entity */
+            entity?: string | null;
+            /**
+             * Highlights
+             * @default []
+             */
+            highlights: string[];
+            /**
+             * Keywords
+             * @default []
+             */
+            keywords: string[];
+            /** Name */
+            name?: string | null;
+            /**
+             * Roles
+             * @default []
+             */
+            roles: string[];
+            /** Startdate */
+            startDate?: string | null;
+            /** Type */
+            type?: string | null;
+            /** Url */
+            url?: string | null;
+        };
+        /** Publication */
+        Publication: {
+            /** Name */
+            name?: string | null;
+            /** Publisher */
+            publisher?: string | null;
+            /** Releasedate */
+            releaseDate?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Url */
+            url?: string | null;
         };
         /** Readiness */
         Readiness: {
@@ -183,6 +488,27 @@ export interface components {
             /** Size Bytes */
             size_bytes: number;
         };
+        /** Skill */
+        Skill: {
+            /**
+             * Keywords
+             * @default []
+             */
+            keywords: string[];
+            /** Level */
+            level?: string | null;
+            /** Name */
+            name?: string | null;
+        };
+        /** SocialProfile */
+        SocialProfile: {
+            /** Network */
+            network?: string | null;
+            /** Url */
+            url?: string | null;
+            /** Username */
+            username?: string | null;
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -195,6 +521,48 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** Volunteer */
+        Volunteer: {
+            /** Enddate */
+            endDate?: string | null;
+            /**
+             * Highlights
+             * @default []
+             */
+            highlights: string[];
+            /** Organization */
+            organization?: string | null;
+            /** Position */
+            position?: string | null;
+            /** Startdate */
+            startDate?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Url */
+            url?: string | null;
+        };
+        /** Work */
+        Work: {
+            /** Enddate */
+            endDate?: string | null;
+            /**
+             * Highlights
+             * @default []
+             */
+            highlights: string[];
+            /** Location */
+            location?: string | null;
+            /** Name */
+            name?: string | null;
+            /** Position */
+            position?: string | null;
+            /** Startdate */
+            startDate?: string | null;
+            /** Summary */
+            summary?: string | null;
+            /** Url */
+            url?: string | null;
         };
     };
     responses: never;
@@ -256,6 +624,175 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    get_profile_profile_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileVersionOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No profile yet */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    save_profile_profile_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileSave"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileVersionOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description base_version_id is no longer the current version */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The profile is over 256 KB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The profile doesn't match the schema */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    list_versions_profile_versions_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileVersionSummary"][];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_version_profile_versions__version_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProfileVersionOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such version for this user */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
             };
         };
     };
