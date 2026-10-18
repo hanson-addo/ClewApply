@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, StringConstraints
+from pydantic import AfterValidator, BaseModel, StringConstraints
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,7 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from clew.auth.deps import CurrentUser
 from clew.db.session import get_session
 from clew.models import Profile, ProfileVersion
-from clew.profile.schema import ProfileData
+from clew.profile.schema import ProfileData, reject_control_characters
 
 router = APIRouter(tags=["profile"])
 
@@ -33,7 +33,12 @@ Session = Annotated[AsyncSession, Depends(get_session)]
 class ProfileSave(BaseModel):
     data: ProfileData
     change_summary: (
-        Annotated[str, StringConstraints(strip_whitespace=True, max_length=200)] | None
+        Annotated[
+            str,
+            StringConstraints(strip_whitespace=True, max_length=200),
+            AfterValidator(reject_control_characters),
+        ]
+        | None
     ) = None
     # The version the edit started from. When given and it is no longer the current one,
     # the save is refused, so an edit in one tab can't silently undo another.
@@ -56,6 +61,8 @@ class ProfileVersionSummary(BaseModel):
 
 
 def _out(version: ProfileVersion, current_id: uuid.UUID | None) -> ProfileVersionOut:
+    # Stored versions are re-validated against today's ProfileData. A change that tightens
+    # the schema must come with a data migration for old versions, or reads will fail.
     return ProfileVersionOut(
         id=version.id,
         data=ProfileData.model_validate(version.data),

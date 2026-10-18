@@ -356,3 +356,26 @@ async def test_deleting_the_account_removes_profile_and_versions(
     assert await db.scalar(select(func.count()).where(Profile.user_id == uid)) == 0
     assert await db.scalar(select(func.count()).where(ProfileVersion.user_id == uid)) == 0
     assert await db.scalar(text("SELECT 1"))
+
+
+@pytest.mark.parametrize(
+    "body",
+    [
+        {"data": {"basics": {"summary": "pasted\u0000text"}}},
+        {"data": {"work": [{"highlights": ["fine", "bad\u0000"]}]}},
+        {"data": {"basics": {"location": {"postalCode": "12\u00003"}}}},
+        {"data": {"basics": {"url": "https://example.test/\u0000"}}},
+        {"data": {"skills": [{"keywords": ["SQL\u001b"]}]}},
+        {"data": {}, "change_summary": "oops\u0000"},
+    ],
+)
+async def test_control_characters_are_422_not_500(
+    api: AsyncClient, alice: dict[str, str], body: dict[str, Any]
+) -> None:
+    response = await api.put("/profile", headers=alice, json=body)
+    assert response.status_code == 422
+
+
+async def test_tabs_and_newlines_are_fine(api: AsyncClient, alice: dict[str, str]) -> None:
+    saved = await save(api, alice, {"basics": {"summary": "Line one\nLine two\twith a tab"}})
+    assert saved["data"]["basics"]["summary"] == "Line one\nLine two\twith a tab"

@@ -8,9 +8,25 @@ Left out on purpose:
   stored encrypted on their own (product rules), never in the profile.
 """
 
-from typing import Annotated
+import re
+from typing import Annotated, Any
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
+
+# C0 control characters other than tab, newline and carriage return. Postgres can't store
+# NUL in text or jsonb at all, and the rest have no place in a profile.
+CONTROL_CHARACTERS = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+NO_CONTROL_CHARACTERS = "Text can't contain control characters."
+
+
+def reject_control_characters(value: Any) -> Any:
+    if isinstance(value, str) and CONTROL_CHARACTERS.search(value):
+        raise ValueError(NO_CONTROL_CHARACTERS)
+    if isinstance(value, list):
+        for item in value:
+            reject_control_characters(item)
+    return value
+
 
 ShortText = Annotated[str, StringConstraints(strip_whitespace=True, max_length=200)]
 LongText = Annotated[str, StringConstraints(strip_whitespace=True, max_length=5000)]
@@ -36,6 +52,12 @@ Highlights = Annotated[list[LongText], Field(max_length=30)]
 
 class Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    @field_validator("*")
+    @classmethod
+    def no_control_characters(cls, value: Any) -> Any:
+        # Every string field of every section, and strings in lists (highlights, keywords).
+        return reject_control_characters(value)
 
 
 class Location(Strict):
