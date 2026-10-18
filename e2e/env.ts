@@ -15,6 +15,19 @@ export const hasClerk = Boolean(
   process.env.CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY && process.env.CLEW_CLERK_ISSUER,
 );
 
+// These tests create and delete Clerk users, so they must never run against a live instance.
+if (
+  hasClerk &&
+  !(
+    process.env.CLERK_PUBLISHABLE_KEY?.startsWith("pk_test_") &&
+    process.env.CLERK_SECRET_KEY?.startsWith("sk_test_")
+  )
+) {
+  throw new Error(
+    "End-to-end tests need Clerk development keys (pk_test_ and sk_test_), never live keys.",
+  );
+}
+
 /**
  * One id per test run, shared by setup, teardown and every worker. On GitHub Actions it is the
  * run id and attempt; locally a random one. The config loads this file first, so workers
