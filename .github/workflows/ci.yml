@@ -35,6 +35,9 @@ jobs:
     env:
       CLEW_ENV: test
       CLEW_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
+      # Migrations and the test suite's setup run as the owner; the tests switch the API
+      # itself to the clew_app role.
+      CLEW_MIGRATIONS_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
@@ -96,7 +99,9 @@ jobs:
           --health-retries 10
     env:
       CLEW_ENV: test
-      CLEW_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
+      # The API runs as clew_app, as in production; migrations run as the owner.
+      CLEW_DATABASE_URL: postgresql+asyncpg://clew_app:clew_app@localhost:5432/clew
+      CLEW_MIGRATIONS_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
@@ -114,6 +119,10 @@ jobs:
         run: |
           uv sync --locked
           uv run alembic upgrade head
+      - name: Let the app role log in (the migration creates it without a login)
+        env:
+          PGPASSWORD: clew
+        run: psql -h localhost -U clew -d clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"
       - name: Install web app
         working-directory: apps/web
         run: npm ci

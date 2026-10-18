@@ -19,7 +19,7 @@ from clew.auth.tokens import (
     http_jwks_fetcher,
 )
 from clew.config import get_settings
-from clew.db.session import get_session
+from clew.db.session import bind_user, get_session
 from clew.models import User
 
 logger = logging.getLogger(__name__)
@@ -92,6 +92,8 @@ async def get_current_user(
         await session.execute(update(User).where(User.id == user.id).values(email=claims.email))
         await session.commit()
         await session.refresh(user)
+    # From here on, row-level security shows this request only the user's own rows.
+    await bind_user(session, user.id)
     return user
 
 

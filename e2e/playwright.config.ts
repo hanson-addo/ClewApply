@@ -52,7 +52,8 @@ export default defineConfig({
       env: {
         CLEW_ENV: "test",
         CLEW_DATABASE_URL:
-          process.env.CLEW_DATABASE_URL ?? "postgresql+asyncpg://clew:clew@localhost:5432/clew",
+          process.env.CLEW_DATABASE_URL ??
+          "postgresql+asyncpg://clew_app:clew_app@localhost:5432/clew",
         CLEW_CORS_ORIGINS: JSON.stringify([WEB_URL]),
         CLEW_CLERK_ISSUER: process.env.CLEW_CLERK_ISSUER ?? "",
       },
