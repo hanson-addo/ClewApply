@@ -7,13 +7,15 @@ Clew's API never connects to Postgres as the role that owns the tables. Two role
 | Owner (`clew` locally) | Migrations (`CLEW_MIGRATIONS_DATABASE_URL`) | Create and change tables |
 | `clew_app` | The API (`CLEW_DATABASE_URL`) | Read and write rows it's been granted; can't bypass row-level security |
 
-Per-user tables (`resumes` today; profiles, applications and sensitive answers as they're added) have row-level security turned on. A row is visible only when its `user_id` matches `app.user_id`, which the API sets for each transaction from the signed-in user. If a route forgets its own `WHERE user_id = ...`, the database still returns only that user's rows (threat model R1).
+Per-user tables (`resumes`, `profiles` and `profile_versions` today; applications and sensitive answers as they're added) have row-level security turned on. A row is visible only when its `user_id` matches `app.user_id`, which the API sets for each transaction from the signed-in user. If a route forgets its own `WHERE user_id = ...`, the database still returns only that user's rows (threat model R1).
 
 `users` itself has no row policy yet: sign-in has to find an account by its Clerk id before anyone is bound. Until it gets one (planned before launch, with sign-in moved into a `SECURITY DEFINER` function), `users` stays thin. Profile content, resume text and sensitive answers always go in their own per-user tables, never as columns on `users`.
 
 ## Adding a per-user table
 
 In the table's migration, call `enable_user_rls("<table>")` from `clew.db.rls`. It grants `clew_app` access, turns on and forces row-level security, and adds the policy. `tests/test_row_security.py` fails for any table with a `user_id` column that skips it.
+
+For history tables the API must never rewrite, pass fewer privileges: `enable_user_rls("profile_versions", "SELECT, INSERT")` leaves `clew_app` unable to change or delete a saved version.
 
 Tables that aren't per user (such as a shared job catalog) call `grant_app_access("<table>", "SELECT")` with only the privileges the API needs.
 
