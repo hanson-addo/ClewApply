@@ -1,8 +1,11 @@
 import { expect, test } from "@playwright/test";
 
-// CI builds the web app without a Clerk key, so every route shows the
-// "sign-in isn't set up" page. Signed-in journeys (AUTH-*, X-06 on the home
-// page) need a Clerk dev instance and get their own spec once QA has keys.
+import { SETUP_URL } from "../env";
+
+// A build without a Clerk key shows the "sign-in isn't set up" page on every route. The config
+// always serves one at SETUP_URL. Signed-in journeys are in signed-in.spec.ts.
+
+test.use({ baseURL: SETUP_URL });
 
 test.describe("app without a Clerk key", () => {
   test("shows the Clew brand and says sign-in isn't set up", async ({ page }) => {

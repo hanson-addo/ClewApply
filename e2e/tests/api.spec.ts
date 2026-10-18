@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { API_URL } from "../playwright.config";
+import { API_URL, hasClerk } from "../env";
 
 test.describe("API in test mode", () => {
   test("health check is ok and reports a version", async ({ request }) => {
@@ -32,5 +32,21 @@ test.describe("API in test mode", () => {
       headers: { Origin: "https://evil.example" },
     });
     expect(other.headers()["access-control-allow-origin"]).toBeUndefined();
+  });
+});
+
+test.describe("signed-in API routes", () => {
+  test("GET /me without a token is refused (AUTH-10)", async ({ request }) => {
+    const res = await request.get(`${API_URL}/me`);
+    // 401 when sign-in is configured; 503 "not set up" when the API has no Clerk issuer.
+    expect(res.status()).toBe(hasClerk ? 401 : 503);
+  });
+
+  test("GET /me with a made-up token is refused", async ({ request }) => {
+    test.skip(!hasClerk, "Clerk development keys are not set");
+    const res = await request.get(`${API_URL}/me`, {
+      headers: { Authorization: "Bearer eyJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJ4In0.c2lnbmF0dXJl" },
+    });
+    expect(res.status()).toBe(401);
   });
 });
