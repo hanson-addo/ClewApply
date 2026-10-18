@@ -3,7 +3,13 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { API_URL, hasClerk, testEmail } from "../env";
-import { createTestUser, enterEmailCode, fillNameIfAsked, signInAsNewUser } from "./clerk-helpers";
+import {
+  createTestUser,
+  enterEmailCode,
+  fillNameIfAsked,
+  SIGN_IN_TIMEOUT,
+  signInAsNewUser,
+} from "./clerk-helpers";
 
 // Sign-in journeys against the Clerk development instance (test plan §3.1). They need the
 // CLERK_* and CLEW_CLERK_ISSUER secrets; without them every test here is skipped.
@@ -63,7 +69,7 @@ test.describe("sign up and sign in", () => {
     const me = page.waitForResponse((r) => r.url() === `${API_URL}/me` && r.ok());
     await enterEmailCode(page);
 
-    await expect(welcome(page)).toBeVisible();
+    await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
     expect(await (await me).json()).toMatchObject({ email, plan: "free" });
     await expect(page.getByText(email)).toBeVisible();
   });
@@ -75,7 +81,7 @@ test.describe("sign up and sign in", () => {
     await continueButton(page).click();
     await enterEmailCode(page);
 
-    await expect(welcome(page)).toBeVisible();
+    await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
     await expect(page.getByText(email)).toBeVisible();
   });
 
@@ -91,7 +97,7 @@ test.describe("signed in", () => {
   test("sign out returns to sign-in and the app stays closed (AUTH-08)", async ({ page }) => {
     await signInAsNewUser(page, "signout");
     await page.goto("/");
-    await expect(welcome(page)).toBeVisible();
+    await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
     await page.getByRole("button", { name: "Sign out" }).click();
     await expectSignInPage(page);
@@ -106,7 +112,7 @@ test.describe("signed in", () => {
   test("no session token is kept in browser storage (AUTH-06)", async ({ page }) => {
     await signInAsNewUser(page, "storage");
     await page.goto("/");
-    await expect(welcome(page)).toBeVisible();
+    await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
     // Clerk may cache non-secret settings; what must never be there is a JWT.
     const values = await page.evaluate(() =>
@@ -123,7 +129,7 @@ test.describe("signed in", () => {
   }) => {
     await signInAsNewUser(page, "a11y");
     await page.goto("/");
-    await expect(welcome(page)).toBeVisible();
+    await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
     await expectNoBlockingA11yIssues(page);
     await expectNoSidewaysScroll(page);
   });
@@ -158,7 +164,7 @@ test.describe("signed in", () => {
 async function openHomeAndReadMe(page: Page): Promise<{ id: string }> {
   const response = page.waitForResponse((r) => r.url() === `${API_URL}/me` && r.ok());
   await page.goto("/");
-  await expect(welcome(page)).toBeVisible();
+  await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
   return (await response).json();
 }
 

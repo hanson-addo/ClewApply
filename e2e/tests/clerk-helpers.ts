@@ -32,11 +32,23 @@ export async function signInAsNewUser(page: Page, label: string): Promise<string
   return email;
 }
 
-/** Types Clerk's test code into the verification step. The first box has focus. */
+/**
+ * Types Clerk's test code into the verification step. Focuses the first code box explicitly
+ * once it is enabled, because typing before Clerk moves focus there drops digits.
+ */
 export async function enterEmailCode(page: Page): Promise<void> {
   await expect(page.getByText(/check your email|verify your email/i).first()).toBeVisible();
-  await page.keyboard.type(TEST_EMAIL_CODE);
+  const firstBox = page
+    .locator('input[autocomplete="one-time-code"]')
+    .or(page.getByLabel(/verification code/i))
+    .first();
+  await expect(firstBox).toBeEnabled();
+  await firstBox.click();
+  await page.keyboard.type(TEST_EMAIL_CODE, { delay: 50 });
 }
+
+/** Clerk's sign-in round trip plus the first /me call can take longer than the default 5s. */
+export const SIGN_IN_TIMEOUT = 15_000;
 
 /** Fills first and last name on the sign-up form when the Clerk instance asks for them. */
 export async function fillNameIfAsked(page: Page): Promise<void> {
