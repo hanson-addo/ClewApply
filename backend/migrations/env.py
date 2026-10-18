@@ -1,4 +1,7 @@
-"""Alembic migrations. The database URL comes from CLEW_DATABASE_URL, never from alembic.ini."""
+"""Alembic migrations, run as the table owner.
+
+The URL comes from CLEW_MIGRATIONS_DATABASE_URL (or CLEW_DATABASE_URL), never from alembic.ini.
+"""
 
 import asyncio
 
@@ -13,6 +16,11 @@ from clew.db.base import Base
 target_metadata = Base.metadata
 
 
+def migrations_url() -> str:
+    settings = get_settings()
+    return settings.migrations_database_url or settings.database_url
+
+
 def do_run_migrations(connection: Connection) -> None:
     context.configure(connection=connection, target_metadata=target_metadata)
     with context.begin_transaction():
@@ -20,7 +28,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    engine = create_async_engine(get_settings().database_url)
+    engine = create_async_engine(migrations_url())
     async with engine.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await engine.dispose()
@@ -28,7 +36,7 @@ async def run_async_migrations() -> None:
 
 def run_migrations_offline() -> None:
     context.configure(
-        url=get_settings().database_url,
+        url=migrations_url(),
         target_metadata=target_metadata,
         literal_binds=True,
     )

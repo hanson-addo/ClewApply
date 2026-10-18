@@ -15,7 +15,10 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_prefix="CLEW_", env_file=".env", extra="ignore")
 
     env: Literal["local", "test", "production"] = "production"
+    # The API connects as the app role (clew_app), which can't bypass row-level security.
     database_url: str
+    # Migrations run as the role that owns the tables. Falls back to database_url.
+    migrations_database_url: str | None = None
     cors_origins: list[str] = []
     # Clerk instance URL, e.g. https://example-name-12.clerk.accounts.dev. Session tokens must
     # carry it as "iss", and its public keys are fetched from <issuer>/.well-known/jwks.json.
@@ -46,7 +49,7 @@ class Settings(BaseSettings):
             raise ValueError("CLEW_CLERK_ISSUER must be an https:// URL")
         return issuer.rstrip("/")
 
-    @field_validator("s3_bucket", "s3_endpoint_url", "s3_access_key_id")
+    @field_validator("migrations_database_url", "s3_bucket", "s3_endpoint_url", "s3_access_key_id")
     @classmethod
     def blank_is_unset(cls, value: str | None) -> str | None:
         return value or None

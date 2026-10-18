@@ -39,6 +39,8 @@ npm install
 npm run dev                            # Web app on http://localhost:5173
 ```
 
+The API logs in to Postgres as `clew_app`, a role that row-level security applies to, and migrations run as `clew`, the owner. A new Docker volume creates `clew_app` for you. If your volume is older than that, run `uv run alembic upgrade head` and then this once: `docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"`. Details are in [docs/setup/database.md](docs/setup/database.md).
+
 Sign-in needs a Clerk development instance. The one-time setup is in [docs/setup/clerk.md](docs/setup/clerk.md). Without it, the app still runs, but signed-in pages say sign-in isn't set up.
 
 Checks that CI runs on every pull request:
