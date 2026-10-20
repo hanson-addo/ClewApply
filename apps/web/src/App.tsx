@@ -5,6 +5,7 @@ import { clerkAppearance } from "./auth/clerkAppearance";
 import { RequireSignIn } from "./auth/RequireSignIn";
 import { config } from "./config";
 import { HomePage } from "./pages/HomePage";
+import { ProfilePage } from "./profile/ProfilePage";
 import { SetupNeededPage } from "./pages/SetupNeededPage";
 import { SignInPage } from "./pages/SignInPage";
 
@@ -18,6 +19,15 @@ export function AppRoutes() {
         element={
           <RequireSignIn>
             <HomePage />
+          </RequireSignIn>
+        }
+      />
+      <Route path="/profile" element={<Navigate to="/profile/basics" replace />} />
+      <Route
+        path="/profile/:section"
+        element={
+          <RequireSignIn>
+            <ProfilePage />
           </RequireSignIn>
         }
       />
