@@ -20,7 +20,7 @@ The left column (on phones, under the card) lists these before any file is chose
 1. Every file is checked for viruses before we keep it.
 2. Only you can open it. Download links expire after 5 minutes.
 3. An AI service reads it to draft your profile. The privacy policy link names the provider.
-4. Delete it any time from Profile, Settings.
+4. Delete it any time from Profile, Settings. Show this point only once resume delete exists in the API; until then, leave it off.
 
 The AI line must be visible without scrolling on desktop and appear above "Choose a file" on phones, because reading starts as soon as the upload finishes (#71).
 
