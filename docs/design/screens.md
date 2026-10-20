@@ -58,7 +58,7 @@ If the user leaves mid-way, the next visit opens the step they were on with the 
 
 ### Not built yet
 
-Resume parsing isn't in the backend yet; today `POST /resumes` stores and scans the file only. Until the parser lands, "Reading your resume" is skipped and "Review what we found" opens step 2 with empty fields, labeled "We'll fill this in from your resume soon. For now, add your details here."
+Resume parsing is in review (#71): after upload, `GET /resumes/{id}/parse` reports progress and returns a draft profile plus the fields to "Check this". Until that merges, `POST /resumes` only stores and scans the file, so "Reading your resume" is skipped and "Review what we found" opens step 2 with empty fields, labeled "We'll fill this in from your resume soon. For now, add your details here."
 
 ## Review parsed resume (onboarding step 2)
 
