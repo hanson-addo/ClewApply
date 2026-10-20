@@ -83,6 +83,20 @@ Work authorization, veteran status, disability and EEO answers.
 - Saved values are masked by default ("Answered"), with a "Show" toggle button (`aria-pressed`, label "Show veteran status") that reveals the value until the user leaves the section.
 - Values never appear in toasts, the live region, error summaries or page titles. Announce "Saved" rather than the answer.
 
+## FileUpload
+
+Resume upload on onboarding step 1 and "Replace file" on the profile. Screen-level states and error copy are in [screens.md](screens.md#resume-upload-onboarding-step-1).
+
+- **Anatomy:** a drop zone (2px dashed `border-control`, `bg-subtle`, radius `lg`) holding an icon, "Drag your resume here", the limits line ("PDF or Word (.docx), up to 10 MB", `text-secondary`), and a primary Button that is the `<label>` for a visually hidden `<input type="file" accept=".pdf,.docx">`.
+- **Drag over:** border becomes `focus-ring` and the background `bg-selected`; the text changes to "Drop to upload". Dropping more than one file uses the first and says "We used the first file."
+- **Phone (under `md`):** no drop zone text; the full-width button opens the phone's file picker. A hint under it says "Opens Files, iCloud Drive or Google Drive on your phone."
+- **Progress:** an `<ol>` of steps (done, current, to do) plus one `role="status"` line. Never a bare percentage bar with no words.
+- **Screen reader:** the button reads "Choose a file, PDF or Word, up to 10 MB" (the limits line is joined with `aria-describedby`). The input itself must stay focusable: hide it with the `clew-sr-only` pattern, never `display: none`.
+
+```ts
+type FileUploadProps = { accept: string[]; maxBytes: number; onFile: (file: File) => void; state: 'idle' | 'checking' | 'done' | 'error'; error?: { title: string; body: string } };
+```
+
 ## Select
 
 - Native `<select>` styled like TextField, with a custom chevron icon (`aria-hidden`). Use native so phones get their own picker.
