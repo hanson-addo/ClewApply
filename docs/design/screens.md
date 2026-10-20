@@ -13,6 +13,17 @@ Route: `/onboarding/upload`. Comes right after first sign-in. The stepper shows 
 | `lg` and up | Two columns: intro and the three privacy points on the left, the upload card on the right |
 | Under `lg` | One column: heading, upload card, then privacy points. Drag and drop is not offered under `md` (phones can't drag files), so the card shows only "Choose a file" |
 
+### Privacy points
+
+The left column (on phones, under the card) lists these before any file is chosen, so the user knows them before uploading:
+
+1. Every file is checked for viruses before we keep it.
+2. Only you can open it. Download links expire after 5 minutes.
+3. An AI service reads it to draft your profile. The privacy policy link names the provider.
+4. Delete it any time from Profile, Settings.
+
+The AI line must be visible without scrolling on desktop and appear above "Choose a file" on phones, because reading starts as soon as the upload finishes (#71).
+
 ### Upload card states
 
 The card has one state at a time. The mockup's Tweaks panel ("Upload state") shows each one.
@@ -56,7 +67,7 @@ Rules:
 
 If the user leaves mid-way, the next visit opens the step they were on with the uploaded file kept (UP-11). "Replace file" on step 2 returns here and shows the current file name above the drop zone.
 
-### Not built yet
+### Until parsing merges
 
 Resume parsing is in review (#71): after upload, `GET /resumes/{id}/parse` reports progress and returns a draft profile plus the fields to "Check this". Until that merges, `POST /resumes` only stores and scans the file, so "Reading your resume" is skipped and "Review what we found" opens step 2 with empty fields, labeled "We'll fill this in from your resume soon. For now, add your details here."
 
