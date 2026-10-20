@@ -1,6 +1,6 @@
 # Clew design system
 
-This is the designer's handoff for the web app and the browser add-on. It covers the tokens, the rules for phones and screen readers, and how each screen is laid out. Component-by-component specs are in [components.md](components.md).
+This is the designer's handoff for the web app and the browser add-on. It covers the tokens, the rules for phones and screen readers, and how each screen is laid out. Component-by-component specs are in [components.md](components.md). Screen-level specs (states, error copy, phone layout) are in [screens.md](screens.md).
 
 - Tokens (source of truth): [`packages/design-tokens/tokens.json`](../../packages/design-tokens/tokens.json)
 - Generated CSS variables: `packages/design-tokens/tokens.css`
