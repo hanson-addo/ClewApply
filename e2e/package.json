@@ -12,7 +12,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",
-    "@clerk/backend": "3.22.0",
+    "@clerk/backend": "3.26.1",
     "@clerk/testing": "2.2.42",
     "@playwright/test": "1.63.0",
     "@types/node": "^22.10.0",
