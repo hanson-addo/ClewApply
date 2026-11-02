@@ -2,7 +2,7 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API_URL, hasClerk } from "../env";
-import { signInAsNewUser } from "./clerk-helpers";
+import { bearer, signInForApi } from "./api-as";
 
 // Master profile through the real stack (test plan §3.3): a real Clerk session token, the API
 // running as the restricted clew_app role, and Postgres row-level security. There is no
@@ -29,23 +29,15 @@ class ApiAs {
     private readonly request: APIRequestContext,
   ) {}
 
-  private async headers(): Promise<Record<string, string>> {
-    const token = await this.page.evaluate(async () => {
-      const clerk = (window as unknown as {
-        Clerk?: { session?: { getToken(): Promise<string | null> } };
-      }).Clerk;
-      return (await clerk?.session?.getToken()) ?? null;
-    });
-    expect(token, "the page should have a Clerk session").toBeTruthy();
-    return { Authorization: `Bearer ${token}` };
-  }
-
   async get(path: string) {
-    return this.request.get(`${API_URL}${path}`, { headers: await this.headers() });
+    return this.request.get(`${API_URL}${path}`, { headers: await bearer(this.page) });
   }
 
   async put(path: string, body: unknown) {
-    return this.request.put(`${API_URL}${path}`, { headers: await this.headers(), data: body });
+    return this.request.put(`${API_URL}${path}`, {
+      headers: await bearer(this.page),
+      data: body,
+    });
   }
 
   async save(body: unknown): Promise<Version> {
@@ -62,16 +54,8 @@ class ApiAs {
 }
 
 async function signedIn(page: Page, request: APIRequestContext, label: string): Promise<ApiAs> {
-  await signInAsNewUser(page, label);
-  // Settle on the app with a live session before reading tokens from it.
-  await page.goto("/");
-  await page.waitForFunction(
-    () => Boolean((window as unknown as { Clerk?: { session?: unknown } }).Clerk?.session),
-  );
-  const api = new ApiAs(page, request);
-  // The first signed-in call creates the account.
-  expect((await api.get("/me")).status()).toBe(200);
-  return api;
+  await signInForApi(page, request, label);
+  return new ApiAs(page, request);
 }
 
 const firstJob: Work = { name: "Labyrinth Logistics", position: "Thread Engineer", startDate: "2021-03" };

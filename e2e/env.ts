@@ -29,6 +29,13 @@ if (
 }
 
 /**
+ * Upload specs need S3-compatible storage and ClamAV. CI starts MinIO and ClamAV and sets these;
+ * the API server inherits them. Locally, `docker compose up` and export the same CLEW_S3_* and
+ * CLEW_CLAMAV_* values as backend/.env.example.
+ */
+export const hasUploadServices = Boolean(process.env.CLEW_S3_BUCKET && process.env.CLEW_CLAMAV_HOST);
+
+/**
  * One id per test run, shared by setup, teardown and every worker. On GitHub Actions it is the
  * run id and attempt; locally a random one. The config loads this file first, so workers
  * inherit the value through the environment.

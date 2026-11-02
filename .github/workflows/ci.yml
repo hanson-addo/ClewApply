@@ -102,7 +102,32 @@ jobs:
       # The API runs as clew_app, as in production; migrations run as the owner.
       CLEW_DATABASE_URL: postgresql+asyncpg://clew_app:clew_app@localhost:5432/clew
       CLEW_MIGRATIONS_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
+      # File storage (MinIO) and the virus scanner (ClamAV) for the upload specs. CI-only
+      # placeholder credentials; the containers start in the first step below.
+      CLEW_S3_BUCKET: clew-resumes
+      CLEW_S3_ENDPOINT_URL: http://localhost:9000
+      CLEW_S3_REGION: us-east-1
+      CLEW_S3_ACCESS_KEY_ID: clew-ci
+      CLEW_S3_SECRET_ACCESS_KEY: clew-ci-only
+      CLEW_CLAMAV_HOST: localhost
+      CLEW_CLAMAV_PORT: "3310"
     steps:
+      # Started first so ClamAV loads its signatures while the installs run. Both images are
+      # for CI only, pinned by digest.
+      # - ClamAV uses the signatures in the image and skips the online update, so runs are
+      #   repeatable and stay off ClamAV's rate-limited mirrors. Frozen signatures are fine
+      #   for testing the upload flow but don't meet production's freshness rule (R7).
+      # - MinIO no longer publishes images on Docker Hub, so this is Bitnami's frozen build
+      #   of the same MinIO release as docker-compose.yml. It gets no updates: never use it
+      #   in production. It creates the private bucket on start.
+      - name: Start file storage and the virus scanner
+        run: |
+          docker run -d --name minio -p 127.0.0.1:9000:9000 \
+            -e MINIO_ROOT_USER="$CLEW_S3_ACCESS_KEY_ID" -e MINIO_ROOT_PASSWORD="$CLEW_S3_SECRET_ACCESS_KEY" \
+            -e MINIO_DEFAULT_BUCKETS="$CLEW_S3_BUCKET" \
+            bitnamilegacy/minio:2025.4.22-debian-12-r2@sha256:50cec18ac4184af4671a78aedd5554942c8ae105d51a465fa82037949046da01
+          docker run -d --name clamav -p 127.0.0.1:3310:3310 -e CLAMAV_NO_FRESHCLAMD=true \
+            clamav/clamav:1.4@sha256:8ad6197396974726c35d017e50aaaaf4b91745726a04faec8480c203edd98052
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
         with:
@@ -133,6 +158,23 @@ jobs:
           npx playwright install --with-deps chromium
       - run: npm run typecheck
         working-directory: e2e
+      - name: Wait for file storage and the virus scanner
+        run: |
+          wait_for() { # seconds, then a command that succeeds once the service is ready
+            local deadline=$((SECONDS + $1)); shift
+            until "$@"; do
+              if ((SECONDS >= deadline)); then echo "Timed out waiting for: $*"; exit 1; fi
+              sleep 2
+            done
+          }
+          bucket_is_private() {
+            [ "$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:9000/$CLEW_S3_BUCKET/")" = 403 ]
+          }
+          clamav_answers() { printf 'PING\n' | nc -w 2 localhost 3310 | grep -q PONG; }
+          wait_for 120 curl -sf http://localhost:9000/minio/health/ready
+          # The bucket exists (and is private) once an anonymous request gets 403, not 404.
+          wait_for 60 bucket_is_private
+          wait_for 300 clamav_answers
       - run: npm test
         working-directory: e2e
         env:
