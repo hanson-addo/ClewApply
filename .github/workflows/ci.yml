@@ -157,10 +157,21 @@ jobs:
         working-directory: e2e
       - name: Wait for file storage and the virus scanner
         run: |
-          timeout 120 sh -c 'until curl -sf http://localhost:9000/minio/health/ready; do sleep 2; done'
+          wait_for() { # seconds, then a command that succeeds once the service is ready
+            local deadline=$((SECONDS + $1)); shift
+            until "$@"; do
+              if ((SECONDS >= deadline)); then echo "Timed out waiting for: $*"; exit 1; fi
+              sleep 2
+            done
+          }
+          bucket_is_private() {
+            [ "$(curl -s -o /dev/null -w '%{http_code}' "http://localhost:9000/$CLEW_S3_BUCKET/")" = 403 ]
+          }
+          clamav_answers() { printf 'PING\n' | nc -w 2 localhost 3310 | grep -q PONG; }
+          wait_for 120 curl -sf http://localhost:9000/minio/health/ready
           # The bucket exists (and is private) once an anonymous request gets 403, not 404.
-          timeout 60 sh -c 'until [ "$(curl -s -o /dev/null -w "%{http_code}" "$1")" = 403 ]; do sleep 2; done' _ "http://localhost:9000/$CLEW_S3_BUCKET/"
-          timeout 300 sh -c 'until printf "PING\n" | nc -w 2 localhost 3310 | grep -q PONG; do sleep 3; done'
+          wait_for 60 bucket_is_private
+          wait_for 300 clamav_answers
       - run: npm test
         working-directory: e2e
         env:
