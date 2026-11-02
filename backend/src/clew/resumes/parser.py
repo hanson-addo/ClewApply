@@ -100,10 +100,16 @@ class AnthropicParser:
         *,
         max_retries: int = 2,
         http_client: "httpx2.AsyncClient | None" = None,
+        base_url: str | None = None,
     ) -> None:
-        # The SDK retries connection errors, 429s and 5xx responses itself.
+        # The SDK retries connection errors, 429s and 5xx responses itself. With no base_url
+        # it reads ANTHROPIC_BASE_URL from the environment.
         self._client = anthropic.AsyncAnthropic(
-            api_key=api_key, timeout=timeout, max_retries=max_retries, http_client=http_client
+            api_key=api_key,
+            timeout=timeout,
+            max_retries=max_retries,
+            http_client=http_client,
+            base_url=base_url,
         )
         self._model = model
 
@@ -255,6 +261,11 @@ def redact(value: Any, key: str = "") -> Any:
     return value
 
 
+# Production always talks to Anthropic itself, so a stray ANTHROPIC_BASE_URL can't send
+# resume text anywhere else. Local and test runs may point at a stand-in (e2e/fake-anthropic).
+ANTHROPIC_API_URL = "https://api.anthropic.com"
+
+
 @lru_cache
 def get_resume_parser() -> ResumeParser | None:
     settings = get_settings()
@@ -264,4 +275,5 @@ def get_resume_parser() -> ResumeParser | None:
         settings.anthropic_api_key.get_secret_value(),
         settings.parser_model,
         settings.parser_timeout_seconds,
+        base_url=ANTHROPIC_API_URL if settings.env == "production" else None,
     )
