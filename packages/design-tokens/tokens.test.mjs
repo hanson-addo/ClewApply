@@ -34,6 +34,8 @@ const pairs = [
   ['text-secondary', 'bg-page', 4.5],
   ['text-secondary', 'bg-surface', 4.5],
   ['text-secondary', 'bg-subtle', 4.5],
+  ['text-primary', 'bg-sunken', 4.5],
+  ['text-secondary', 'bg-sunken', 4.5],
   ['text-accent', 'bg-surface', 4.5],
   ['text-accent', 'bg-page', 4.5],
   ['text-link', 'bg-surface', 4.5],

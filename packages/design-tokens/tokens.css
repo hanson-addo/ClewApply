@@ -2,6 +2,7 @@
 :root {
   --clew-color-ink-50: #F4F2FF;
   --clew-color-ink-100: #EDEBF5;
+  --clew-color-ink-150: #E4E2EE;
   --clew-color-ink-200: #DCDAE8;
   --clew-color-ink-300: #C3C7DD;
   --clew-color-ink-400: #7D82A0;
@@ -30,6 +31,7 @@
   --clew-bg-page: var(--clew-color-ink-100);
   --clew-bg-surface: var(--clew-color-white);
   --clew-bg-subtle: var(--clew-color-ink-50);
+  --clew-bg-sunken: var(--clew-color-ink-150);
   --clew-bg-inverse: var(--clew-color-ink-900);
   --clew-bg-inverse-raised: var(--clew-color-ink-700);
   --clew-bg-selected: var(--clew-color-coral-100);
