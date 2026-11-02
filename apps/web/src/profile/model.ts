@@ -153,11 +153,6 @@ export function versionDate(iso: string, now = new Date()): string {
 }
 
 /** Versions come newest first, so the oldest is version 1. */
-export function versionNumber(versions: VersionSummary[], id: string): number {
-  const index = versions.findIndex((v) => v.id === id);
-  return index === -1 ? 0 : versions.length - index;
-}
-
 export function sectionBySlug(slug: string | undefined) {
   return SECTIONS.find((s) => s.slug === slug);
 }

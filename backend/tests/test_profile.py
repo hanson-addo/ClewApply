@@ -106,7 +106,9 @@ async def test_each_save_adds_a_version_and_old_ones_stay_unchanged(
     second = await save(api, alice, profile(name="Jordan Q. Testperson"), change_summary="Name")
     assert second["id"] != first["id"]
 
+    assert (first["number"], second["number"]) == (1, 2)
     old = (await api.get(f"/profile/versions/{first['id']}", headers=alice)).json()
+    assert old["number"] == 1
     assert old["data"] == first["data"]
     assert old["data"]["basics"]["name"] == "Jordan Testperson"
     assert old["is_current"] is False
@@ -126,6 +128,7 @@ async def test_saving_the_same_data_adds_no_version(
     first = await save(api, alice, profile())
     again = await save(api, alice, profile())
     assert again["id"] == first["id"]
+    assert again["number"] == first["number"] == 1
     assert len((await api.get("/profile/versions", headers=alice)).json()) == 1
 
 
@@ -134,6 +137,8 @@ async def test_list_limit(api: AsyncClient, alice: dict[str, str]) -> None:
         await save(api, alice, profile(name=f"Jordan {n}"))
     listed = (await api.get("/profile/versions?limit=2", headers=alice)).json()
     assert len(listed) == 2
+    # Numbers come from the server, so a page that doesn't reach version 1 still shows them.
+    assert [v["number"] for v in listed] == [3, 2]
     assert (await api.get("/profile/versions?limit=101", headers=alice)).status_code == 422
 
 
@@ -181,7 +186,9 @@ async def test_first_saves_racing_make_one_profile(
     assert [r.status_code for r in responses] == [200, 200, 200]
     uid = await user_id(alice, api)
     assert await db.scalar(select(func.count()).where(Profile.user_id == uid)) == 1
-    assert len((await api.get("/profile/versions", headers=alice)).json()) == 3
+    listed = (await api.get("/profile/versions", headers=alice)).json()
+    # Racing saves still get distinct numbers in save order.
+    assert [v["number"] for v in listed] == [3, 2, 1]
 
 
 async def test_another_user_cannot_read_your_profile(

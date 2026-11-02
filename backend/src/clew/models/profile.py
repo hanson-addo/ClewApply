@@ -8,6 +8,7 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     ForeignKeyConstraint,
+    Integer,
     String,
     UniqueConstraint,
     func,
@@ -58,6 +59,7 @@ class ProfileVersion(Base):
     __tablename__ = "profile_versions"
     __table_args__ = (
         UniqueConstraint("id", "user_id", name="uq_profile_versions_id_user_id"),
+        UniqueConstraint("user_id", "number", name="uq_profile_versions_user_id_number"),
         ForeignKeyConstraint(
             ["profile_id", "user_id"],
             ["profiles.id", "profiles.user_id"],
@@ -71,6 +73,8 @@ class ProfileVersion(Base):
     )
     profile_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False, index=True)
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), nullable=False)
+    # 1 for a user's first save, then 2, 3... Shown in History as "Version N".
+    number: Mapped[int] = mapped_column(Integer, nullable=False)
     # JSON Resume document, validated by clew.profile.schema before it is written.
     data: Mapped[dict[str, Any]] = mapped_column(JSONB, nullable=False)
     change_summary: Mapped[str | None] = mapped_column(String(200))

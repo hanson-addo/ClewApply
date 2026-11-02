@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "../App";
@@ -48,6 +48,7 @@ const DATA: ProfileData = {
 
 const V1: ProfileVersion = {
   id: "11111111-1111-4111-8111-111111111111",
+  number: 1,
   created_at: "2026-10-18T15:00:00Z",
   change_summary: null,
   is_current: false,
@@ -55,6 +56,7 @@ const V1: ProfileVersion = {
 };
 const V2: ProfileVersion = {
   id: "22222222-2222-4222-8222-222222222222",
+  number: 2,
   created_at: "2026-10-19T15:00:00Z",
   change_summary: "Edited Basics",
   is_current: true,
@@ -62,8 +64,8 @@ const V2: ProfileVersion = {
 };
 
 function summary(version: ProfileVersion) {
-  const { id, created_at, change_summary, is_current } = version;
-  return { id, created_at, change_summary, is_current };
+  const { id, number, created_at, change_summary, is_current } = version;
+  return { id, number, created_at, change_summary, is_current };
 }
 
 type Handler = (request: Request) => Response | Promise<Response>;
@@ -83,6 +85,7 @@ function serve(overrides: Record<string, Handler> = {}) {
       saved.push({ body });
       return Response.json({
         id: "33333333-3333-4333-8333-333333333333",
+        number: 3,
         created_at: "2026-10-20T15:00:00Z",
         change_summary: body.change_summary,
         is_current: true,
@@ -93,15 +96,15 @@ function serve(overrides: Record<string, Handler> = {}) {
   };
 }
 
-function renderAt(path: string) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <App publishableKey="pk_test_placeholder" />
-    </MemoryRouter>,
+function renderAt(path: string | string[]) {
+  const router = createMemoryRouter(
+    [{ path: "*", element: <App publishableKey="pk_test_placeholder" /> }],
+    { initialEntries: Array.isArray(path) ? path : [path] },
   );
+  return { ...render(<RouterProvider router={router} />), router };
 }
 
-async function renderLoaded(path = "/profile/basics") {
+async function renderLoaded(path: string | string[] = "/profile/basics") {
   const view = renderAt(path);
   await screen.findByRole("navigation", { name: "Profile sections" });
   return view;
@@ -331,15 +334,42 @@ describe("profile page", () => {
     const home = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Home" });
 
     await u.click(home);
-    let dialog = screen.getByRole("dialog", { name: "Save your changes?" });
+    let dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Keep editing" }));
     expect(screen.getByLabelText("Full name")).toHaveValue("Riley Example Jr.");
 
     await u.click(home);
-    dialog = screen.getByRole("dialog", { name: "Save your changes?" });
+    dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Discard" }));
     expect(await screen.findByRole("heading", { name: /you're in/i })).toBeInTheDocument();
     expect(saved).toHaveLength(0);
+  });
+
+  it("asks before the browser's Back button leaves with unsaved changes", async () => {
+    const u = user();
+    const { router } = await renderLoaded(["/", "/profile/basics"]);
+    await u.type(screen.getByLabelText("Full name"), " Jr.");
+
+    await act(() => router.navigate(-1));
+    let dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
+    await u.click(within(dialog).getByRole("button", { name: "Keep editing" }));
+    expect(router.state.location.pathname).toBe("/profile/basics");
+    expect(screen.getByLabelText("Full name")).toHaveValue("Riley Example Jr.");
+
+    await act(() => router.navigate(-1));
+    dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
+    await u.click(within(dialog).getByRole("button", { name: "Save" }));
+    expect(await screen.findByRole("heading", { name: /you're in/i })).toBeInTheDocument();
+    expect(saved).toHaveLength(1);
+  });
+
+  it("moves between sections with Back without asking", async () => {
+    const u = user();
+    const { router } = await renderLoaded(["/profile/basics", "/profile/experience"]);
+    await u.click(screen.getByRole("button", { name: "Add a role" }));
+    await act(() => router.navigate(-1));
+    expect(await screen.findByRole("heading", { level: 1, name: "Basics" })).toBeInTheDocument();
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
   it("saves before signing out when asked to", async () => {
@@ -373,6 +403,23 @@ describe("profile page", () => {
     });
     expect(await screen.findByRole("status")).toHaveTextContent("Restored version 1.");
     expect(screen.getByLabelText("Headline")).toHaveValue("");
+  });
+
+  it("shows the version numbers the server gives, even past one page of history", async () => {
+    const latest = { ...V2, number: 150 };
+    const older = { ...V1, number: 149 };
+    serve({
+      "GET /profile": () => Response.json(latest),
+      "GET /profile/versions": () => Response.json([summary(latest), summary(older)]),
+      [`GET /profile/versions/${V1.id}`]: () => Response.json(older),
+    });
+    const u = user();
+    await renderLoaded();
+    expect(screen.getByRole("button", { name: /^Version 150/ })).toBeInTheDocument();
+    await u.click(screen.getByRole("button", { name: /^Version 149/ }));
+    const view = await screen.findByRole("dialog", { name: "Version 149" });
+    await u.click(within(view).getByRole("button", { name: "Restore this version" }));
+    expect(screen.getByRole("dialog", { name: "Restore version 149?" })).toBeInTheDocument();
   });
 
   it("says so when the profile can't load", async () => {

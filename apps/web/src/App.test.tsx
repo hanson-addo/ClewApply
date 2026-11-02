@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router";
+import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { App } from "./App";
@@ -10,9 +10,11 @@ vi.mock("@clerk/react", async () => (await import("./test/clerkMock")).clerkModu
 
 function renderAt(path: string, publishableKey = "pk_test_placeholder") {
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <App publishableKey={publishableKey} />
-    </MemoryRouter>,
+    <RouterProvider
+      router={createMemoryRouter([{ path: "*", element: <App publishableKey={publishableKey} /> }], {
+        initialEntries: [path],
+      })}
+    />,
   );
 }
 

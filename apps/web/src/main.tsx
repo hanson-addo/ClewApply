@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router";
+import { createBrowserRouter, RouterProvider } from "react-router";
 
 import { App } from "./App";
 // Fonts are bundled with the app, so no visitor data goes to a font CDN.
@@ -17,10 +17,11 @@ import "./styles.css";
 const root = document.getElementById("root");
 if (!root) throw new Error("Missing #root element");
 
+// A data router, so the profile editor can ask before Back leaves with unsaved changes.
+const router = createBrowserRouter([{ path: "*", element: <App /> }]);
+
 createRoot(root).render(
   <StrictMode>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
+    <RouterProvider router={router} />
   </StrictMode>,
 );

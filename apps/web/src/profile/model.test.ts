@@ -15,7 +15,6 @@ import {
   stripControl,
   validateProfile,
   versionDate,
-  versionNumber,
   withFieldText,
   type ProfileData,
 } from "./model";
@@ -147,13 +146,7 @@ describe("helpers", () => {
     expect(entryName(work, {}, 1)).toBe("Role 2");
   });
 
-  it("numbers versions oldest first and dates them", () => {
-    const versions = [
-      { id: "b", created_at: "2026-10-19T15:00:00Z", change_summary: null, is_current: true },
-      { id: "a", created_at: "2026-10-18T15:00:00Z", change_summary: null, is_current: false },
-    ];
-    expect(versionNumber(versions, "b")).toBe(2);
-    expect(versionNumber(versions, "a")).toBe(1);
+  it("dates versions", () => {
     const now = new Date("2026-10-19T18:00:00Z");
     expect(versionDate("2026-10-19T17:30:00Z", now)).toMatch(/^today, /);
     expect(versionDate("2026-01-05T12:00:00Z", now)).toMatch(/^Jan 5, 2026, /);

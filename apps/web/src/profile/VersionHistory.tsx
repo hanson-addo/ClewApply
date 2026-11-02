@@ -24,8 +24,8 @@ export function VersionHistory({
         <p className="profile-history-empty">Each time you save, Clew keeps a copy here.</p>
       ) : (
         <ol className="profile-history-list">
-          {versions.map((version, index) => {
-            const number = versions.length - index;
+          {versions.map((version) => {
+            const number = version.number;
             return (
               <li key={version.id}>
                 <button
