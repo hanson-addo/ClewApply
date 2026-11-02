@@ -386,3 +386,43 @@ async def test_control_characters_are_422_not_500(
 async def test_tabs_and_newlines_are_fine(api: AsyncClient, alice: dict[str, str]) -> None:
     saved = await save(api, alice, {"basics": {"summary": "Line one\nLine two\twith a tab"}})
     assert saved["data"]["basics"]["summary"] == "Line one\nLine two\twith a tab"
+
+
+@pytest.mark.parametrize(
+    ("section", "start", "end"),
+    [
+        ("work", "2021-06", "2021-05"),
+        ("volunteer", "2020", "2019-12"),
+        ("education", "2018-09-01", "2018-08-31"),
+        ("projects", "2022-03", "2021"),
+    ],
+)
+async def test_end_before_start_is_refused(
+    api: AsyncClient, alice: dict[str, str], section: str, start: str, end: str
+) -> None:
+    entries = [{"startDate": "2010", "endDate": "2011"}, {"startDate": start, "endDate": end}]
+    data = profile()
+    data[section] = entries
+    response = await api.put("/profile", headers=alice, json={"data": data})
+    assert response.status_code == 422
+    assert response.json()["detail"] == [
+        {
+            "type": "date_order",
+            "loc": ["body", "data", section, 1, "endDate"],
+            "msg": "End date must be after the start date.",
+            "input": end,
+        }
+    ]
+    assert (await api.get("/profile/versions", headers=alice)).json() == []
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [("2021", "2021-06"), ("2021-06", "2021"), ("2021-06", "2021-06-30"), ("2021-06", None)],
+)
+async def test_dates_compare_on_the_part_both_have(
+    api: AsyncClient, alice: dict[str, str], start: str, end: str | None
+) -> None:
+    await save(
+        api, alice, profile(work=[{"name": "Example Corp", "startDate": start, "endDate": end}])
+    )

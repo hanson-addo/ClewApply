@@ -9,6 +9,7 @@ from datetime import datetime
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.exceptions import RequestValidationError
 from pydantic import AfterValidator, BaseModel, StringConstraints
 from sqlalchemy import func, select, update
 from sqlalchemy.dialects.postgresql import insert
@@ -43,6 +44,36 @@ class ProfileSave(BaseModel):
     # The version the edit started from. When given and it is no longer the current one,
     # the save is refused, so an edit in one tab can't silently undo another.
     base_version_id: uuid.UUID | None = None
+
+
+# Sections whose entries have a start and end date.
+DATED_SECTIONS = ("work", "volunteer", "education", "projects")
+END_BEFORE_START = "End date must be after the start date."
+
+
+def date_order_errors(data: ProfileData) -> list[dict[str, Any]]:
+    """Entries that end before they start. Dates can be a year, a month or a day, so they are
+    compared on the part both have: "2021" and "2021-06" are fine together.
+
+    Checked only when saving, not in ProfileData, so versions saved before this check still
+    read back."""
+    errors: list[dict[str, Any]] = []
+    for section in DATED_SECTIONS:
+        for index, entry in enumerate(getattr(data, section) or []):
+            start, end = entry.startDate, entry.endDate
+            if not start or not end:
+                continue
+            length = min(len(start), len(end))
+            if end[:length] < start[:length]:
+                errors.append(
+                    {
+                        "type": "date_order",
+                        "loc": ("body", "data", section, index, "endDate"),
+                        "msg": END_BEFORE_START,
+                        "input": end,
+                    }
+                )
+    return errors
 
 
 class ProfileVersionOut(BaseModel):
@@ -111,6 +142,8 @@ async def get_profile(user: CurrentUser, session: Session) -> ProfileVersionOut:
 async def save_profile(body: ProfileSave, user: CurrentUser, session: Session) -> ProfileVersionOut:
     """Save the whole profile as a new version. Saving data identical to the current version
     adds nothing and returns the current version."""
+    if errors := date_order_errors(body.data):
+        raise RequestValidationError(errors)
     # Creates the profile on first save; ON CONFLICT covers two first saves racing.
     await session.execute(
         insert(Profile)
@@ -172,7 +205,9 @@ async def list_versions(
     versions = await session.scalars(
         select(ProfileVersion)
         .where(ProfileVersion.user_id == user.id)
-        .order_by(ProfileVersion.created_at.desc(), ProfileVersion.id.desc())
+        # By number, not created_at: racing saves can commit in a different order than
+        # their transactions started.
+        .order_by(ProfileVersion.number.desc())
         .limit(limit)
     )
     return [
