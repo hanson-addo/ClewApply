@@ -156,7 +156,7 @@ Route: `/jobs`. The signed-in home page. Covers QA journeys FEED-01 to FEED-16. 
 
 ### Filters
 
-Work type (Remote, Hybrid near [city], On-site), location, minimum salary, posted within (1, 7, 30 days, any), and sources. Filters live in the URL query, so they survive reload and can be bookmarked (FEED-07). "Clear filters" restores the full list and is offered whenever any filter is on.
+Work type (Remote, Hybrid near [city], On-site), location, minimum salary, posted within (1, 7, 30 days, any), and sources. Filters live in the URL query, so they survive reload and can be bookmarked (FEED-07). Only filter values go in the URL, never names, emails or profile data, and the app sends `Referrer-Policy: strict-origin-when-cross-origin` so the query never reaches outside sites. "Clear filters" restores the full list and is offered whenever any filter is on.
 
 ### Job detail
 
@@ -165,9 +165,11 @@ Order of sections, on desktop and phone alike:
 2. **Why this fits:** the top three reasons (FEED-06).
 3. **Skills check:** "You have" and "Not on your profile" as two plain lists from the posting (FEED-13). Each missing skill has an "Add to profile" link only when the skill isn't already in the profile under another name.
 4. **Where it's posted:** every source. The "Apply here" source is the employer's own site first, then USAJobs, then a job board (FEED-04).
-5. **About the job:** the first 600 characters, then "Read the full description". Descriptions from sources are sanitized to plain formatting (paragraphs, lists, bold, links) before display. No scripts, images, iframes, styles or event attributes ever render (FEED-16). Links in descriptions open in a new tab with `rel="noopener noreferrer"`.
+5. **About the job:** the first 600 characters, then "Read the full description". Descriptions from sources are sanitized to plain formatting (paragraphs, lists, bold, links) before display. No scripts, images, iframes, styles or event attributes ever render (FEED-16). Description links keep only `http:` and `https:` hrefs; any other href (`javascript:`, `data:`, `mailto:` and so on) is dropped and its text kept as plain text. Kept links open in a new tab with `rel="noopener noreferrer"`. Sanitize with an allowlist when a job is ingested and again before rendering; never pass source HTML straight to `dangerouslySetInnerHTML`.
 
-Actions: the primary button is "Apply on [employer]'s site" and opens the posting in a new tab. Its accessible name ends "(opens in a new tab)". On phones the actions stick to the bottom of the screen. Then Save and "Not for me".
+Actions: the primary button is "Apply on [employer]'s site" and opens the posting in a new tab. Its accessible name ends "(opens in a new tab)". Under it, the destination's domain shows in `text-secondary` ("greenhouse.io"), so a look-alike link from a poisoned alert email is visible before the user clicks.
+
+Outbound URLs ("Apply here" and every "Where it's posted" row) come from outside feeds, so the same rule applies: only `http:` and `https:` URLs become links or buttons, and every one opens with `rel="noopener noreferrer"`. A source with any other URL is listed as plain text with no link, and gets no Apply button. On phones the actions stick to the bottom of the screen. Then Save and "Not for me".
 
 ### After "Apply"
 
