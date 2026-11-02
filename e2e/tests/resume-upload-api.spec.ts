@@ -3,7 +3,7 @@ import { expect, test, type APIRequestContext, type Page } from "@playwright/tes
 
 import { API_URL, hasClerk, hasUploadServices } from "../env";
 import { bearer, signInForApi } from "./api-as";
-import { docx, eicarPdf, MAX_RESUME_BYTES, pdf, windowsProgram } from "./files";
+import { docx, eicarDocx, MAX_RESUME_BYTES, pdf, windowsProgram } from "./files";
 
 // Resume upload through the real stack (test plan §3.2): a real Clerk session, real ClamAV
 // and S3-compatible storage (MinIO in CI), and the API as clew_app. There is no upload screen
@@ -120,7 +120,7 @@ test("the virus check flags the EICAR test file and nothing is kept (UP-07)", as
   request,
 }) => {
   await signInForApi(page, request, "upload-eicar");
-  const response = await upload(page, request, "resume.pdf", eicarPdf(), PDF_TYPE);
+  const response = await upload(page, request, "resume.docx", eicarDocx(), DOCX_TYPE);
   expect(response.status(), await response.text()).toBe(422);
   // The audit log entry the test plan asks for has no API to read it yet; the backend tests
   // check that the file isn't stored.

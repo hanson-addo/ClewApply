@@ -16,12 +16,14 @@ export function pdf(size?: number): Buffer {
 }
 
 /**
- * The standard EICAR antivirus test string inside an otherwise valid PDF. Harmless, but every
- * scanner flags it. Built from two halves so this source file itself doesn't trip a scanner.
+ * A Word document carrying the standard EICAR antivirus test file as an embedded file. Harmless,
+ * but every scanner flags it. ClamAV matches EICAR only as a whole file, so pasting the string
+ * into a PDF isn't enough; it does unpack the .docx and check each part. The string is built
+ * from two halves so this source file itself doesn't trip a scanner.
  */
-export function eicarPdf(): Buffer {
+export function eicarDocx(): Buffer {
   const eicar = "X5O!P%@AP[4\\PZX54(P^)7CC)7}$" + "EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*";
-  return Buffer.concat([PDF_START, Buffer.from(`${eicar}\n`), PDF_END]);
+  return zip({ ...DOCX_PARTS, "word/embeddings/oleObject1.bin": eicar });
 }
 
 /** The first bytes of a Windows program: what a renamed .exe looks like. */
@@ -31,13 +33,15 @@ export function windowsProgram(): Buffer {
 
 /** A minimal Word document: a zip with the two parts that make a package a .docx. */
 export function docx(): Buffer {
-  return zip({
-    "[Content_Types].xml":
-      '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>',
-    "word/document.xml":
-      '<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Ariadne Testuser</w:t></w:r></w:p></w:body></w:document>',
-  });
+  return zip(DOCX_PARTS);
 }
+
+const DOCX_PARTS = {
+  "[Content_Types].xml":
+    '<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>',
+  "word/document.xml":
+    '<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p><w:r><w:t>Ariadne Testuser</w:t></w:r></w:p></w:body></w:document>',
+};
 
 /** A zip with uncompressed entries, enough for the server's package check. */
 function zip(entries: Record<string, string>): Buffer {
