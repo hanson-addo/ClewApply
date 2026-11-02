@@ -126,9 +126,15 @@ describe("helpers", () => {
         { loc: ["body", "data", "work", 1, "url"], msg: "bad" },
         { loc: ["body", "data", "basics", "email"], msg: "bad" },
         { loc: ["body", "change_summary"], msg: "bad" },
+        {
+          type: "date_order",
+          loc: ["body", "data", "education", 0, "endDate"],
+          msg: "End date must be after the start date.",
+        },
       ]),
     ).toEqual({
       "work.1.url": "This doesn't look right. Check it and try again.",
+      "education.0.endDate": "End date must be after the start date.",
       "basics.email": "This doesn't look right. Check it and try again.",
     });
     expect(errorsFromApi("nope")).toEqual({});

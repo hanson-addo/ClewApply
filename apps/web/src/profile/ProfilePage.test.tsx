@@ -383,6 +383,17 @@ describe("profile page", () => {
     expect(saved).toHaveLength(1);
   });
 
+  it("returns focus to the History entry when a version closes", async () => {
+    const u = user();
+    await renderLoaded();
+    const entry = screen.getByRole("button", { name: /^Version 1/ });
+    await u.click(entry);
+    const view = await screen.findByRole("dialog", { name: "Version 1" });
+    await u.click(within(view).getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog", { name: "Version 1" })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^Version 1/ })).toHaveFocus();
+  });
+
   it("shows an old version and restores it as a new version", async () => {
     const u = user();
     await renderLoaded();
