@@ -17,7 +17,7 @@ The config starts the API on port 8000 (with `CLEW_ENV=test`) and the web app on
 
 ### Signed-in tests
 
-`tests/signed-in.spec.ts` signs in through the Clerk development instance. It runs only when these are set, and is skipped otherwise:
+`tests/signed-in.spec.ts` and the API specs sign in through the Clerk development instance. They run only when these are set, and are skipped otherwise:
 
 | Variable | Value |
 | --- | --- |
@@ -26,6 +26,10 @@ The config starts the API on port 8000 (with `CLEW_ENV=test`) and the web app on
 | `CLEW_CLERK_ISSUER` | The instance's Frontend API URL |
 
 In CI they come from GitHub Actions secrets, and only for this repository's own branches. Locally, export them in your shell; never commit them. The tests create Clerk users named `e2e-<run id>-…+clerk_test@example.com` (Clerk's test addresses, which use the fixed code 424242 and get no real email), and the teardown deletes only the current run's users, so runs that overlap on the shared instance never delete each other's.
+
+### Upload tests
+
+`tests/resume-upload-api.spec.ts` also needs file storage and the virus scanner. It runs only when `CLEW_S3_BUCKET` and `CLEW_CLAMAV_HOST` are set (and the Clerk keys above). CI starts MinIO and ClamAV in the end-to-end job. Locally, run `docker compose up -d minio minio-setup clamav` from the repository root, wait for ClamAV to finish loading its signatures, and export the `CLEW_S3_*` and `CLEW_CLAMAV_*` values from `backend/.env.example`. Every test file is built in memory at test time (`tests/files.ts`), including the harmless EICAR antivirus test string.
 
 The config also serves a second build without a Clerk key on port 4174, so the "sign-in isn't set up" page stays tested.
 
