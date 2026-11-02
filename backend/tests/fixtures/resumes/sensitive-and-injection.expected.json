@@ -1,0 +1,16 @@
+{
+  "basics": {
+    "name": "Jamie Testcase",
+    "label": "Accountant",
+    "email": "jamie.testcase@example.test"
+  },
+  "work": [
+    {
+      "name": "Example & Example CPAs",
+      "position": "Staff Accountant",
+      "startDate": "2020",
+      "endDate": "2025",
+      "highlights": ["Prepared 150 small-business tax returns a season."]
+    }
+  ]
+}

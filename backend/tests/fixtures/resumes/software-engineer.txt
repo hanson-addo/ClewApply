@@ -1,0 +1,24 @@
+Avery Quinlan
+Senior Software Engineer
+avery.quinlan@example.test | (555) 010-2233 | https://example.test/avery
+Portland, OR
+
+SUMMARY
+Backend engineer with eight years building payment and search systems in Python and Go.
+
+EXPERIENCE
+Nimbus Ledger Inc. - Senior Software Engineer
+March 2021 - Present
+- Led the move of the billing service to event sourcing, cutting failed charges by 30%.
+- Mentored four engineers.
+
+Copperline Labs - Software Engineer
+June 2016 - February 2021
+- Built the search indexing pipeline for 40 million listings.
+
+EDUCATION
+Lakeside State University - B.S. Computer Science, 2016
+
+SKILLS
+Languages: Python, Go, SQL
+Tools: Postgres, Kafka, Kubernetes

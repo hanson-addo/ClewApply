@@ -1,0 +1,41 @@
+{
+  "basics": {
+    "name": "Avery Quinlan",
+    "label": "Senior Software Engineer",
+    "email": "avery.quinlan@example.test",
+    "phone": "(555) 010-2233",
+    "url": "https://example.test/avery",
+    "summary": "Backend engineer with eight years building payment and search systems in Python and Go.",
+    "location": {"city": "Portland", "region": "OR", "countryCode": "US"}
+  },
+  "work": [
+    {
+      "name": "Nimbus Ledger Inc.",
+      "position": "Senior Software Engineer",
+      "startDate": "2021-03",
+      "highlights": [
+        "Led the move of the billing service to event sourcing, cutting failed charges by 30%.",
+        "Mentored four engineers."
+      ]
+    },
+    {
+      "name": "Copperline Labs",
+      "position": "Software Engineer",
+      "startDate": "2016-06",
+      "endDate": "2021-02",
+      "highlights": ["Built the search indexing pipeline for 40 million listings."]
+    }
+  ],
+  "education": [
+    {
+      "institution": "Lakeside State University",
+      "studyType": "B.S.",
+      "area": "Computer Science",
+      "endDate": "2016"
+    }
+  ],
+  "skills": [
+    {"name": "Languages", "keywords": ["Python", "Go", "SQL"]},
+    {"name": "Tools", "keywords": ["Postgres", "Kafka", "Kubernetes"]}
+  ]
+}

@@ -31,6 +31,11 @@ class MemoryStore:
             raise StorageUnavailable
         self.objects[key] = (data, content_type)
 
+    async def get(self, key: str, max_bytes: int) -> bytes:
+        if self.fail:
+            raise StorageUnavailable
+        return self.objects[key][0]
+
     def download_url(self, key: str, *, filename: str, content_type: str, expires_in: int) -> str:
         return f"https://storage.test/{key}?filename={filename}&expires={expires_in}"
 

@@ -10,8 +10,10 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from clew.api.resume_parse import start_parse
 from clew.auth.deps import CurrentUser
 from clew.db.session import get_session
+from clew.jobs import JobQueue, get_job_queue
 from clew.limits import TOO_LARGE
 from clew.models import Resume
 from clew.resumes.files import MAX_RESUME_BYTES, detect_resume_type, safe_filename
@@ -50,6 +52,7 @@ def require_malware_scanner(
 Store = Annotated[ObjectStore, Depends(require_object_store)]
 Scanner = Annotated[MalwareScanner, Depends(require_malware_scanner)]
 Session = Annotated[AsyncSession, Depends(get_session)]
+Queue = Annotated[JobQueue | None, Depends(get_job_queue)]
 
 
 class ResumeOut(BaseModel):
@@ -77,10 +80,16 @@ class DownloadLink(BaseModel):
     },
 )
 async def upload_resume(
-    file: UploadFile, user: CurrentUser, session: Session, store: Store, scanner: Scanner
+    file: UploadFile,
+    user: CurrentUser,
+    session: Session,
+    store: Store,
+    scanner: Scanner,
+    queue: Queue,
 ) -> ResumeOut:
     """Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,
-    and the file is virus-scanned before it is stored."""
+    and the file is virus-scanned before it is stored. Reading it into a draft profile starts
+    straight away; follow it with GET /resumes/{id}/parse."""
     data = await file.read(MAX_RESUME_BYTES + 1)
     if len(data) > MAX_RESUME_BYTES:
         raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, TOO_LARGE)
@@ -114,6 +123,7 @@ async def upload_resume(
     session.add(resume)
     await session.commit()
     await session.refresh(resume)
+    await start_parse(session, queue, resume.id, user.id)
     return ResumeOut(
         id=resume.id,
         filename=resume.filename,

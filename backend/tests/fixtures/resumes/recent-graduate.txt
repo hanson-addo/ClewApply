@@ -1,0 +1,17 @@
+Riley Okafor-Lind
+riley.ol@example.test
+github.example.test/rileyol
+
+Education
+Bayview Example University, B.A. Economics, expected May 2027
+GPA 3.7
+
+Projects
+Rent Tracker (2026): a web app that charts rent prices from public city data. React, Python.
+
+Experience
+Campus Library — Student Assistant, Sep 2024 – Present
+Helped 30+ students a week find research sources.
+
+Skills
+Excel, Python, Tableau
