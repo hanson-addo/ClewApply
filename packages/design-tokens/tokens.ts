@@ -4,6 +4,7 @@ export const tokens = {
     "ink": {
       "50": "#F4F2FF",
       "100": "#EDEBF5",
+      "150": "#E4E2EE",
       "200": "#DCDAE8",
       "300": "#C3C7DD",
       "400": "#7D82A0",
@@ -45,6 +46,7 @@ export const tokens = {
     "bg-page": "#EDEBF5",
     "bg-surface": "#FFFFFF",
     "bg-subtle": "#F4F2FF",
+    "bg-sunken": "#E4E2EE",
     "bg-inverse": "#101935",
     "bg-inverse-raised": "#2A3560",
     "bg-selected": "#FFE9E3",

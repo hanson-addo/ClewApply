@@ -1,6 +1,6 @@
-# Screen specs: resume upload and master profile
+# Screen specs
 
-These specs cover the screens behind phase 1 user journeys UP (resume upload) and PRO (master profile) in the [QA test plan](../qa/e2e-test-plan.md). Mockups are on the [mockup canvas](https://claude.ai/artifact/ViUm1ywkTR8FQdN1RyHS2D) as boards "1b. Onboarding: upload resume", "2. Onboarding: review parsed resume", "5. Master profile", "Phone: upload resume" and "Phone: master profile". Components and tokens are in [components.md](components.md) and [README.md](README.md).
+These specs cover the screens behind the phase 1 user journeys UP (resume upload), PRO (master profile), FEED (job feed) and TRK (applications) in the [QA test plan](../qa/e2e-test-plan.md). Mockups are on the [mockup canvas](https://claude.ai/artifact/ViUm1ywkTR8FQdN1RyHS2D) as boards "1b. Onboarding: upload resume", "2. Onboarding: review parsed resume", "5. Master profile", "Phone: upload resume" and "Phone: master profile". Each section below names its own boards. Components and tokens are in [components.md](components.md) and [README.md](README.md).
 
 ## Resume upload (onboarding step 1)
 
@@ -134,3 +134,94 @@ Uses the SensitiveFieldset spec in components.md: encrypted separately, `autocom
 - After switching section, focus moves to the section's `<h1>`.
 - The phone header keeps Sync Center reachable: an icon link whose name is "Sync Center, 3 changes waiting".
 - The sticky Save bar doesn't cover the focused field: the form gets bottom padding equal to the bar's height, and focused fields scroll into view above it.
+
+## Job feed
+
+Route: `/jobs`. The signed-in home page. Covers QA journeys FEED-01 to FEED-16. Mockup boards: "4. Job feed", "Phone: job feed", "Phone: job detail".
+
+### Layout
+
+| Width | Layout |
+| --- | --- |
+| `lg` and up | Filters column, job list, and a sticky job detail panel, side by side |
+| `md` to `lg` | Job list and detail side by side; filters open in a sheet from a "Filters" button |
+| Under `md` | One column: search, a "Filters, 3 on" button, the result count, then the list. Tapping a job opens its detail as its own page (`/jobs/:id`) with "Back to jobs" at the top |
+
+### Job list
+
+- Sorted by fit score, highest first (FEED-05). Each card is a JobCard (components.md): fit score, title, company, location and salary, the top reason, and "Seen on" listing every site the job was merged from (FEED-01, FEED-02).
+- The result line says how many jobs and how many duplicates were merged: "148 jobs, 41 duplicates merged". It is in the live region, so it is announced when filters change.
+- Load 25 jobs at a time. A "Show 25 more" button at the end of the list loads the next page and moves focus to the first new card. No infinite scroll, so keyboard and screen-reader users can reach the footer (FEED-15).
+- A job that closed (its sources gone for 7 days) leaves the feed. If it was saved, its Applications card gets a neutral "Posting closed" pill (FEED-11).
+
+### Filters
+
+Work type (Remote, Hybrid near [city], On-site), location, minimum salary, posted within (1, 7, 30 days, any), and sources. Filters live in the URL query, so they survive reload and can be bookmarked (FEED-07). "Clear filters" restores the full list and is offered whenever any filter is on.
+
+### Job detail
+
+Order of sections, on desktop and phone alike:
+1. Fit score as text ("FIT 92 OF 100"), title as `<h1>` on its own page or `<h2>` in the panel, company, location, salary or "Salary not posted".
+2. **Why this fits:** the top three reasons (FEED-06).
+3. **Skills check:** "You have" and "Not on your profile" as two plain lists from the posting (FEED-13). Each missing skill has an "Add to profile" link only when the skill isn't already in the profile under another name.
+4. **Where it's posted:** every source. The "Apply here" source is the employer's own site first, then USAJobs, then a job board (FEED-04).
+5. **About the job:** the first 600 characters, then "Read the full description". Descriptions from sources are sanitized to plain formatting (paragraphs, lists, bold, links) before display. No scripts, images, iframes, styles or event attributes ever render (FEED-16). Links in descriptions open in a new tab with `rel="noopener noreferrer"`.
+
+Actions: the primary button is "Apply on [employer]'s site" and opens the posting in a new tab. Its accessible name ends "(opens in a new tab)". On phones the actions stick to the bottom of the screen. Then Save and "Not for me".
+
+### After "Apply"
+
+When the user comes back to the Clew tab after opening a posting, show a panel above the detail: "Did you apply to Senior Backend Engineer?" with "Yes, log it" (primary) and "Not yet". "Yes, log it" asks which resume version was sent (default: the variant used for autofill, else the default variant) and creates an Applied card (FEED-14). Never log an application without the user saying so.
+
+### Save and Not for me
+
+- Save adds the job to Applications under Saved, changes the button to "Saved" (`aria-pressed="true"`), and shows a toast with a link: "Saved. View in Applications" (FEED-08).
+- "Not for me" hides the job, moves focus to the next card, and shows a toast with Undo for 10 seconds. Hidden jobs stay hidden after reload (FEED-09). Settings has a "Hidden jobs" list to bring one back.
+
+### Empty and loading states
+
+| State | Heading | Text | Action |
+| --- | --- | --- | --- |
+| New account, nothing connected | No jobs yet | Connect a job feed and we'll start finding matches. | Connect a job feed |
+| Connected, but nothing matches | No matches right now | Try fewer filters, or widen the location or salary. New jobs arrive every few hours. | Clear filters |
+| Loading | Skeleton cards with `aria-busy="true"` | "Loading jobs" announced once | |
+| Feed failed to load | We couldn't load your jobs | Check your connection and try again. | Try again |
+
+FEED-12 needs the first two to show guidance, never a blank page.
+
+## Applications
+
+Route: `/applications`. Covers TRK-01 to TRK-08. Mockup boards: "7. Applications" (clickable) and "Phone: applications".
+
+### Columns
+
+Saved, Applied, Interview, Offer, Closed. Closed holds both rejected and withdrawn applications, each with a neutral pill that says which (TRK-01, TRK-01b). Each column shows its count in its heading.
+
+### Moving a card
+
+- Every card has a visible **Status** select with Saved, Applied, Interview, Offer, "Closed: rejected" and "Closed: withdrawn". This is the main way to move a card: it works with a keyboard, a screen reader and touch (TRK-03). Its accessible name includes the job ("Status of Senior Backend Engineer").
+- Drag and drop between columns is an extra on desktop (TRK-02). While dragging, the target column gets a 2px `focus-ring` outline.
+- After a move, the live region says "Senior Backend Engineer moved to Interview." Focus stays on the card's Status select in its new column.
+- The first move to Applied sets the applied date. Moving a card back out of Closed removes its Rejected or Withdrawn pill and keeps its notes, resume version and applied date (TRK-01c).
+
+### Card contents
+
+Title, company, the date of the latest step ("applied Oct 20"), and one line that matters for that column:
+- Saved: fit score, or a blocker such as "Sync USAJobs profile first".
+- Applied: "Sent: Backend resume, version 7". This is the version that was sent, and it never changes when the profile changes later (TRK-04).
+- Interview: the next step and date, from the card's notes.
+- Closed: the Rejected or Withdrawn pill.
+
+Opening a card (its title is a link) shows a detail page with the posting link, the resume version (with a "Download this version" link), notes (TRK-05), and Delete. Delete asks first: "Delete this application? This can't be undone." (TRK-07).
+
+### Add an application
+
+"Add an application" opens a dialog for a job that isn't in the feed: job title (required), company (required), link (optional, must be http or https), status (default Applied), date, and resume version. It creates the card in its column (TRK-06).
+
+### Phone
+
+Under `md` the board becomes one list with a row of status tabs above it (Saved 2, Applied 2, Interview 1, Offer 0, Closed 1). The tabs are `role="tablist"` buttons, and the arrow keys move between them. Each card keeps its Status select, so moving a card never needs dragging (TRK-08).
+
+### Empty state
+
+Each empty column says what goes there ("Save a job from your feed to keep it here."). A brand-new account sees one message instead of five empty columns: "No applications yet. Save or apply to a job from your feed and it shows up here." with a "Go to your jobs" button.

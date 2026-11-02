@@ -192,6 +192,20 @@ The core trust moment: the user sees exactly what will change on a site and appr
 - Appears at the top of a form after a failed submit: `status-danger-bg` panel with a 2px `status-danger-edge` border, heading "Fix 2 things to continue", then a list of links to each field.
 - Receives focus (`tabindex="-1"`) when shown.
 
+## ApplicationCard
+
+One card on the Applications board.
+
+- **Anatomy:** title (link to the application's page), company and latest date (`text-secondary`), one context line (screens.md says which per column), an optional neutral StatusPill (Rejected, Withdrawn, Posting closed), then a labeled Status `<select>`.
+- **Tokens:** `bg-surface`, 1px `border-subtle`, radius `lg`, padding `space-4`. Columns use `bg-sunken` with radius `lg`.
+- **Moving:** the Status select is required and always visible. Drag and drop is an optional extra and never the only way. The select's label is "Status", with the job title appended for screen readers.
+- **Screen reader:** each column is a `<section>` labeled by its heading ("Applied 2"). Cards are list items. Moves are announced in the live region.
+
+```ts
+type ApplicationStatus = 'saved' | 'applied' | 'interview' | 'offer' | 'rejected' | 'withdrawn';
+type ApplicationCardProps = { id: string; title: string; company: string; status: ApplicationStatus; dateLabel: string; contextLine?: string; onStatusChange: (s: ApplicationStatus) => void };
+```
+
 ## Avatar
 
 - 40px circle (`size-avatar`), initials in Figtree 700 `sm`. On the indigo header: `color-ink-50` fill, `text-primary` initials.
