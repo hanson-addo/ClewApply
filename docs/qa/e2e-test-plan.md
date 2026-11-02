@@ -75,6 +75,23 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | UP-12 | P2 | Skip upload, enter profile by hand | Allowed; profile saved |
 | UP-13 | P1 | Upload a `.txt`, `.rtf` or image file | Rejected with "PDF or Word only" |
 
+### 3.2b Reading a resume (API)
+
+Reading runs in the background worker after every upload (#71). In CI the worker talks to a local stand-in for the AI (`e2e/fake-anthropic.mjs`), so these need no AI key; RP-09 uses the real AI and runs only when a key is set. Spec: `e2e/tests/resume-parse-api.spec.ts`.
+
+| ID | P | Case | Expected |
+| --- | --- | --- | --- |
+| RP-01 | P0 | Upload a made-up text PDF, then poll `GET /resumes/{id}/parse` | Pending or running, then done; the draft profile holds the name from the file's text |
+| RP-02 | P0 | Draft profile flags | A field with low confidence (or none) is listed in `check`; a confident one isn't |
+| RP-03 | P0 | Password-protected PDF | Failed: "This file is password-protected. Remove the password and upload it again." |
+| RP-04 | P0 | PDF with no text layer (scanned image) | Failed: "We couldn't find any text in this file…" |
+| RP-05 | P1 | Word file whose text part is over 5 MB | Failed: "We couldn't read this resume…" |
+| RP-06 | P1 | `POST /resumes/{id}/parse` after a failure; and on a finished read | Restarts (202, pending); a finished read is returned as it is |
+| RP-07 | P0 | A second resume while one is still being read | The second is refused with "We're still reading your other resume…"; `POST` gets 429; it can be read once the first is done |
+| RP-08 | P0 | 11th start in a day | 429 with "You've reached today's limit for reading resumes…" |
+| RP-09 | P1 | Real AI reads a made-up resume (needs `CLEW_E2E_ANTHROPIC_API_KEY`) | Done, with the name from the file |
+| RP-10 | P0 | Another user's resume; no session | 404 for another user's resume; 401 without a session |
+
 ### 3.3 Master profile and versions
 
 | ID | P | Case | Expected |
@@ -91,6 +108,24 @@ Priority key: **P0** blocks release and runs on every PR. **P1** runs nightly an
 | PRO-10 | P0 | Two tabs edit the profile at once | Second save is told the profile changed and is offered a reload; no silent overwrite |
 | PRO-11 | P1 | Export all my data | JSON download includes profile, versions, applications; excludes other users' data |
 | PRO-12 | P1 | Delete account | Signed out; sign-in again fails; data gone from API |
+
+#### Profile editor screen
+
+From the Master profile spec in `docs/design/screens.md` (#74). Automated once the editor (#15) merges; each also runs at phone width (390 px) unless marked desktop.
+
+| ID | P | Case | Expected |
+| --- | --- | --- | --- |
+| PE-01 | P0 | Edit each section (basics, experience, education, skills) and save | One new version per save; toast "Saved…"; the entry shows "Edited, not synced"; reload shows the edit |
+| PE-02 | P0 | Only one entry open at a time | Opening a second entry closes the first; closed entries show a summary and an Edit link named for the entry |
+| PE-03 | P1 | Discard with and without changes | Asks to confirm only when there are changes; confirming restores the saved values |
+| PE-04 | P0 | Leave with unsaved changes (PRO-04) | "Save your changes?" with Save, Discard and Keep editing; each does what it says |
+| PE-05 | P0 | Validation (PRO-05): end before start, bad email, non-http link, 201-character headline | The messages from the spec appear inline and in the error summary; save is blocked; nothing saved |
+| PE-06 | P1 | "I still work here" | Ticking it clears and disables the end date |
+| PE-07 | P0 | Save after the profile changed in another tab (PRO-10) | Alert "Your profile changed somewhere else."; Reload latest and Keep my edits for now; nothing overwritten |
+| PE-08 | P0 | History: open an old version, restore it (PRO-03) | Read-only view; confirm "Restore version N?…"; a new version equal to it, change summary "Restored version N" |
+| PE-09 | P1 | Section switching | Desktop: nav with `aria-current`; phone: "Section" select changes the route; focus moves to the section heading |
+| PE-10 | P0 | Phone width (390 px) | No sideways scroll; sticky Save and Discard don't cover the focused field; no serious axe issues |
+| PE-11 | P0 | Sensitive answers never show in history, toasts or the live region (PRO-06) | Absent from every history view and announcement |
 
 ### 3.4 Job feed
 

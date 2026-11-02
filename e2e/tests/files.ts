@@ -84,3 +84,50 @@ function zip(entries: Record<string, string>): Buffer {
   end.writeUInt32LE(offset, 16);
   return Buffer.concat([...locals, directory, end]);
 }
+
+/**
+ * A real one-page PDF with a text layer, so the server can read `lines` back out. Pass no
+ * lines for a page with no text at all, like a scanned image. `encrypted` adds an /Encrypt
+ * entry, which is how a password-protected PDF announces itself.
+ */
+export function textPdf(lines: string[], { encrypted = false } = {}): Buffer {
+  const escape = (line: string) => line.replace(/[\\()]/g, (c) => `\\${c}`);
+  const stream = lines.length
+    ? `BT /F1 12 Tf 72 720 Td 16 TL ${lines.map((l) => `(${escape(l)}) '`).join(" ")} ET`
+    : "";
+  const objects = [
+    "<< /Type /Catalog /Pages 2 0 R >>",
+    "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${Buffer.byteLength(stream, "latin1")} >>\nstream\n${stream}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
+  ];
+  if (encrypted) {
+    // Standard security handler, 40-bit RC4. The keys are made up: the file is only refused.
+    objects.push(
+      `<< /Filter /Standard /V 1 /R 2 /O <${"28bf4e5e".repeat(8)}> /U <${"0a1b2c3d".repeat(8)}> /P -44 >>`,
+    );
+  }
+  let body = "%PDF-1.4\n";
+  const offsets: number[] = [];
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.byteLength(body, "latin1"));
+    body += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+  const xref = Buffer.byteLength(body, "latin1");
+  body += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  body += offsets.map((o) => `${String(o).padStart(10, "0")} 00000 n \n`).join("");
+  const encrypt = encrypted ? ` /Encrypt ${objects.length} 0 R /ID [<${"ab".repeat(16)}> <${"ab".repeat(16)}>]` : "";
+  body += `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R${encrypt} >>\nstartxref\n${xref}\n%%EOF\n`;
+  return Buffer.from(body, "latin1");
+}
+
+/** A Word document whose text part is bigger than the server will read (over 5 MB). */
+export function oversizedDocx(): Buffer {
+  const paragraph = "<w:p><w:r><w:t>Ariadne Testuser wound the thread.</w:t></w:r></w:p>";
+  const count = Math.ceil((5 * 1024 * 1024) / paragraph.length) + 1;
+  return zip({
+    ...DOCX_PARTS,
+    "word/document.xml": `<?xml version="1.0"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${paragraph.repeat(count)}</w:body></w:document>`,
+  });
+}

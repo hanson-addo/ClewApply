@@ -31,3 +31,18 @@ export async function signInForApi(
   );
   expect((await request.get(`${API_URL}/me`, { headers: await bearer(page) })).status()).toBe(200);
 }
+
+/** Uploads a resume as the user signed in on `page`. */
+export async function uploadResume(
+  page: Page,
+  request: APIRequestContext,
+  name: string,
+  buffer: Buffer,
+  mimeType = "application/octet-stream",
+) {
+  return request.post(`${API_URL}/resumes`, {
+    headers: await bearer(page),
+    multipart: { file: { name, mimeType, buffer } },
+    timeout: 60_000,
+  });
+}

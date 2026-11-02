@@ -1,6 +1,6 @@
-import { defineConfig, devices } from "@playwright/test";
+import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
 
-import { API_URL, SETUP_URL, WEB_URL } from "./env";
+import { API_URL, FAKE_ANTHROPIC_URL, hasParsing, realParserKey, SETUP_URL, WEB_URL } from "./env";
 
 // Starts the real API and two production builds of the web app (with and without a Clerk key),
 // then drives them in Chromium. Test plan: ../docs/qa/e2e-test-plan.md
@@ -11,6 +11,42 @@ const isCI = !!process.env.CI;
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_PATH || undefined;
 
 const port = (url: string) => new URL(url).port;
+
+const databaseUrl =
+  process.env.CLEW_DATABASE_URL ?? "postgresql+asyncpg://clew_app:clew_app@localhost:5432/clew";
+
+// Resume reading: the background worker, and the stand-in AI unless a real key was given.
+type WebServer = Exclude<NonNullable<PlaywrightTestConfig["webServer"]>, unknown[]>;
+const parsingServers: WebServer[] = !hasParsing
+  ? []
+  : [
+      ...(realParserKey
+        ? []
+        : [
+            {
+              name: "fake-anthropic",
+              command: "node fake-anthropic.mjs",
+              url: `${FAKE_ANTHROPIC_URL}/health`,
+              reuseExistingServer: !isCI,
+              timeout: 30_000,
+              env: { FAKE_ANTHROPIC_URL },
+            },
+          ]),
+      {
+        name: "worker",
+        command: "uv run arq clew.worker.WorkerSettings",
+        cwd: "../backend",
+        wait: { stderr: /Starting worker/ },
+        timeout: 120_000,
+        env: {
+          CLEW_ENV: "test",
+          CLEW_DATABASE_URL: databaseUrl,
+          ...(realParserKey
+            ? { CLEW_ANTHROPIC_API_KEY: realParserKey }
+            : { CLEW_ANTHROPIC_API_KEY: "e2e-fake-key", ANTHROPIC_BASE_URL: FAKE_ANTHROPIC_URL }),
+        },
+      },
+    ];
 
 export default defineConfig({
   testDir: "./tests",
@@ -51,9 +87,7 @@ export default defineConfig({
       timeout: 120_000,
       env: {
         CLEW_ENV: "test",
-        CLEW_DATABASE_URL:
-          process.env.CLEW_DATABASE_URL ??
-          "postgresql+asyncpg://clew_app:clew_app@localhost:5432/clew",
+        CLEW_DATABASE_URL: databaseUrl,
         CLEW_CORS_ORIGINS: JSON.stringify([WEB_URL]),
         CLEW_CLERK_ISSUER: process.env.CLEW_CLERK_ISSUER ?? "",
       },
@@ -80,5 +114,6 @@ export default defineConfig({
       timeout: 180_000,
       env: { VITE_API_URL: API_URL, VITE_CLERK_PUBLISHABLE_KEY: "" },
     },
+    ...parsingServers,
   ],
 });

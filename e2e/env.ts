@@ -60,3 +60,16 @@ export function testEmail(label: string): string {
 }
 
 export const TEST_EMAIL_CODE = "424242";
+
+/**
+ * Resume reading also needs Redis and the background worker. With these set, the config starts
+ * the worker and a stand-in for the Anthropic API (fake-anthropic.mjs), so reading runs end to
+ * end without a real key or real AI calls.
+ */
+export const hasParsing = hasUploadServices && Boolean(process.env.CLEW_REDIS_URL);
+export const FAKE_ANTHROPIC_URL = "http://127.0.0.1:8787";
+/**
+ * Set this to a real Anthropic key to send the made-up test resumes to the real AI instead of
+ * the stand-in. Tests that depend on the stand-in's answers skip then.
+ */
+export const realParserKey = process.env.CLEW_E2E_ANTHROPIC_API_KEY ?? "";
