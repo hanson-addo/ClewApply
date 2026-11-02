@@ -1,6 +1,6 @@
 # Screen specs
 
-These specs cover the screens behind the phase 1 user journeys UP (resume upload), PRO (master profile), FEED (job feed) and TRK (applications) in the [QA test plan](../qa/e2e-test-plan.md). Mockups are on the [mockup canvas](https://claude.ai/artifact/ViUm1ywkTR8FQdN1RyHS2D) as boards "1b. Onboarding: upload resume", "2. Onboarding: review parsed resume", "5. Master profile", "Phone: upload resume" and "Phone: master profile". Each section below names its own boards. Components and tokens are in [components.md](components.md) and [README.md](README.md).
+These specs cover the screens behind the phase 1 user journeys UP (resume upload), PRO (master profile), FEED (job feed) and TRK (applications), plus consent, settings and the privacy page, in the [QA test plan](../qa/e2e-test-plan.md). Mockups are on the [mockup canvas](https://claude.ai/artifact/ViUm1ywkTR8FQdN1RyHS2D) as boards "1b. Onboarding: upload resume", "2. Onboarding: review parsed resume", "5. Master profile", "Phone: upload resume" and "Phone: master profile". Each section below names its own boards. Components and tokens are in [components.md](components.md) and [README.md](README.md).
 
 ## Resume upload (onboarding step 1)
 
@@ -19,10 +19,10 @@ The left column (on phones, under the card) lists these before any file is chose
 
 1. Every file is checked for viruses before we keep it.
 2. Only you can open it. Download links expire after 5 minutes.
-3. An AI service reads it to draft your profile. The privacy policy link names the provider.
+3. If you agree, Anthropic's AI reads it to draft your profile. Nothing is read until you tick the box on the card (see [AI reading consent](#ai-reading-consent)).
 4. Delete it any time from Profile, Settings. Show this point only once resume delete exists in the API; until then, leave it off.
 
-The AI line must be visible without scrolling on desktop and appear above "Choose a file" on phones, because reading starts as soon as the upload finishes (#71).
+The consent box and its wording must be visible without scrolling on desktop and sit above "Choose a file" on phones, so the user reads them before choosing a file.
 
 ### Upload card states
 
@@ -31,7 +31,7 @@ The card has one state at a time. The mockup's Tweaks panel ("Upload state") sho
 | State | What the card shows | Primary action | Also offered |
 | --- | --- | --- | --- |
 | Idle | Dashed drop zone, "Drag your resume here", "PDF or Word (.docx), up to 10 MB" | Choose a file | Enter your details by hand |
-| Checking | File name and size, then a three-step list: Uploading, Checking for viruses, Reading your resume | None while it runs | |
+| Checking | File name and size, then a step list: Uploading, Checking for viruses, and Reading your resume only if the user agreed (see below) | None while it runs | |
 | Done | All three steps ticked, "Done. We found 5 sections in your resume." | Review what we found (goes to step 2) | |
 | Error | Danger panel with a title and one sentence, see below | Choose another file, or Try again | Enter it by hand |
 
@@ -67,15 +67,78 @@ Rules:
 
 If the user leaves mid-way, the next visit opens the step they were on with the uploaded file kept (UP-11). "Replace file" on step 2 returns here and shows the current file name above the drop zone.
 
-### Until parsing merges
+### AI reading consent
 
-Resume parsing is in review (#71): after upload, `GET /resumes/{id}/parse` reports progress and returns a draft profile plus the fields to "Check this". Until that merges, `POST /resumes` only stores and scans the file, so "Reading your resume" is skipped and "Review what we found" opens step 2 with empty fields, labeled "We'll fill this in from your resume soon. For now, add your details here."
+Issue #75. Uploading never needs consent: the file is stored and virus-checked either way. Reading it with AI happens only after the user ticks the box.
+
+The upload card shows this above "Choose a file", unticked by default:
+
+> ☐ **Let Clew's AI read my resume and fill in my profile.**
+> Clew uses Anthropic's AI to read your resume and fill in your profile. Anthropic may keep the text for up to 30 days and doesn't use it to train its models. [Privacy policy](/privacy)
+
+This is the #75 wording; the owner approves the final text with the policy (#76). The bold first line is the checkbox `<label>`. The paragraph is tied to it with `aria-describedby`, so a screen reader hears both. The privacy policy link opens in a new tab, so a file mid-upload isn't lost, and its accessible name says so ("Privacy policy, opens in a new tab").
+
+| User | What happens |
+| --- | --- |
+| Ticks the box, then uploads | The client records consent first (`ai_parsing_consent_at` plus the policy version shown, #75), then uploads. The step list is Uploading, Checking for viruses, Reading your resume. |
+| Uploads without ticking | Steps are Uploading and Checking for viruses only. The Done state says "Your resume is saved." and offers **Read my resume** (primary, disabled until the box is ticked; ticking records consent, then pressing it starts reading) and **Enter my details by hand** (secondary, goes to step 2 with empty fields). |
+| Agreed earlier to the current policy version | The box shows ticked, with "You agreed on Oct 20, 2026. Change this in Settings." Reading starts after upload. |
+| Agreed to an older policy version | The box is unticked again, with "Our privacy policy changed. Please read it and tick again." |
+| Withdrew consent in Settings | Same as never agreed. |
+
+Rules:
+- Never pre-tick the box, and never merge it into the upload button ("Upload and read" is not allowed).
+- The consent record stores the timestamp and policy version only.
+- Unticking after a read has started doesn't cancel that read. It stops future ones, and the box says so: "This stops future reads. Your current draft is kept."
 
 ## Review parsed resume (onboarding step 2)
 
-Covered by the existing mockup. Additions:
-- A field the parser wasn't sure about gets a warning StatusPill ("Check this", "Check the dates") next to its label, and the side panel counts them ("2 fields need a look"). The pill text is part of the label, so a screen reader hears "Headline, check this".
-- "Looks good, continue" saves profile version 1 with change summary "From your resume upload".
+Route: `/onboarding/review`. Shows the draft from `GET /resumes/{id}/parse` (#71). The draft is only a suggestion: nothing is saved to the profile until the user presses "Looks good, continue".
+
+### Draft states
+
+The client polls `GET /resumes/{id}/parse` every 2 seconds for the first 30 seconds, then every 5 seconds, and stops when the tab is hidden or the page is left. The server turns a read stuck for 15 minutes into `failed`, so the client needs no timeout of its own.
+
+| Status | What the page shows | Actions |
+| --- | --- | --- |
+| No read (404), because the user didn't agree | Empty profile form with "Add your details below. You can let Clew's AI read your resume later from Settings." | Looks good, continue |
+| `pending` | Skeleton form with `aria-busy="true"` and "Waiting to read your resume." | Enter by hand instead |
+| `running` | Skeleton form and "Reading your resume. This usually takes under a minute." | Enter by hand instead |
+| `done` | The filled form. Fields named in `check` carry a "Check this" pill, and the side panel says "2 fields need a look" with a link to each. | Looks good, continue |
+| `failed` | A danger panel with the server's `message` (below), above an empty form | Depends on the message |
+
+"Enter by hand instead" leaves the read running. If it finishes while the user is typing, a status line offers "Your resume is ready. Fill in the blanks from it?", which fills only fields that are still empty.
+
+### When reading fails
+
+The panel body is the server's `message` word for word, so QA and support see the same text. The title and actions come from this table, matched on the message.
+
+| Server message | Title | Actions |
+| --- | --- | --- |
+| This file is password-protected. Remove the password and upload it again. | This file is locked | Upload another file, Enter by hand |
+| We couldn't find any text in this file. If it's a scanned image, upload the original document instead. | We couldn't find any text | Upload another file, Enter by hand (UP-04, UP-08) |
+| We couldn't read this resume. Save it again as a PDF or Word file and upload that. | We couldn't read this resume | Upload another file, Try again, Enter by hand |
+| We couldn't accept this file. Please try a different copy. | We couldn't accept this file | Upload another file, Enter by hand. The file's download link is removed |
+| This file hasn't passed the virus check, so it can't be read. | Still checking this file | Try again |
+| Reading resumes is unavailable right now. Try again in a few minutes. | Reading is paused for a moment | Try again, Enter by hand |
+| We're still reading your other resume. Try this one again when it's done. | Another resume is being read | Try again (enabled after 30 seconds), Enter by hand |
+| You've reached today's limit for reading resumes. Try again tomorrow. | Daily limit reached | Enter by hand. No Try again button |
+| Anything else | We couldn't read this resume | Try again, Enter by hand |
+
+"Try again" calls `POST /resumes/{id}/parse`. A 429 answer shows its message in the same panel; a 409 shows the "Still checking this file" row.
+
+### Saving the draft
+
+- "Looks good, continue" saves the form with `PUT /profile` as version 1, change summary "From your resume upload", then goes to step 3 (UP-09).
+- If the user already has a profile (a later upload from Profile), the button reads "Replace my profile" and the page says "This replaces your current profile. Your old one stays in History." It sends the current `base_version_id`; a 409 shows the master profile's "changed somewhere else" panel.
+- Leaving without saving keeps the draft on the server, and coming back shows it again (UP-11).
+
+### Accessibility
+
+- One `role="status"` line announces each state change once ("Reading your resume.", "Done. 2 fields need a look."), never on every poll.
+- The failure panel is `role="alert"`, and focus moves to its first action.
+- A "Check this" pill is part of the field's label ("Headline, check this"). The side panel links move focus to the field.
+- Skeletons are hidden from screen readers; the status line carries the meaning.
 
 ## Master profile
 
@@ -227,3 +290,101 @@ Under `md` the board becomes one list with a row of status tabs above it (Saved 
 ### Empty state
 
 Each empty column says what goes there ("Save a job from your feed to keep it here."). A brand-new account sees one message instead of five empty columns: "No applications yet. Save or apply to a job from your feed and it shows up here." with a "Go to your jobs" button.
+
+## Account settings
+
+Route: `/settings`, from the avatar menu. Covers AUTH-09 and AUTH-15, plus the consent withdrawal (#75), export and delete (#31) promises.
+
+### Layout
+
+One column of Cards, max width 40rem, in this order. On every width the sections stack the same way; under `md` each Card goes full width with the 16px page gutter, and buttons go full width.
+
+1. **Account**: email (read only, with "Change it in your sign-in settings" linking to Clerk's account page) and plan ("Free").
+2. **Privacy**: AI resume reading, Download your data, and a link to the privacy policy.
+3. **Sessions**: Sign out, and Sign out everywhere.
+4. **Delete account**: a Card with a 2px `status-danger-fg` top border.
+
+Each Card has an `<h2>`, so screen-reader users can jump between sections by heading.
+
+### AI resume reading
+
+A switch (`role="switch"`, with a visible "On" or "Off" text next to it) labeled "Let Clew's AI read my resumes". Under it:
+- On: "You agreed on Oct 20, 2026 (privacy policy version 1). Anthropic may keep resume text for up to 30 days and doesn't use it to train its models."
+- Off: "Clew won't read new resumes. You can still upload them and fill in your profile by hand."
+
+Turning it off asks nothing and takes effect at once; a status line says "AI reading is off." Turning it off doesn't delete the profile, past drafts or files; the help text says "To remove your files, delete them from Profile." Turning it on shows the same wording as the upload card, then records consent with the current policy version.
+
+### Download your data
+
+"Download your data" explains: "A file with your profile, every version, your applications and your settings, in JSON." Pressing **Prepare download**:
+1. Asks the user to confirm it's them (a passkey or a fresh one-time code, AUTH-15).
+2. Calls `POST /me/export` and shows "Preparing your file." as a status line.
+3. When ready, shows **Download (expires in 15 minutes)** and the file size. The link is never emailed or put in the URL bar.
+
+If preparing fails: "We couldn't prepare your file. Try again in a few minutes."
+
+### Sign out everywhere
+
+"Sign out everywhere" asks in a Dialog: "Sign out on every device? You'll need to sign in again here too." with **Sign out everywhere** and Cancel. After it, the user lands on sign-in with "You're signed out on every device." (AUTH-09).
+
+### Delete account
+
+The Card says what goes: "This deletes your profile, every version, your resumes, your applications and your settings. It can't be undone." Then **Delete my account** (danger button).
+
+1. Confirm it's them (passkey or fresh one-time code, AUTH-15).
+2. A Dialog lists the same items, and has a text field labeled "Type DELETE to confirm". **Delete my account** stays disabled until the field matches (case-insensitive, spaces trimmed). Cancel is the default focus.
+3. `DELETE /me`. While it runs the button says "Deleting…" and the dialog can't be closed.
+4. The user is signed out and lands on a public page: "Your account is deleted. Copies in backups are removed within 30 days." with a link to the home page.
+
+If it fails, the dialog shows "We couldn't delete your account. Nothing was removed. Try again, or contact us." and stays open.
+
+### Accessibility
+
+- The switch's state is in its name and in visible text, never color alone.
+- Dialogs trap focus, close on Escape (except while deleting), and return focus to the button that opened them.
+- Status lines use one shared `role="status"` region; errors use `role="alert"`.
+- The typed confirm field has a visible label and its rule ("Type DELETE to confirm") is the label, not a placeholder.
+
+## Privacy policy
+
+Route: `/privacy`, public (no sign-in). Linked from sign-in, the upload consent box, Settings, and the footer of every page (#76). The owner writes and approves the text; this spec covers the page, not the wording.
+
+### Layout
+
+- Text column max width 68 characters (`max-width: 68ch`), body text 16px (`font.size.md`) at 1.6 line height, on `bg-surface`. The app header shows the logo only; the footer is the normal one.
+- At the top: `<h1>` "Privacy policy", then one line such as "Version 1 · Effective November 15, 2026" (`text-secondary`, real date from the owner), then "What changed" linking to the change list at the bottom.
+- A "The short version" box (`bg-subtle`, no border) with five or six bullets: what we collect, who processes it (Anthropic, Clerk, hosting and storage), Anthropic keeps resume text up to 30 days and doesn't train on it, we never sell your data, you can download or delete everything from Settings, US only.
+- A table of contents as an `<nav aria-label="On this page">` list of links to each `<h2>`. On `lg` and up it sits in a sticky left column; under `lg` it sits after the short version box.
+- Each `<h2>` has an id and a "Link to this section" anchor that appears on hover and focus.
+- Processors are a real `<table>` with a `<caption>`: name, what they do, what data, where. Under `md` the table becomes one Card per processor.
+- At the bottom: "Changes to this policy", a list of versions with dates and one line each.
+
+### Versions
+
+The page shows one version: the current one. The version number shown here is the one recorded with consent. When it changes in a way that affects AI reading, the upload card and Settings ask again (see [AI reading consent](#ai-reading-consent)).
+
+### Print and accessibility
+
+- The page prints cleanly: the header, footer and table of contents are hidden in print, and link URLs are printed after their text.
+- Headings go `h1`, then `h2`, then `h3` with no skipped levels.
+- No text in images. Language set with `lang="en"`.
+
+## QA cases to add
+
+Proposed IDs for the [QA test plan](../qa/e2e-test-plan.md); QA owns the final list.
+
+| ID | Case | Expected |
+| --- | --- | --- |
+| CON-01 | Open upload as a new user | Consent box is unticked; wording and privacy link visible above "Choose a file" on desktop and phone |
+| CON-02 | Upload without ticking | File stored and scanned; no read started (no parse row); "Read my resume" disabled until ticked |
+| CON-03 | Tick, then upload | Consent stored with timestamp and policy version before the upload request; reading starts |
+| CON-04 | Policy version raised | Box shows unticked with "Our privacy policy changed" |
+| CON-05 | Turn AI reading off in Settings, then upload | No read starts; profile and files kept |
+| DRAFT-01 | Each server failure message | Matching title and actions from the table; daily limit shows no Try again |
+| DRAFT-02 | Screen reader during a read | Each state announced once, not on every poll |
+| DRAFT-03 | Save the draft | Profile version 1 with "From your resume upload" |
+| SET-01 | Download your data | Re-auth first; link expires; file has profile, versions, applications, settings |
+| SET-02 | Delete account | Re-auth, typed DELETE, signed out, data gone; another session is signed out |
+| SET-03 | Settings at 320px wide | No horizontal scroll; all buttons at least 44px tall |
+| PRIV-01 | Open `/privacy` signed out | Loads; version and date at the top; table of contents links work |
+| PRIV-02 | Print `/privacy` | No header, footer or table of contents; URLs printed |
