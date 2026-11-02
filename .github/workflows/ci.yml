@@ -114,12 +114,15 @@ jobs:
     steps:
       # Started first so ClamAV loads its signatures while the installs run. The image ships
       # with signatures; skipping the online update keeps runs repeatable and off ClamAV's
-      # rate-limited mirrors.
+      # rate-limited mirrors. MinIO no longer publishes images on Docker Hub, so this is
+      # Bitnami's frozen build of the same MinIO release as docker-compose.yml; it creates the
+      # private bucket on start.
       - name: Start file storage and the virus scanner
         run: |
           docker run -d --name minio -p 127.0.0.1:9000:9000 \
             -e MINIO_ROOT_USER="$CLEW_S3_ACCESS_KEY_ID" -e MINIO_ROOT_PASSWORD="$CLEW_S3_SECRET_ACCESS_KEY" \
-            minio/minio:RELEASE.2025-04-22T22-12-26Z server /data
+            -e MINIO_DEFAULT_BUCKETS="$CLEW_S3_BUCKET" \
+            bitnamilegacy/minio:2025.4.22-debian-12-r2
           docker run -d --name clamav -p 127.0.0.1:3310:3310 -e CLAMAV_NO_FRESHCLAMD=true \
             clamav/clamav:1.4
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
@@ -152,12 +155,11 @@ jobs:
           npx playwright install --with-deps chromium
       - run: npm run typecheck
         working-directory: e2e
-      - name: Create the private resume bucket and wait for the virus scanner
+      - name: Wait for file storage and the virus scanner
         run: |
-          timeout 60 sh -c 'until curl -sf http://localhost:9000/minio/health/live; do sleep 1; done'
-          docker run --rm --network host --entrypoint sh minio/mc:RELEASE.2025-04-16T18-13-26Z -c \
-            "mc alias set ci http://localhost:9000 $CLEW_S3_ACCESS_KEY_ID $CLEW_S3_SECRET_ACCESS_KEY \
-            && mc mb --ignore-existing ci/$CLEW_S3_BUCKET && mc anonymous set none ci/$CLEW_S3_BUCKET"
+          timeout 120 sh -c 'until curl -sf http://localhost:9000/minio/health/ready; do sleep 2; done'
+          # The bucket exists (and is private) once an anonymous request gets 403, not 404.
+          timeout 60 sh -c 'until [ "$(curl -s -o /dev/null -w "%{http_code}" "http://localhost:9000/$CLEW_S3_BUCKET/")" = 403 ]; do sleep 2; done'
           timeout 300 sh -c 'until printf "PING\n" | nc -w 2 localhost 3310 | grep -q PONG; do sleep 3; done'
       - run: npm test
         working-directory: e2e
