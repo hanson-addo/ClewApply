@@ -122,6 +122,10 @@ test("the virus check flags the EICAR test file and nothing is kept (UP-07)", as
   await signInForApi(page, request, "upload-eicar");
   const response = await upload(page, request, "resume.docx", eicarDocx(), DOCX_TYPE);
   expect(response.status(), await response.text()).toBe(422);
+  // FastAPI also answers 422 for a malformed request, so check it was the scanner.
+  expect((await response.json()).detail).toBe(
+    "We couldn't accept this file. Please try a different copy.",
+  );
   // The audit log entry the test plan asks for has no API to read it yet; the backend tests
   // check that the file isn't stored.
 });
