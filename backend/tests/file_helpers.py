@@ -34,6 +34,29 @@ def plain_zip() -> bytes:
 EICAR = ("X5O!P%@AP[4\\PZX54(P^)7CC)7}$" + "EICAR-STANDARD-ANTIVIRUS-TEST-FILE!$H+H*").encode()
 
 
+def infected_docx() -> bytes:
+    """A Word file carrying EICAR as one of its parts. Real ClamAV unpacks the zip and flags
+    it; EICAR pasted into a PDF's bytes is not flagged (QA found this in #89)."""
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w") as package:
+        package.writestr("[Content_Types].xml", "<Types/>")
+        package.writestr("word/document.xml", "<w:document>Jordan Example</w:document>")
+        package.writestr("word/media/eicar.com", EICAR)
+    return buffer.getvalue()
+
+
+def clamav_would_flag(data: bytes) -> bool:
+    """What real ClamAV 1.4 does with EICAR: it matches the whole file, or a whole member of
+    a zip (which a .docx is). EICAR anywhere else in the bytes is not a match."""
+    if data == EICAR:
+        return True
+    try:
+        with zipfile.ZipFile(io.BytesIO(data)) as package:
+            return any(package.read(name) == EICAR for name in package.namelist())
+    except zipfile.BadZipFile:
+        return False
+
+
 def text_pdf(text: str) -> bytes:
     """A real one-page PDF whose text layer is `text` (Helvetica, WinAnsi encoding)."""
     lines = text.splitlines() or [""]

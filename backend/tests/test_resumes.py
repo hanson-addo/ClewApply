@@ -15,7 +15,14 @@ from clew.resumes.files import DOCX, MAX_RESUME_BYTES, PDF, detect_resume_type, 
 from clew.scanning import ScannerUnavailable, ScanVerdict, get_malware_scanner
 from clew.storage import S3ObjectStore, StorageUnavailable, get_object_store, s3_client
 from tests.auth_helpers import SigningKey, make_token
-from tests.file_helpers import EICAR, FAKE_PDF, docx, pdf_of_size, plain_zip
+from tests.file_helpers import (
+    FAKE_PDF,
+    clamav_would_flag,
+    docx,
+    infected_docx,
+    pdf_of_size,
+    plain_zip,
+)
 from tests.test_auth import verifier
 
 KEY = SigningKey("kid_resumes")
@@ -41,7 +48,7 @@ class MemoryStore:
 
 
 class FakeScanner:
-    """Flags the EICAR test string, like ClamAV does."""
+    """Flags the EICAR test string the way real ClamAV does (`clamav_would_flag`)."""
 
     def __init__(self) -> None:
         self.down = False
@@ -51,7 +58,7 @@ class FakeScanner:
         self.scanned += 1
         if self.down:
             raise ScannerUnavailable
-        return ScanVerdict.INFECTED if EICAR in data else ScanVerdict.CLEAN
+        return ScanVerdict.INFECTED if clamav_would_flag(data) else ScanVerdict.CLEAN
 
 
 @pytest.fixture
@@ -228,14 +235,15 @@ async def test_storage_not_configured_is_503() -> None:
 async def test_infected_file_is_rejected_and_not_kept(
     api: AsyncClient, store: MemoryStore, db: AsyncSession
 ) -> None:
-    infected = FAKE_PDF + EICAR
     response = await api.post(
-        "/resumes", headers=as_user("user_scan_eicar"), files=upload("eicar.pdf", infected)
+        "/resumes",
+        headers=as_user("user_scan_eicar"),
+        files=upload("eicar.docx", infected_docx()),
     )
     assert response.status_code == 422
     assert response.json()["detail"] == "We couldn't accept this file. Please try a different copy."
     assert store.objects == {}
-    assert "eicar.pdf" not in (await db.scalars(select(Resume.filename))).all()
+    assert "eicar.docx" not in (await db.scalars(select(Resume.filename))).all()
 
 
 async def test_scanner_down_is_503_and_nothing_kept(

@@ -6,7 +6,7 @@ from collections.abc import AsyncIterator, Callable
 import pytest
 
 from clew.scanning import CHUNK_BYTES, ClamdScanner, ScannerUnavailable, ScanVerdict
-from tests.file_helpers import EICAR, FAKE_PDF
+from tests.file_helpers import EICAR, FAKE_PDF, clamav_would_flag, infected_docx
 
 
 class FakeClamd:
@@ -30,7 +30,7 @@ class FakeClamd:
 
 
 def clamav_like(data: bytes) -> bytes:
-    return b"stream: Eicar-Signature FOUND\0" if EICAR in data else b"stream: OK\0"
+    return b"stream: Eicar-Signature FOUND\0" if clamav_would_flag(data) else b"stream: OK\0"
 
 
 @pytest.fixture
@@ -51,7 +51,17 @@ async def test_clean_file(clamd: tuple[FakeClamd, ClamdScanner]) -> None:
 
 async def test_eicar_is_infected(clamd: tuple[FakeClamd, ClamdScanner]) -> None:
     _, scanner = clamd
-    assert await scanner.scan(FAKE_PDF + EICAR) is ScanVerdict.INFECTED
+    assert await scanner.scan(infected_docx()) is ScanVerdict.INFECTED
+    assert await scanner.scan(EICAR) is ScanVerdict.INFECTED
+
+
+def test_fake_scanners_match_real_clamav() -> None:
+    # Real ClamAV 1.4 (checked in QA's e2e job, #89) flags EICAR as a whole file or a whole
+    # zip member, not pasted into another file's bytes.
+    assert clamav_would_flag(EICAR)
+    assert clamav_would_flag(infected_docx())
+    assert not clamav_would_flag(FAKE_PDF + EICAR)
+    assert not clamav_would_flag(FAKE_PDF)
 
 
 async def test_large_file_is_sent_in_chunks_intact(clamd: tuple[FakeClamd, ClamdScanner]) -> None:
