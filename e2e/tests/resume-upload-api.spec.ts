@@ -2,7 +2,7 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API_URL, hasClerk, hasUploadServices } from "../env";
-import { bearer, signInForApi } from "./api-as";
+import { bearer, signInForApi, uploadResume } from "./api-as";
 import { docx, eicarDocx, MAX_RESUME_BYTES, pdf, windowsProgram } from "./files";
 
 // Resume upload through the real stack (test plan §3.2): a real Clerk session, real ClamAV
@@ -21,19 +21,7 @@ type Link = { url: string; expires_at: string };
 const PDF_TYPE = "application/pdf";
 const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
 
-async function upload(
-  page: Page,
-  request: APIRequestContext,
-  name: string,
-  buffer: Buffer,
-  mimeType = "application/octet-stream",
-) {
-  return request.post(`${API_URL}/resumes`, {
-    headers: await bearer(page),
-    multipart: { file: { name, mimeType, buffer } },
-    timeout: 60_000,
-  });
-}
+const upload = uploadResume;
 
 async function downloadLink(page: Page, request: APIRequestContext, id: string) {
   return request.get(`${API_URL}/resumes/${id}/download`, { headers: await bearer(page) });

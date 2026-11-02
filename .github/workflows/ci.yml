@@ -97,6 +97,15 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 10
+      # Job queue for resume reading. CI-only, pinned by digest.
+      redis:
+        image: redis:7-alpine@sha256:8da19c7399dca900c6822a1cf30f9d2285585e2c4b457ff4095b0f4500054d3f
+        ports: ["127.0.0.1:6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     env:
       CLEW_ENV: test
       # The API runs as clew_app, as in production; migrations run as the owner.
@@ -111,6 +120,9 @@ jobs:
       CLEW_S3_SECRET_ACCESS_KEY: clew-ci-only
       CLEW_CLAMAV_HOST: localhost
       CLEW_CLAMAV_PORT: "3310"
+      # Resume reading: the config starts the arq worker and a local stand-in for the AI
+      # (e2e/fake-anthropic.mjs) when this is set. No AI key is used in CI.
+      CLEW_REDIS_URL: redis://localhost:6379/0
     steps:
       # Started first so ClamAV loads its signatures while the installs run. Both images are
       # for CI only, pinned by digest.
