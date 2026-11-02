@@ -76,7 +76,7 @@ The upload card shows this above "Choose a file", unticked by default:
 > ☐ **Let Clew's AI read my resume and fill in my profile.**
 > Clew uses Anthropic's AI to read your resume and fill in your profile. Anthropic may keep the text for up to 30 days and doesn't use it to train its models. [Privacy policy](/privacy)
 
-This is the #75 wording; the owner approves the final text with the policy (#76). The bold first line is the checkbox `<label>`. The paragraph is tied to it with `aria-describedby`, so a screen reader hears both. The privacy policy link opens in a new tab, so a file mid-upload isn't lost, and its accessible name says so ("Privacy policy, opens in a new tab").
+This is the #75 wording; the owner approves the final text with the policy (#76). Security suggests "normally deletes it within 30 days" instead of "may keep the text for up to 30 days", since Anthropic can keep flagged inputs longer; the owner decides with #76. The bold first line is the checkbox `<label>`. The paragraph is tied to it with `aria-describedby`, so a screen reader hears both. The privacy policy link opens in a new tab, so a file mid-upload isn't lost, and its accessible name says so ("Privacy policy, opens in a new tab").
 
 | User | What happens |
 | --- | --- |
@@ -87,9 +87,10 @@ This is the #75 wording; the owner approves the final text with the policy (#76)
 | Withdrew consent in Settings | Same as never agreed. |
 
 Rules:
+- **The server enforces consent; the client only shows it.** `POST /resumes` always stores and scans the file, but queues a read only when the user's stored consent matches the current policy version. `POST /resumes/{id}/parse` answers 403 without it (see [When reading fails](#when-reading-fails)). The worker checks consent again right before sending text to Anthropic, so a read still queued when the user withdraws is dropped and never sent.
 - Never pre-tick the box, and never merge it into the upload button ("Upload and read" is not allowed).
-- The consent record stores the timestamp and policy version only.
-- Unticking after a read has started doesn't cancel that read. It stops future ones, and the box says so: "This stops future reads. Your current draft is kept."
+- The consent record stores the timestamp and policy version only. Keep it as an append-only list of changes (agreed or withdrawn, policy version, time), so we can tell what the user had agreed to when a given resume was read.
+- Unticking stops every read that hasn't reached Anthropic yet. A resume already sent can't be recalled, and the box says so: "This stops future reads. A resume already sent to the AI can't be recalled. Your current draft is kept."
 
 ## Review parsed resume (onboarding step 2)
 
@@ -123,6 +124,7 @@ The panel body is the server's `message` word for word, so QA and support see th
 | Reading resumes is unavailable right now. Try again in a few minutes. | Reading is paused for a moment | Try again, Enter by hand |
 | We're still reading your other resume. Try this one again when it's done. | Another resume is being read | Try again (enabled after 30 seconds), Enter by hand |
 | You've reached today's limit for reading resumes. Try again tomorrow. | Daily limit reached | Enter by hand. No Try again button |
+| No consent for the current policy version (403). The backend adds this message with #75: "You haven't agreed to let Clew's AI read your resume." | AI reading is off | A link to the consent box, Enter by hand |
 | Anything else | We couldn't read this resume | Try again, Enter by hand |
 
 "Try again" calls `POST /resumes/{id}/parse`. A 429 answer shows its message in the same panel; a 409 shows the "Still checking this file" row.
@@ -316,25 +318,25 @@ Turning it off asks nothing and takes effect at once; a status line says "AI rea
 
 ### Download your data
 
-"Download your data" explains: "A file with your profile, every version, your applications and your settings, in JSON." Pressing **Prepare download**:
-1. Asks the user to confirm it's them (a passkey or a fresh one-time code, AUTH-15).
+"Download your data" explains: "A zip with your profile, every version, your applications, your settings, your consent history, your resume drafts and your uploaded resume files." Sensitive answers (work authorization, veteran, disability, EEO) go in only if the user ticks a separate, unticked box: "Include my sensitive answers". Pressing **Prepare download**:
+1. Asks the user to confirm it's them (a passkey or a fresh one-time code, AUTH-15). The server enforces this: `POST /me/export` refuses unless Clerk reverification on the session token shows a factor verified within the last 10 minutes. The dialog is only the way to get there.
 2. Calls `POST /me/export` and shows "Preparing your file." as a status line.
-3. When ready, shows **Download (expires in 15 minutes)** and the file size. The link is never emailed or put in the URL bar.
+3. When ready, shows **Download (expires in 15 minutes)** and the file size. The link is never emailed or put in the URL bar. The download is served with `Cache-Control: no-store` and `Content-Disposition: attachment`, under the same row-level security as every other per-user read.
 
 If preparing fails: "We couldn't prepare your file. Try again in a few minutes."
 
 ### Sign out everywhere
 
-"Sign out everywhere" asks in a Dialog: "Sign out on every device? You'll need to sign in again here too." with **Sign out everywhere** and Cancel. After it, the user lands on sign-in with "You're signed out on every device." (AUTH-09).
+"Sign out everywhere" asks in a Dialog: "Sign out on every device? You'll need to sign in again here too." with **Sign out everywhere** and Cancel, then asks the user to confirm it's them. The server enforces the same 10-minute Clerk reverification and revokes every Clerk session for the user, not just this browser's. After it, the user lands on sign-in with "You're signed out on every device." (AUTH-09).
 
 ### Delete account
 
 The Card says what goes: "This deletes your profile, every version, your resumes, your applications and your settings. It can't be undone." Then **Delete my account** (danger button).
 
-1. Confirm it's them (passkey or fresh one-time code, AUTH-15).
+1. Confirm it's them (passkey or fresh one-time code, AUTH-15). The server enforces this: `DELETE /me` refuses unless Clerk reverification shows a factor verified within the last 10 minutes.
 2. A Dialog lists the same items, and has a text field labeled "Type DELETE to confirm". **Delete my account** stays disabled until the field matches (case-insensitive, spaces trimmed). Cancel is the default focus.
 3. `DELETE /me`. While it runs the button says "Deleting…" and the dialog can't be closed.
-4. The user is signed out and lands on a public page: "Your account is deleted. Copies in backups are removed within 30 days." with a link to the home page.
+4. The user is signed out and lands on a public page: "Your account is deleted. Copies in backups are removed within 30 days." That sentence needs backup retention at the host of 30 days or less, and #31 must delete resume files, drafts (`resume_parses`) and `usage_events` as well as the profile rows; until both are true, show only "Your account is deleted." with a link to the home page.
 
 If it fails, the dialog shows "We couldn't delete your account. Nothing was removed. Try again, or contact us." and stays open.
 
@@ -380,10 +382,13 @@ Proposed IDs for the [QA test plan](../qa/e2e-test-plan.md); QA owns the final l
 | CON-03 | Tick, then upload | Consent stored with timestamp and policy version before the upload request; reading starts |
 | CON-04 | Policy version raised | Box shows unticked with "Our privacy policy changed" |
 | CON-05 | Turn AI reading off in Settings, then upload | No read starts; profile and files kept |
+| CON-06 | Call `POST /resumes/{id}/parse` with no consent, skipping the UI | 403; nothing sent to Anthropic |
+| CON-07 | Withdraw consent while a read is still queued | The read is dropped before Anthropic is called |
 | DRAFT-01 | Each server failure message | Matching title and actions from the table; daily limit shows no Try again |
 | DRAFT-02 | Screen reader during a read | Each state announced once, not on every poll |
 | DRAFT-03 | Save the draft | Profile version 1 with "From your resume upload" |
-| SET-01 | Download your data | Re-auth first; link expires; file has profile, versions, applications, settings |
+| SET-01 | Download your data | Re-auth first; link expires; file has profile, versions, applications, settings, consent history, drafts and resume files; no sensitive answers unless ticked |
+| SET-04 | Call `POST /me/export`, `DELETE /me` and sign out everywhere with a session older than 10 minutes since verification, skipping the dialog | API refuses |
 | SET-02 | Delete account | Re-auth, typed DELETE, signed out, data gone; another session is signed out |
 | SET-03 | Settings at 320px wide | No horizontal scroll; all buttons at least 44px tall |
 | PRIV-01 | Open `/privacy` signed out | Loads; version and date at the top; table of contents links work |
