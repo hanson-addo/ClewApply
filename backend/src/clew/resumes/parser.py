@@ -207,7 +207,7 @@ _SENSITIVE_KEYWORD_THEN_ID = [
     rf"[^.\n]{{0,20}}?\b{_DATE_OR_YEAR}",
     rf"(social security|ssn)[^.\n]{{0,20}}?{_DIGIT_RUN}",
     # A licence or passport word, then an identifier with a digit in it.
-    r"(passport|driver'?s? licen[cs]e|driving licen[cs]e|licen[cs]e)"
+    r"(passport|driver'?s? licen[cs]e|driving licen[cs]e|licen[cs]e|dl)"
     rf"\s*(no\.?|number|#)?\s*:?\s*\b(?={_IDENTIFIER}\b)[A-Z0-9-]{{5,}}",
     rf"(routing|account|acct|credit card|debit card|card)\s*(no\.?|number|#)?\s*:?\s*{_DIGIT_RUN}",
     r"iban\s*(no\.?|number|#)?\s*:?\s*[A-Z]{2}\d{2}",

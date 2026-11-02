@@ -220,6 +220,8 @@ def test_no_key_means_no_parser(monkeypatch: pytest.MonkeyPatch) -> None:
         "Routing 000111222.",
         "Card number 4111 1111 1111 1111.",
         "IBAN GB00EXMP00000000000000.",
+        "DL# D1234567.",
+        "DL No: D1234567.",
     ],
 )
 def test_more_sensitive_patterns_are_stripped(text: str) -> None:
