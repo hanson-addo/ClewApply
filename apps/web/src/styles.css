@@ -216,3 +216,569 @@
   background: var(--clew-status-danger-bg);
   color: var(--clew-status-danger-fg);
 }
+
+/* --- Main nav -------------------------------------------------------------------------- */
+
+.app-nav {
+  flex: 1;
+  min-width: 0;
+}
+
+.app-nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clew-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-nav-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--clew-size-touch-target);
+  padding: 0 var(--clew-space-3);
+  border-radius: var(--clew-radius-sm);
+  color: var(--clew-text-on-inverse);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
+  text-decoration: none;
+}
+
+.app-nav-link[aria-current="page"] {
+  background: var(--clew-action-primary-bg);
+  color: var(--clew-action-primary-fg);
+  font-weight: var(--clew-font-weight-heavy);
+}
+
+/* --- Buttons --------------------------------------------------------------------------- */
+
+.button-primary {
+  background: var(--clew-action-primary-bg);
+  color: var(--clew-action-primary-fg);
+  border: none;
+  font-weight: var(--clew-font-weight-heavy);
+}
+
+.button-primary:hover {
+  background: var(--clew-action-primary-bg-hover);
+}
+
+.button-secondary {
+  background: var(--clew-action-secondary-bg);
+  color: var(--clew-action-secondary-fg);
+  border: 2px solid var(--clew-action-secondary-border);
+}
+
+.button-ghost {
+  background: transparent;
+  color: var(--clew-text-link);
+  border: none;
+  padding: 0 var(--clew-space-3);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- Fields ---------------------------------------------------------------------------- */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-1);
+  min-width: 0;
+}
+
+.field-label {
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.field-hint {
+  font-size: var(--clew-font-size-sm);
+  color: var(--clew-text-secondary);
+}
+
+.field-error {
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
+  color: var(--clew-status-danger-fg);
+}
+
+.field-input {
+  min-height: var(--clew-size-control-height);
+  padding: var(--clew-space-2) var(--clew-space-3);
+  border: 2px solid var(--clew-border-control);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-bg-surface);
+  color: var(--clew-text-primary);
+  font: inherit;
+  font-size: var(--clew-font-size-md);
+}
+
+.field-input:focus {
+  border-color: var(--clew-border-strong);
+}
+
+.field-invalid .field-input {
+  border-color: var(--clew-status-danger-fg);
+}
+
+.field-textarea {
+  resize: vertical;
+  line-height: var(--clew-font-line-height-normal);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--clew-space-4);
+}
+
+@media (min-width: 30rem) {
+  .field-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .field-wide {
+    grid-column: 1 / -1;
+  }
+}
+
+.field-check {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-3);
+  min-height: var(--clew-size-touch-target);
+  font-weight: var(--clew-font-weight-semibold);
+}
+
+.field-check input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--clew-control-accent);
+}
+
+/* --- Error summary and dialogs --------------------------------------------------------- */
+
+.error-summary {
+  padding: var(--clew-space-4);
+  border: 2px solid var(--clew-status-danger-edge);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-status-danger-bg);
+  color: var(--clew-status-danger-fg);
+}
+
+.error-summary-title {
+  margin: 0 0 var(--clew-space-2);
+  font-size: var(--clew-font-size-lg);
+}
+
+.error-summary ul {
+  margin: 0;
+  padding-left: var(--clew-space-5);
+}
+
+.error-summary a {
+  color: inherit;
+}
+
+.dialog {
+  width: min(560px, calc(100vw - 2 * var(--clew-space-4)));
+  max-height: calc(100vh - 2 * var(--clew-space-8));
+  padding: var(--clew-space-6);
+  border: none;
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  color: var(--clew-text-primary);
+  box-shadow: var(--clew-shadow-overlay);
+}
+
+.dialog::backdrop {
+  background: color-mix(in srgb, var(--clew-color-ink-900) 60%, transparent);
+}
+
+.dialog-title {
+  margin: 0 0 var(--clew-space-2);
+  font-size: var(--clew-font-size-xl);
+}
+
+.dialog-meta {
+  margin: 0 0 var(--clew-space-4);
+  color: var(--clew-text-secondary);
+}
+
+.dialog-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--clew-space-3);
+  margin-top: var(--clew-space-6);
+}
+
+/* On phones, dialogs become bottom sheets. */
+@media (max-width: 47.99rem) {
+  .dialog {
+    width: 100vw;
+    max-width: 100vw;
+    margin: auto 0 0;
+    border-radius: var(--clew-radius-xl) var(--clew-radius-xl) 0 0;
+    padding-bottom: calc(var(--clew-space-6) + env(safe-area-inset-bottom));
+  }
+
+  .dialog-actions .button {
+    flex: 1 1 100%;
+  }
+}
+
+.version-body h3 {
+  margin: var(--clew-space-4) 0 var(--clew-space-2);
+  font-size: var(--clew-font-size-lg);
+}
+
+.version-basics {
+  margin: 0;
+}
+
+.version-basics div {
+  margin-bottom: var(--clew-space-2);
+}
+
+.version-basics dt {
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.version-basics dd {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* --- Profile --------------------------------------------------------------------------- */
+
+.profile-page {
+  max-width: var(--clew-size-container-wide);
+  margin: 0 auto;
+  padding: var(--clew-space-6) var(--clew-space-4) var(--clew-space-16);
+}
+
+.profile-eyebrow {
+  margin: 0;
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
+  color: var(--clew-text-secondary);
+}
+
+.profile-head h1 {
+  margin: 0 0 var(--clew-space-2);
+  font-size: var(--clew-font-size-3xl);
+}
+
+.profile-lede {
+  margin: 0 0 var(--clew-space-4);
+  color: var(--clew-text-secondary);
+}
+
+.profile-status:empty {
+  display: none;
+}
+
+.profile-status {
+  padding: var(--clew-space-3) var(--clew-space-4);
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-status-success-bg);
+  color: var(--clew-status-success-fg);
+}
+
+.profile-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-areas: "select" "form" "aside";
+  gap: var(--clew-space-6);
+}
+
+.profile-nav {
+  grid-area: nav;
+  display: none;
+}
+
+.profile-select {
+  grid-area: select;
+}
+
+.profile-form {
+  grid-area: form;
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-4);
+  min-width: 0;
+  padding: var(--clew-space-5) var(--clew-space-4);
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+}
+
+.profile-aside {
+  grid-area: aside;
+  min-width: 0;
+}
+
+/* Tablet: section nav on the left, the form on the right, history under the form. */
+@media (min-width: 48rem) {
+  .profile-page {
+    padding-left: var(--clew-space-6);
+    padding-right: var(--clew-space-6);
+  }
+
+  .profile-layout {
+    grid-template-columns: 12rem minmax(0, 1fr);
+    grid-template-areas: "nav form" "nav aside";
+  }
+
+  .profile-nav {
+    display: block;
+  }
+
+  .profile-select {
+    display: none;
+  }
+
+  .profile-form {
+    padding: var(--clew-space-6);
+  }
+}
+
+/* Desktop: nav, form, then history in a side panel. */
+@media (min-width: 64rem) {
+  .profile-layout {
+    grid-template-columns: 12rem minmax(0, 1fr) 18rem;
+    grid-template-areas: "nav form aside";
+    align-items: start;
+  }
+}
+
+.profile-nav ul {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-nav-link {
+  display: flex;
+  align-items: center;
+  min-height: var(--clew-size-touch-target);
+  padding: 0 var(--clew-space-3);
+  border-radius: var(--clew-radius-sm);
+  color: var(--clew-text-primary);
+  font-weight: var(--clew-font-weight-semibold);
+  text-decoration: none;
+}
+
+.profile-nav-link[aria-current="page"] {
+  background: var(--clew-bg-selected);
+  color: var(--clew-text-selected);
+  font-weight: var(--clew-font-weight-heavy);
+}
+
+.profile-entries {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-entry {
+  border: 1px solid var(--clew-border-subtle);
+  border-radius: var(--clew-radius-lg);
+  padding: var(--clew-space-3) var(--clew-space-4);
+}
+
+.profile-entry-closed {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clew-space-3);
+}
+
+.profile-entry-summary {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-weight: var(--clew-font-weight-semibold);
+}
+
+.profile-entry-flag {
+  color: var(--clew-status-danger-fg);
+  font-size: var(--clew-font-size-sm);
+}
+
+.profile-entry-open {
+  padding: var(--clew-space-4);
+  border-color: var(--clew-border-strong);
+}
+
+.profile-entry-title {
+  margin: 0 0 var(--clew-space-4);
+  font-size: var(--clew-font-size-xl);
+  overflow-wrap: anywhere;
+}
+
+.profile-entry-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clew-space-3);
+  margin-top: var(--clew-space-4);
+}
+
+.profile-empty,
+.profile-history-empty {
+  margin: 0;
+  color: var(--clew-text-secondary);
+}
+
+.profile-conflict {
+  padding: var(--clew-space-4);
+  border: 2px solid var(--clew-status-warning-edge);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-status-warning-bg);
+  color: var(--clew-status-warning-fg);
+}
+
+.profile-conflict p {
+  margin: 0 0 var(--clew-space-3);
+}
+
+.profile-conflict-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clew-space-3);
+}
+
+/* Save and Discard stay in reach: stuck to the bottom of the screen on phones. */
+.profile-savebar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--clew-space-3);
+  margin: 0 calc(-1 * var(--clew-space-4)) calc(-1 * var(--clew-space-5));
+  padding: var(--clew-space-3) var(--clew-space-4)
+    calc(var(--clew-space-3) + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--clew-border-subtle);
+  border-radius: 0 0 var(--clew-radius-xl) var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+}
+
+.profile-savebar-state {
+  flex: 1 1 100%;
+  font-size: var(--clew-font-size-sm);
+  color: var(--clew-text-secondary);
+}
+
+@media (min-width: 30rem) {
+  .profile-savebar-state {
+    flex: 1 1 auto;
+  }
+}
+
+@media (min-width: 48rem) {
+  .profile-savebar {
+    margin: 0 calc(-1 * var(--clew-space-6)) calc(-1 * var(--clew-space-6));
+    padding-left: var(--clew-space-6);
+    padding-right: var(--clew-space-6);
+  }
+}
+
+/* The sticky bar must not hide the field being edited. */
+.profile-form .field-input {
+  scroll-margin-bottom: 8rem;
+}
+
+.profile-history h2 {
+  margin: 0 0 var(--clew-space-3);
+  font-size: var(--clew-font-size-xl);
+}
+
+.profile-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-2);
+  max-height: 32rem;
+  overflow-y: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.profile-history-item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--clew-space-1);
+  width: 100%;
+  min-height: var(--clew-size-touch-target);
+  padding: var(--clew-space-3);
+  border: 1px solid var(--clew-border-subtle);
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-bg-surface);
+  color: var(--clew-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-history-name {
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.profile-history-current {
+  font-weight: var(--clew-font-weight-regular);
+  color: var(--clew-text-secondary);
+}
+
+.profile-history-meta {
+  font-size: var(--clew-font-size-sm);
+  color: var(--clew-text-secondary);
+  overflow-wrap: anywhere;
+}
+
+/* Section and card titles are Figtree 700; only page titles use Syne (design README, Type). */
+.profile-entry-title,
+.profile-history h2,
+.dialog-title,
+.error-summary-title,
+.version-body h3 {
+  font-family: var(--clew-font-family-body);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+/* Phones: the main nav gets its own row under the logo. */
+@media (max-width: 47.99rem) {
+  .app-header {
+    flex-wrap: wrap;
+  }
+
+  .app-nav {
+    order: 3;
+    flex-basis: 100%;
+  }
+
+  /* Save and Discard share the full width (design: primary actions go full width). */
+  .profile-savebar .button {
+    flex: 1 1 0;
+  }
+}
+
+/* Headings take focus only so screen readers start there; they aren't controls. */
+h1[tabindex="-1"]:focus,
+h2[tabindex="-1"]:focus {
+  outline: none;
+}

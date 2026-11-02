@@ -53,7 +53,7 @@ export function HomePage() {
         email={state.status === "ready" ? state.me.email : null}
         onSignOut={() => void signOut({ redirectUrl: "/sign-in" })}
       />
-      <main className="home">
+      <main id="main" className="home">
         {state.status === "loading" && <p role="status">Loading your account…</p>}
         {state.status === "error" && (
           <p role="alert" className="home-error">
