@@ -111,6 +111,10 @@ async def run_parse(
         error = ParseError.PARSE_INVALID
     except ParseFailed:
         error = ParseError.PARSE_FAILED
+    except Exception as exc:  # Any other bug must still finish the parse.
+        # The type only: a message can quote resume text.
+        logger.error("resume_parse_crashed", extra={"error": type(exc).__name__})
+        error = ParseError.PARSE_FAILED
 
     async with sessions() as session:
         await bind_user(session, user_id)

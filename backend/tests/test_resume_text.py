@@ -8,7 +8,7 @@ import pytest
 from pypdf import PdfWriter
 
 from clew.resumes.files import DOCX, PDF
-from clew.resumes.isolation import run_isolated
+from clew.resumes.isolation import CHILD_ENV_KEEP, run_isolated
 from clew.resumes.text import (
     MAX_CHARS,
     MAX_DOCX_XML_BYTES,
@@ -209,3 +209,24 @@ async def test_extraction_errors_come_back_from_the_child() -> None:
     with pytest.raises(ExtractionFailed) as caught:
         await run_isolated(extract_text, text_pdf(""), PDF)
     assert caught.value.code is ExtractError.NO_TEXT
+
+
+def report_environment(_: bytes, __: str) -> str:
+    import os
+
+    return ",".join(sorted(os.environ))
+
+
+async def test_the_extractor_gets_no_secrets(monkeypatch: pytest.MonkeyPatch) -> None:
+    import os
+
+    monkeypatch.setenv("CLEW_ANTHROPIC_API_KEY", "test-key-not-real")
+    monkeypatch.setenv("CLEW_DATABASE_URL", "postgresql://example.test/clew")
+    monkeypatch.setenv("HOME_SECRET_FOR_TEST", "placeholder")
+    names = (await run_isolated(report_environment, b"", PDF)).split(",")
+    assert not [name for name in names if name.startswith("CLEW_")]
+    assert "HOME_SECRET_FOR_TEST" not in names
+    # Anything else is what the child's own interpreter sets up (locale, terminal size).
+    assert set(names) - {*CHILD_ENV_KEEP, ""} <= {"LC_CTYPE", "COLUMNS", "LINES"}
+    # The worker's own environment is back as it was.
+    assert os.environ["CLEW_ANTHROPIC_API_KEY"] == "test-key-not-real"

@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     redis_url: str | None = None
     # LLM that turns resume text into a profile. Without a key, parsing reports "unavailable".
     anthropic_api_key: SecretStr | None = None
+    # The parser forces one tool call (tool_choice). A model set here must support forced tool
+    # use, or every parse fails as parse_failed with a 400 from the API.
     parser_model: str = "claude-haiku-5-5"
     parser_timeout_seconds: float = 60.0
 

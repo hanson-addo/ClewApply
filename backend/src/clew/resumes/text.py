@@ -24,8 +24,11 @@ MAX_COMPRESSION_RATIO = 100
 
 W = "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}"
 
-# pypdf logs warnings about malformed files; those can quote file content.
-logging.getLogger("pypdf").setLevel(logging.ERROR)
+# pypdf logs about malformed files, at every level up to ERROR, and those messages can quote
+# file content. Keep all of it out of the logs.
+_pypdf_logger = logging.getLogger("pypdf")
+_pypdf_logger.setLevel(logging.CRITICAL)
+_pypdf_logger.propagate = False
 
 
 class ExtractError(StrEnum):

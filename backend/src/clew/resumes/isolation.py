@@ -7,7 +7,9 @@ the same process can't stop CPU-bound code. A child process can be killed outrig
 import asyncio
 import logging
 import multiprocessing
+import os
 import resource
+import threading
 from collections.abc import Callable
 from multiprocessing.connection import Connection
 from typing import Any
@@ -23,6 +25,25 @@ WALL_LIMIT_SECONDS = 30
 # "spawn" starts a fresh interpreter: no copy of the worker's event loop, threads or
 # database connections ends up in the child.
 _CONTEXT = multiprocessing.get_context("spawn")
+
+# The only environment variables the child gets. It never needs the worker's secrets (API key,
+# storage and database credentials), so a parser bug that ran code couldn't reach them.
+CHILD_ENV_KEEP = ("PATH", "PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "LANG", "LC_ALL", "TMPDIR")
+_ENV_LOCK = threading.Lock()
+
+
+def _start_without_secrets(process: multiprocessing.process.BaseProcess) -> None:
+    """Starts `process` with a minimal environment. A spawned child copies os.environ at
+    start, so it is trimmed for that moment and restored straight after."""
+    with _ENV_LOCK:
+        saved = dict(os.environ)
+        try:
+            os.environ.clear()
+            os.environ.update({k: v for k, v in saved.items() if k in CHILD_ENV_KEEP})
+            process.start()
+        finally:
+            os.environ.clear()
+            os.environ.update(saved)
 
 
 def _child(conn: Connection, func: Callable[..., str], args: tuple[Any, ...]) -> None:
@@ -46,7 +67,7 @@ async def run_isolated(
     timeout (the child is then killed)."""
     receiver, sender = _CONTEXT.Pipe(duplex=False)
     process = _CONTEXT.Process(target=_child, args=(sender, func, args), daemon=True)
-    process.start()
+    _start_without_secrets(process)
     sender.close()
 
     def wait() -> tuple[str, str] | None:

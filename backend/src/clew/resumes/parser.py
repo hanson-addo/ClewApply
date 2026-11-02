@@ -115,7 +115,7 @@ class AnthropicParser:
                 system=SYSTEM_PROMPT,
                 tools=[TOOL],
                 tool_choice={"type": "tool", "name": TOOL_NAME},
-                messages=[{"role": "user", "content": f"<resume>\n{text}\n</resume>"}],
+                messages=[{"role": "user", "content": f"<resume>\n{_unwrap(text)}\n</resume>"}],
             )
         except (anthropic.APIConnectionError, anthropic.RateLimitError) as exc:
             logger.warning("parser_unavailable", extra={"error": type(exc).__name__})
@@ -137,6 +137,14 @@ class AnthropicParser:
         raise ParseFailed
 
 
+_RESUME_TAG = re.compile(r"</?\s*resume\s*>", re.IGNORECASE)
+
+
+def _unwrap(text: str) -> str:
+    """Removes resume tags from the text, so it can't close the <resume> wrapper early."""
+    return _RESUME_TAG.sub("", text)
+
+
 def to_parsed_resume(raw: object) -> ParsedResume:
     """Validates the model's tool input, strips anything sensitive and works out the flags."""
     try:
@@ -149,7 +157,15 @@ def to_parsed_resume(raw: object) -> ParsedResume:
         )
         raise ParseInvalid from None
     data = redact(output.profile.model_dump(mode="json", exclude_none=True))
-    profile = ProfileData.model_validate(data)
+    try:
+        profile = ProfileData.model_validate(data)
+    except ValidationError as exc:
+        # Redaction left a field the schema refuses. Same handling as invalid output.
+        logger.warning(
+            "parser_invalid_after_redaction",
+            extra={"errors": [(e["type"], e["loc"]) for e in exc.errors()][:10]},
+        )
+        raise ParseInvalid from None
     filled = set(filled_paths(profile.model_dump(mode="json", exclude_none=True)))
     confidence = {c.path: c.score for c in output.confidence if c.path in filled}
     check = sorted(p for p in filled if confidence.get(p, 0.0) < CHECK_THRESHOLD)
@@ -178,16 +194,30 @@ def filled_paths(value: Any, prefix: str = "") -> list[str]:
 
 
 # Sensitive data the profile must never hold, even if a resume (or the model) includes it.
-# Applied to every string field. Losing a stray sentence beats keeping one of these.
+# Applied to every free-text field. A sentence goes only when a keyword is followed by an
+# actual identifier, so ordinary career sentences ("route planning and routing for 40
+# trucks", "Class A commercial driver's license") survive. The digit patterns below catch
+# the numbers on their own as well.
+_DATE_OR_YEAR = r"(\d{4}|\d{1,2}[/.-]\d{1,2})"
+_IDENTIFIER = r"[A-Z0-9-]*\d[A-Z0-9-]*"
+_DIGIT_RUN = r"\d[\d -]{3,}"
+_SENSITIVE_KEYWORD_THEN_ID = [
+    # Birth words, then a year or a date: "born in 1985", "DOB: 03/04/1985".
+    rf"(date of birth|d\.?o\.?b\b\.?|birth ?date|birthday|born( on| in)?)"
+    rf"[^.\n]{{0,20}}?\b{_DATE_OR_YEAR}",
+    rf"(social security|ssn)[^.\n]{{0,20}}?{_DIGIT_RUN}",
+    # A licence or passport word, then an identifier with a digit in it.
+    r"(passport|driver'?s? licen[cs]e|driving licen[cs]e|licen[cs]e)"
+    rf"\s*(no\.?|number|#)?\s*:?\s*\b(?={_IDENTIFIER}\b)[A-Z0-9-]{{5,}}",
+    rf"(routing|account|acct|credit card|debit card|card)\s*(no\.?|number|#)?\s*:?\s*{_DIGIT_RUN}",
+    r"iban\s*(no\.?|number|#)?\s*:?\s*[A-Z]{2}\d{2}",
+]
 _SENSITIVE_SENTENCE = re.compile(
-    r"[^.\n]*\b("
-    r"date of birth|d\.?o\.?b\b\.?|birth ?date|birthday|born( on| in)?|"
-    r"social security|ssn|"
-    r"passport|driver'?s? licen[cs]e|driving licen[cs]e|licen[cs]e (no|number|#)|dl ?(#|no\b)|"
-    r"routing|account (no|number|#)|acct|iban|credit card|debit card|card number"
-    r")[^.\n]*[.\n]?",
+    r"[^.\n]*\b(" + "|".join(_SENSITIVE_KEYWORD_THEN_ID) + r")[^.\n]*[.\n]?",
     re.IGNORECASE,
 )
+# IBANs on their own: two capital letters, two check digits, then 11 to 30 letters or digits.
+_IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?: ?[A-Z0-9]){11,30}\b")
 _SSN = re.compile(r"\b\d{3}[- ]?\d{2}[- ]?\d{4}\b")
 # Bank account, routing and card numbers: long runs of digits, with or without separators.
 _LONG_NUMBER = re.compile(r"\b(?:\d[ -]?){9,19}\b")
@@ -206,8 +236,10 @@ _FULL_DATE = re.compile(
     re.IGNORECASE,
 )
 # Phone numbers and postal codes are digits by nature; date fields hold dates by design
-# (YYYY, YYYY-MM or YYYY-MM-DD, checked by the schema).
-_KEEP_DIGITS = {"phone", "postalCode"}
+# (YYYY, YYYY-MM or YYYY-MM-DD, checked by the schema). Emails, links and usernames are
+# identifiers whose format the schema checks: editing them would change who or where they
+# point to (acct.jo@example.com must not become jo@example.com).
+_KEEP_DIGITS = {"phone", "postalCode", "email", "url", "username"}
 _DATE_FIELDS = {"startDate", "endDate", "date", "releaseDate"}
 
 
@@ -217,7 +249,7 @@ def redact(value: Any, key: str = "") -> Any:
     if isinstance(value, list):
         return [redact(item, key) for item in value]
     if isinstance(value, str) and key not in _KEEP_DIGITS | _DATE_FIELDS:
-        for pattern in (_SENSITIVE_SENTENCE, _FULL_DATE, _SSN, _LONG_NUMBER, _PASSPORT):
+        for pattern in (_SENSITIVE_SENTENCE, _FULL_DATE, _SSN, _IBAN, _LONG_NUMBER, _PASSPORT):
             value = pattern.sub("", value)
         return " ".join(value.split(" ")).strip()
     return value

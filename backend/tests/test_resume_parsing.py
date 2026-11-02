@@ -1,6 +1,7 @@
 """Reading an uploaded resume into a draft profile, end to end (#12): upload, the worker's
 job, and what the user sees. The LLM is a fake; the files are made-up resumes."""
 
+import logging
 import uuid
 from collections.abc import AsyncIterator
 from datetime import UTC, datetime, timedelta
@@ -254,6 +255,27 @@ async def test_parser_giving_bad_output_fails(
     state = await parse_state(api, alice, resume_id)
     assert state["status"] == "failed"
     assert state["message"] == MESSAGES[ParseError.PARSE_FAILED]
+
+
+async def test_an_unexpected_error_fails_the_parse_without_logging_it(
+    api: AsyncClient,
+    alice: dict[str, str],
+    queue: FakeQueue,
+    store: MemoryStore,
+    scanner: FakeScanner,
+    parser: FakeParser,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    caplog.set_level(logging.DEBUG)
+    parser.error = RuntimeError("Quoted resume text: Nimbus Analytics")
+    resume_id = await upload_resume(api, alice)
+    await run_jobs(queue, store, scanner, parser)
+    state = await parse_state(api, alice, resume_id)
+    assert state["status"] == "failed"
+    assert state["message"] == MESSAGES[ParseError.PARSE_FAILED]
+    crashed = [r for r in caplog.records if r.getMessage() == "resume_parse_crashed"]
+    assert [r.__dict__["error"] for r in crashed] == ["RuntimeError"]
+    assert "Nimbus" not in caplog.text
 
 
 @pytest.mark.parametrize("down", ["parser", "scanner", "store", "no_parser"])
