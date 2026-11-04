@@ -44,6 +44,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Preferences
+         * @description The signed-in user's job preferences, or the defaults before the first save.
+         */
+        get: operations["get_preferences_preferences_get"];
+        /**
+         * Save Preferences
+         * @description Replaces the signed-in user's job preferences.
+         */
+        put: operations["save_preferences_preferences_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/profile": {
         parameters: {
             query?: never;
@@ -351,6 +375,85 @@ export interface components {
                 [key: string]: number;
             };
             profile: components["schemas"]["ProfileData"];
+        };
+        /** PreferenceLocation */
+        PreferenceLocation: {
+            /** City */
+            city?: string | null;
+            /** Region */
+            region: string;
+        };
+        /** Preferences */
+        Preferences: {
+            /**
+             * Excluded Companies
+             * @default []
+             */
+            excluded_companies: string[];
+            /**
+             * Excluded Keywords
+             * @default []
+             */
+            excluded_keywords: string[];
+            /**
+             * Locations
+             * @default []
+             */
+            locations: components["schemas"]["PreferenceLocation"][];
+            /**
+             * Remote Ok
+             * @default true
+             */
+            remote_ok: boolean;
+            /** Salary Floor */
+            salary_floor?: number | null;
+            /**
+             * Seniority
+             * @default []
+             */
+            seniority: ("intern" | "entry" | "mid" | "senior" | "lead" | "manager" | "executive")[];
+            /**
+             * Titles
+             * @default []
+             */
+            titles: string[];
+        };
+        /** PreferencesOut */
+        PreferencesOut: {
+            /**
+             * Excluded Companies
+             * @default []
+             */
+            excluded_companies: string[];
+            /**
+             * Excluded Keywords
+             * @default []
+             */
+            excluded_keywords: string[];
+            /**
+             * Locations
+             * @default []
+             */
+            locations: components["schemas"]["PreferenceLocation"][];
+            /**
+             * Remote Ok
+             * @default true
+             */
+            remote_ok: boolean;
+            /** Salary Floor */
+            salary_floor?: number | null;
+            /**
+             * Seniority
+             * @default []
+             */
+            seniority: ("intern" | "entry" | "mid" | "senior" | "lead" | "manager" | "executive")[];
+            /**
+             * Titles
+             * @default []
+             */
+            titles: string[];
+            /** Updated At */
+            updated_at: string | null;
         };
         /**
          * ProfileData
@@ -677,6 +780,71 @@ export interface operations {
             };
             /** @description The account has no email address (detail: email_required) */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_preferences_preferences_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    save_preferences_preferences_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Preferences"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PreferencesOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A value is out of range, or a location is outside the US */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

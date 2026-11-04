@@ -8,7 +8,13 @@ import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from clew.catalog.merge import Posting, add_posting, close_vanished_jobs, source_rank
+from clew.catalog.merge import (
+    InvalidPosting,
+    Posting,
+    add_posting,
+    close_vanished_jobs,
+    source_rank,
+)
 from clew.catalog.normalize import (
     Location,
     dedup_key,
@@ -261,3 +267,19 @@ async def test_jobs_unseen_for_7_days_close_and_reopen_when_seen(
 def test_worker_closes_vanished_jobs_daily() -> None:
     jobs = [job for job in WorkerSettings.cron_jobs if job.coroutine is close_jobs]
     assert len(jobs) == 1
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        "javascript:alert(1)",
+        "data:text/html,<p>hi</p>",
+        "ftp://jobs.example.com/1",
+        "https://jobs.example.com/a b",
+        "",
+    ],
+)
+async def test_only_web_links_go_into_the_catalog(app_db: AsyncSession, url: str) -> None:
+    with pytest.raises(InvalidPosting, match="not_a_web_link"):
+        await add_posting(app_db, posting("greenhouse", company_name(), url=url), now=NOW)
+    await app_db.rollback()

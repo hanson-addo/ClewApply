@@ -569,6 +569,218 @@
         "title": "ParsedResume",
         "type": "object"
       },
+      "PreferenceLocation": {
+        "additionalProperties": false,
+        "properties": {
+          "city": {
+            "anyOf": [
+              {
+                "maxLength": 100,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "City"
+          },
+          "region": {
+            "title": "Region",
+            "type": "string"
+          }
+        },
+        "required": [
+          "region"
+        ],
+        "title": "PreferenceLocation",
+        "type": "object"
+      },
+      "Preferences": {
+        "additionalProperties": false,
+        "properties": {
+          "excluded_companies": {
+            "default": [],
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Excluded Companies",
+            "type": "array"
+          },
+          "excluded_keywords": {
+            "default": [],
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Excluded Keywords",
+            "type": "array"
+          },
+          "locations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PreferenceLocation"
+            },
+            "maxItems": 20,
+            "title": "Locations",
+            "type": "array"
+          },
+          "remote_ok": {
+            "default": true,
+            "title": "Remote Ok",
+            "type": "boolean"
+          },
+          "salary_floor": {
+            "anyOf": [
+              {
+                "maximum": 2000000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Floor"
+          },
+          "seniority": {
+            "default": [],
+            "items": {
+              "enum": [
+                "intern",
+                "entry",
+                "mid",
+                "senior",
+                "lead",
+                "manager",
+                "executive"
+              ],
+              "type": "string"
+            },
+            "maxItems": 7,
+            "title": "Seniority",
+            "type": "array"
+          },
+          "titles": {
+            "default": [],
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Titles",
+            "type": "array"
+          }
+        },
+        "title": "Preferences",
+        "type": "object"
+      },
+      "PreferencesOut": {
+        "additionalProperties": false,
+        "properties": {
+          "excluded_companies": {
+            "default": [],
+            "items": {
+              "maxLength": 200,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Excluded Companies",
+            "type": "array"
+          },
+          "excluded_keywords": {
+            "default": [],
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Excluded Keywords",
+            "type": "array"
+          },
+          "locations": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/PreferenceLocation"
+            },
+            "maxItems": 20,
+            "title": "Locations",
+            "type": "array"
+          },
+          "remote_ok": {
+            "default": true,
+            "title": "Remote Ok",
+            "type": "boolean"
+          },
+          "salary_floor": {
+            "anyOf": [
+              {
+                "maximum": 2000000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Floor"
+          },
+          "seniority": {
+            "default": [],
+            "items": {
+              "enum": [
+                "intern",
+                "entry",
+                "mid",
+                "senior",
+                "lead",
+                "manager",
+                "executive"
+              ],
+              "type": "string"
+            },
+            "maxItems": 7,
+            "title": "Seniority",
+            "type": "array"
+          },
+          "titles": {
+            "default": [],
+            "items": {
+              "maxLength": 100,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 20,
+            "title": "Titles",
+            "type": "array"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At"
+          }
+        },
+        "required": [
+          "updated_at"
+        ],
+        "title": "PreferencesOut",
+        "type": "object"
+      },
       "ProfileData": {
         "additionalProperties": false,
         "description": "A whole profile. Every section is optional, so a half-filled profile can be saved.",
@@ -1468,6 +1680,77 @@
         "summary": "Me",
         "tags": [
           "account"
+        ]
+      }
+    },
+    "/preferences": {
+      "get": {
+        "description": "The signed-in user's job preferences, or the defaults before the first save.",
+        "operationId": "get_preferences_preferences_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Preferences",
+        "tags": [
+          "preferences"
+        ]
+      },
+      "put": {
+        "description": "Replaces the signed-in user's job preferences.",
+        "operationId": "save_preferences_preferences_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Preferences"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PreferencesOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "422": {
+            "description": "A value is out of range, or a location is outside the US"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Preferences",
+        "tags": [
+          "preferences"
         ]
       }
     },

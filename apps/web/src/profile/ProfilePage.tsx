@@ -343,7 +343,10 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
   const signOutSafely = async () => {
     if (!(await readyToLeave())) return;
     leaving.current = true;
-    void signOut({ redirectUrl: "/sign-in" });
+    // If signing out fails, the user stays here and later edits still ask before leaving.
+    signOut({ redirectUrl: "/sign-in" }).catch(() => {
+      leaving.current = false;
+    });
   };
 
   const goToError = (id: string) => {

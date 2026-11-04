@@ -133,13 +133,13 @@ def parse_location(text: str | None) -> Location:
     city: str | None = None
     region: str | None = None
     for index, part in enumerate(parts):
-        code = _state_code(part)
+        code = state_code(part)
         if code and index > 0:
             city, region = parts[index - 1].title(), code
             break
     else:
-        if len(parts) == 1 and _state_code(parts[0]):
-            region = _state_code(parts[0])
+        if len(parts) == 1 and state_code(parts[0]):
+            region = state_code(parts[0])
         elif parts:
             city = parts[0].title()
 
@@ -148,7 +148,8 @@ def parse_location(text: str | None) -> Location:
     return Location(city, region, remote_type)
 
 
-def _state_code(part: str) -> str | None:
+def state_code(part: str) -> str | None:
+    """The two-letter code for a US state, DC or Puerto Rico, given its code or name."""
     if part.upper() in _STATE_CODES and len(part) == 2:
         return part.upper()
     return _STATES.get(part.lower())

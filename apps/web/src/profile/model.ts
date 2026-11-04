@@ -152,7 +152,6 @@ export function versionDate(iso: string, now = new Date()): string {
   return `${day}, ${time}`;
 }
 
-/** Versions come newest first, so the oldest is version 1. */
 export function sectionBySlug(slug: string | undefined) {
   return SECTIONS.find((s) => s.slug === slug);
 }
