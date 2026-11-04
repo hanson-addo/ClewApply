@@ -12,7 +12,7 @@ Each role works in its own thread of the "maze apply" project.
 | Designer | Design tokens, component specs, phone layout, accessibility |
 | Developer | Code, tests, pull requests |
 | Reviewer | Reviews every PR for bugs, quality and test coverage |
-| Security | Threat model, security scanning, must approve every PR |
+| Security | Threat model, security scanning, must approve every PR (see Lean mode below) |
 | QA | Test plans and end-to-end checks of user journeys |
 
 ## How a change gets in
@@ -21,7 +21,9 @@ Each role works in its own thread of the "maze apply" project.
 2. Open a pull request using the template. Link the backlog item it closes.
 3. Reviewer and Security each post a PR review whose first line is `Verdict: approve` or `Verdict: changes requested`. All Claude roles post through one GitHub account, and GitHub won't let an account approve its own PR, so this written verdict is the approval. The author never gives their own verdict.
 4. All checks must pass.
-5. The owner (hanson-addo) merges only when Reviewer and Security have both posted `Verdict: approve`. Nobody pushes directly to `main`.
+5. The owner (hanson-addo) merges only when Reviewer and Security have both posted `Verdict: approve` (see Lean mode below). Nobody pushes directly to `main`.
+
+**Lean mode (owner decision, 2026-11-04, to save tokens until phase 1 works end to end):** only the Developer and Reviewer threads run. The Reviewer also checks security on routine PRs, and its `Verdict: approve` is enough to merge them. Security is woken only for PRs that touch sign-in, uploads, resume parsing, personal data, encryption, secrets, CI workflow changes (permissions, secrets use) or new runtime dependencies, and those still need both verdicts. Designer and QA stay paused; QA returns for one full test pass once the job feed and tracker are in. The owner ends lean mode.
 
 ## Product rules (non-negotiable)
 
