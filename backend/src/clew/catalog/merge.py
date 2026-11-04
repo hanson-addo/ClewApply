@@ -1,6 +1,7 @@
 """Adds postings to the job catalog, merging exact duplicates into one job (#20)."""
 
 import logging
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
@@ -19,6 +20,14 @@ CLOSE_AFTER_DAYS = 7
 # Which link the feed opens when several sites list a job: the employer's own board first,
 # then USAJobs, then anything else (job sites, alert emails).
 ATS_SOURCES = frozenset({"greenhouse", "lever", "ashby"})
+
+
+_WEB_LINK = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
+
+
+class InvalidPosting(ValueError):
+    """A posting that can't go into the catalog. The message is a short code, never the
+    posting's content."""
 
 
 def source_rank(source: str) -> int:
@@ -48,10 +57,15 @@ class Posting:
 async def add_posting(session: AsyncSession, posting: Posting, now: datetime | None = None) -> Job:
     """Adds or refreshes `posting` and returns its job. The caller commits.
 
+    Raises InvalidPosting for a link that isn't http(s); source adapters skip those.
+
     A listing seen before only has its last_seen_at moved on. A new listing whose dedup key
     matches an existing job becomes another source of that job; otherwise it starts a new
     job. Inserts use ON CONFLICT, so two workers adding the same job end with one row.
     """
+    if not _WEB_LINK.match(posting.url):
+        # The link becomes the feed's Apply button, so only web links are kept.
+        raise InvalidPosting("not_a_web_link")
     seen = now or datetime.now(UTC)
     known = await session.scalar(
         select(JobSource).where(

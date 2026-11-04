@@ -372,6 +372,22 @@ describe("profile page", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("still asks before leaving if signing out fails", async () => {
+    clerkState.signOut.mockRejectedValueOnce(new Error("offline"));
+    const u = user();
+    await renderLoaded();
+    await u.type(screen.getByLabelText("Full name"), " Jr.");
+    await u.click(screen.getByRole("button", { name: "Sign out" }));
+    let dialog = screen.getByRole("dialog", { name: "Save your changes?" });
+    await u.click(within(dialog).getByRole("button", { name: "Discard" }));
+    await waitFor(() => expect(clerkState.signOut).toHaveBeenCalled());
+
+    const home = within(screen.getByRole("navigation", { name: "Main" })).getByRole("link", { name: "Home" });
+    await u.click(home);
+    dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
+    expect(dialog).toBeInTheDocument();
+  });
+
   it("saves before signing out when asked to", async () => {
     const u = user();
     await renderLoaded();
