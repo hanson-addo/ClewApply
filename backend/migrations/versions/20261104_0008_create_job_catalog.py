@@ -3,9 +3,9 @@
 These hold public job postings, not user data, so there's no row-level security. The app
 role can read and write the catalog, and delete only raw postings (the 30-day cleanup).
 
-Revision ID: 0007
-Revises: 0006
-Create Date: 2026-11-02
+Revision ID: 0008
+Revises: 0007
+Create Date: 2026-11-04
 """
 
 from collections.abc import Sequence
@@ -16,8 +16,8 @@ from sqlalchemy.dialects import postgresql
 
 from clew.db.rls import grant_app_access, revoke_app_access
 
-revision: str = "0007"
-down_revision: str | None = "0006"
+revision: str = "0008"
+down_revision: str | None = "0007"
 branch_labels: str | Sequence[str] | None = None
 depends_on: str | Sequence[str] | None = None
 
