@@ -1,6 +1,14 @@
 """All tables, imported here so Alembic sees every model."""
 
-from clew.models.catalog import Company, Job, JobSource, JobStatus, RawPosting, RemoteType
+from clew.models.catalog import (
+    Company,
+    CompanyFollow,
+    Job,
+    JobSource,
+    JobStatus,
+    RawPosting,
+    RemoteType,
+)
 from clew.models.preferences import JobPreferences
 from clew.models.profile import Profile, ProfileVersion
 from clew.models.resume import Resume
@@ -10,6 +18,7 @@ from clew.models.user import User
 
 __all__ = [
     "Company",
+    "CompanyFollow",
     "Job",
     "JobPreferences",
     "JobSource",

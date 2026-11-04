@@ -68,6 +68,7 @@ class Company(Base):
     __table_args__ = (
         # One row per public job board (e.g. Greenhouse board "examplecorp").
         UniqueConstraint("ats_type", "board_token", name="uq_companies_ats_board"),
+        Index("ix_companies_poll", "last_polled_at", postgresql_where=text("poll")),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(
@@ -80,6 +81,30 @@ class Company(Base):
     # "greenhouse", "lever", "ashby", or None when the company has no known public board.
     ats_type: Mapped[str | None] = mapped_column(String(16))
     board_token: Mapped[str | None] = mapped_column(String(100))
+    # True once someone follows the board or it is on the starter list; the worker polls
+    # these boards. Never turned off by an unfollow, since others may still follow it.
+    poll: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
+    last_polled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
+
+
+class CompanyFollow(Base):
+    """A user following a company's job board (#19). Private to the user (row-level
+    security), unlike the companies themselves."""
+
+    __tablename__ = "company_follows"
+
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
+    company_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("companies.id", ondelete="CASCADE"),
+        primary_key=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

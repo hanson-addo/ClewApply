@@ -8,10 +8,13 @@ import logging
 import uuid
 from typing import Any, ClassVar
 
+import httpx
 from arq import Retry
 from arq.connections import RedisSettings
 from arq.cron import cron
 
+from clew.catalog.companies import ensure_starter_boards
+from clew.catalog.ingest import poll_due_boards
 from clew.catalog.merge import close_vanished_jobs
 from clew.catalog_cleanup import delete_old_raw_postings
 from clew.config import get_settings
@@ -51,6 +54,15 @@ async def close_jobs(ctx: dict[str, Any]) -> None:
     await close_vanished_jobs(get_sessionmaker())
 
 
+async def poll_boards(ctx: dict[str, Any]) -> None:
+    sessions = get_sessionmaker()
+    async with sessions() as session:
+        await ensure_starter_boards(session)
+        await session.commit()
+    async with httpx.AsyncClient(headers={"User-Agent": "Clew job feed"}) as client:
+        await poll_due_boards(sessions, client)
+
+
 def _redis_settings() -> RedisSettings:
     url = get_settings().redis_url
     if url is None:
@@ -64,6 +76,8 @@ class WorkerSettings:
     cron_jobs: ClassVar[list[Any]] = [
         cron(clean_raw_postings, hour=9, minute=0),
         cron(close_jobs, hour=9, minute=30),
+        # Hourly; each board is read again once POLL_EVERY has passed.
+        cron(poll_boards, minute=15),
     ]
     max_tries = MAX_TRIES
     job_timeout = 300

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "5c1e0f2a-0000-4000-8000-000000000001",
+    "text": "Labyrinth Guide",
+    "categories": {"location": "Denver, CO", "commitment": "Full-time", "team": "Guides"},
+    "workplaceType": "hybrid",
+    "country": "US",
+    "hostedUrl": "https://jobs.lever.co/labyrinthlogistics/5c1e0f2a-0000-4000-8000-000000000001",
+    "applyUrl": "https://jobs.lever.co/labyrinthlogistics/5c1e0f2a-0000-4000-8000-000000000001/apply",
+    "createdAt": 1761900000000,
+    "descriptionPlain": "Lead visitors through the labyrinth.",
+    "salaryRange": {"currency": "USD", "interval": "per-year-salary", "min": 70000, "max": 90000}
+  },
+  {
+    "id": "5c1e0f2a-0000-4000-8000-000000000002",
+    "text": "Thread Engineer",
+    "categories": {"location": "Toronto, ON"},
+    "workplaceType": "on-site",
+    "country": "CA",
+    "hostedUrl": "https://jobs.lever.co/labyrinthlogistics/5c1e0f2a-0000-4000-8000-000000000002",
+    "createdAt": 1761900000000
+  },
+  {
+    "id": "5c1e0f2a-0000-4000-8000-000000000003",
+    "text": "Knot Specialist",
+    "categories": {"location": "Anywhere"},
+    "workplaceType": "remote",
+    "hostedUrl": "https://jobs.lever.co/labyrinthlogistics/5c1e0f2a-0000-4000-8000-000000000003",
+    "createdAt": 1761900000000,
+    "salaryRange": {"currency": "EUR", "interval": "per-year-salary", "min": 60000, "max": 80000}
+  }
+]
