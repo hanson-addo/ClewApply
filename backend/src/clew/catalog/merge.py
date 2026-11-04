@@ -22,7 +22,7 @@ CLOSE_AFTER_DAYS = 7
 ATS_SOURCES = frozenset({"greenhouse", "lever", "ashby"})
 
 
-_WEB_LINK = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
+_WEB_LINK = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
 class InvalidPosting(ValueError):
@@ -63,7 +63,7 @@ async def add_posting(session: AsyncSession, posting: Posting, now: datetime | N
     matches an existing job becomes another source of that job; otherwise it starts a new
     job. Inserts use ON CONFLICT, so two workers adding the same job end with one row.
     """
-    if not _WEB_LINK.match(posting.url):
+    if not _WEB_LINK.fullmatch(posting.url):
         # The link becomes the feed's Apply button, so only web links are kept.
         raise InvalidPosting("not_a_web_link")
     seen = now or datetime.now(UTC)

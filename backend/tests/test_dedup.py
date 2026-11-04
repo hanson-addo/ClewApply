@@ -276,6 +276,7 @@ def test_worker_closes_vanished_jobs_daily() -> None:
         "data:text/html,<p>hi</p>",
         "ftp://jobs.example.com/1",
         "https://jobs.example.com/a b",
+        "https://jobs.example.com/1\n",
         "",
     ],
 )
