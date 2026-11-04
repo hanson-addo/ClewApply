@@ -23,6 +23,8 @@ Each role works in its own thread of the "maze apply" project.
 4. All checks must pass.
 5. The owner (hanson-addo) merges only when Reviewer and Security have both posted `Verdict: approve`. Nobody pushes directly to `main`.
 
+**Lean mode (owner decision, 2026-11-04, to save tokens until phase 1 works end to end):** only the Developer and Reviewer threads run. The Reviewer also checks security on routine PRs, and its `Verdict: approve` is enough to merge them. Security is woken only for PRs that touch sign-in, uploads, resume parsing, personal data, encryption or secrets, and those still need both verdicts. Designer and QA stay paused; QA returns for one full test pass once the job feed and tracker are in. The owner ends lean mode.
+
 ## Product rules (non-negotiable)
 
 - Never ask for, store or log a user's password for any third-party job site.
