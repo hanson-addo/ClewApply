@@ -11,9 +11,10 @@ from typing import Any
 
 import httpx
 import pytest
-from sqlalchemy import func, select
+from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
+from clew.catalog import ingest
 from clew.catalog.boards import (
     MAX_BOARD_BYTES,
     Board,
@@ -25,7 +26,12 @@ from clew.catalog.boards import (
     plain_text,
     to_posting,
 )
-from clew.catalog.companies import STARTER_BOARDS, board_company, ensure_starter_boards
+from clew.catalog.companies import (
+    STARTER_BOARDS,
+    board_company,
+    display_name,
+    ensure_starter_boards,
+)
 from clew.catalog.ingest import POLL_EVERY, boards_due, poll_board, poll_due_boards
 from clew.catalog.merge import InvalidPosting, Posting, add_posting
 from clew.models import Company, Job, JobSource, RawPosting
@@ -245,7 +251,7 @@ def serving(ats: str, data: Any | None = None) -> httpx.AsyncClient:
 
 async def test_polling_adds_listed_us_jobs(sessions: async_sessionmaker[AsyncSession]) -> None:
     company = await new_board(sessions, "greenhouse", f"Labyrinth {uuid.uuid4().hex[:6]}")
-    async with serving("greenhouse") as client:
+    async with serving("greenhouse", fresh_greenhouse_jobs()) as client:
         # Two US jobs; the javascript: link is refused.
         assert await poll_board(sessions, client, company, now=NOW) == 2
 
@@ -265,7 +271,7 @@ async def test_polling_adds_listed_us_jobs(sessions: async_sessionmaker[AsyncSes
                 RawPosting.source == "greenhouse", RawPosting.fetched_at == NOW
             )
         )
-        assert raw is not None and raw >= 3
+        assert raw is not None and raw >= 2
         polled = await session.get_one(Company, company.id)
         assert polled.last_polled_at == NOW
 
@@ -287,6 +293,71 @@ async def test_polling_again_refreshes_instead_of_duplicating(
         ).all()
         assert len(sources) == 1
         assert sources[0].last_seen_at == NOW + timedelta(hours=7)
+
+
+def fresh_greenhouse_jobs() -> Any:
+    """The Greenhouse fixture with job ids no other test uses."""
+    data = fixture("greenhouse")
+    base = uuid.uuid4().int % 10**12
+    for offset, job in enumerate(data["jobs"]):
+        job["id"] = base + offset
+        if job["absolute_url"].startswith("https://"):
+            job["absolute_url"] = f"https://boards.greenhouse.io/labyrinth/jobs/{base + offset}"
+    return data
+
+
+async def test_one_odd_job_is_skipped_and_the_rest_are_kept(
+    sessions: async_sessionmaker[AsyncSession],
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    async def failing_for_maze_mapper(
+        session: AsyncSession, posting: Posting, now: datetime | None = None
+    ) -> Job:
+        if posting.title == "Maze Mapper":
+            await session.execute(text("SELECT 1 / 0"))  # a real database error
+        return await add_posting(session, posting, now=now)
+
+    monkeypatch.setattr(ingest, "add_posting", failing_for_maze_mapper)
+    company = await new_board(sessions, "greenhouse")
+    data = fresh_greenhouse_jobs()
+    data["jobs"][0]["location"] = "Austin, TX"  # a string where Greenhouse sends an object
+    data["jobs"].append({**data["jobs"][3], "id": data["jobs"][3]["id"] + 100})
+    data["jobs"][-1]["absolute_url"] = "https://boards.greenhouse.io/labyrinth/jobs/extra"
+    async with serving("greenhouse", data) as client:
+        assert await poll_board(sessions, client, company, now=NOW) == 1
+    failures = [r.__dict__["error"] for r in caplog.records if r.message == "posting_failed"]
+    assert sorted(failures) == ["AttributeError", "DBAPIError"]
+    async with sessions() as session:
+        titles = await session.scalars(select(Job.title).where(Job.company_id == company.id))
+        assert list(titles) == ["Exit Planner"]
+
+
+async def test_one_failing_board_doesnt_stop_the_others(
+    sessions: async_sessionmaker[AsyncSession],
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    broken = await new_board(sessions, "lever")
+    working = await new_board(sessions, "lever")
+
+    async def due(session: AsyncSession, now: datetime) -> list[Company]:
+        return [broken, working]
+
+    monkeypatch.setattr(ingest, "boards_due", due)
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        if str(broken.board_token) in str(request.url):
+            raise RuntimeError("unexpected")
+        return httpx.Response(200, json=[])
+
+    async with client_for(handler) as client:
+        assert await poll_due_boards(sessions, client, now=NOW) == 2
+    record = next(r for r in caplog.records if r.message == "board_failed")
+    assert record.__dict__["error"] == "RuntimeError"
+    async with sessions() as session:
+        for company in (broken, working):
+            assert (await session.get_one(Company, company.id)).last_polled_at == NOW
 
 
 async def test_a_missing_board_is_marked_polled_and_logged(
@@ -361,7 +432,7 @@ async def test_a_followed_board_never_takes_another_companys_name(
 ) -> None:
     known, slug = await known_company(sessions)
     followed = await new_board(sessions, "ashby", slug=slug)
-    assert followed.name == f"{known.name} (Ashby board, unverified)"
+    assert followed.name == f"{display_name(slug)} (Ashby board, unverified)"
     assert followed.name_norm != known.name_norm
 
     hex6 = uuid.uuid4().hex[:6]
@@ -480,3 +551,5 @@ def test_worker_polls_boards_hourly() -> None:
     jobs = [job for job in WorkerSettings.cron_jobs if job.coroutine is poll_boards]
     assert len(jobs) == 1
     assert jobs[0].minute == 15
+    # A run may take longer than the default job timeout, but finishes before the next one.
+    assert jobs[0].timeout_s == 30 * 60

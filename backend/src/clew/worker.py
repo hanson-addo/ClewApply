@@ -14,7 +14,7 @@ from arq.connections import RedisSettings
 from arq.cron import cron
 
 from clew.catalog.companies import ensure_starter_boards
-from clew.catalog.ingest import poll_due_boards
+from clew.catalog.ingest import POLL_RUN_TIMEOUT, poll_due_boards
 from clew.catalog.merge import close_vanished_jobs
 from clew.catalog_cleanup import delete_old_raw_postings
 from clew.config import get_settings
@@ -77,7 +77,7 @@ class WorkerSettings:
         cron(clean_raw_postings, hour=9, minute=0),
         cron(close_jobs, hour=9, minute=30),
         # Hourly; each board is read again once POLL_EVERY has passed.
-        cron(poll_boards, minute=15),
+        cron(poll_boards, minute=15, timeout=POLL_RUN_TIMEOUT.total_seconds()),
     ]
     max_tries = MAX_TRIES
     job_timeout = 300

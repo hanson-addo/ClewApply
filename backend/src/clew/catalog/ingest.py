@@ -3,6 +3,7 @@
 import logging
 from dataclasses import replace
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 import httpx
 from sqlalchemy import or_, select, update
@@ -23,8 +24,11 @@ logger = logging.getLogger(__name__)
 
 # A board is read again once this long has passed; the worker checks every hour.
 POLL_EVERY = timedelta(hours=6)
-# Boards read per worker run, so one run stays short.
+# Boards read per worker run, so one run stays short. With hourly runs this keeps up with
+# about BOARDS_PER_RUN * 6 = 300 polled boards; past that, polls fall behind POLL_EVERY.
 BOARDS_PER_RUN = 50
+# Time allowed for one run: each board can take its 20 s fetch timeout and then some.
+POLL_RUN_TIMEOUT = timedelta(minutes=30)
 
 
 async def boards_due(session: AsyncSession, now: datetime) -> list[Company]:
@@ -67,32 +71,46 @@ async def poll_board(
     count = 0
     async with sessions() as session:
         for job in board_jobs(board, data):
-            posting = to_posting(board, job)
-            if posting is None:
-                continue
-            posting = replace(posting, company_id=company.id)
-            # Public board JSON only: no user data goes in raw_postings.
-            session.add(
-                RawPosting(
-                    source=board.ats,
-                    source_job_id=posting.source_job_id,
-                    payload=job,
-                    fetched_at=seen,
-                )
-            )
+            # A savepoint per job, so one bad job (an odd shape, a value too long for its
+            # column) is skipped without losing the board's other jobs.
             try:
-                await add_posting(session, posting, now=seen)
+                async with session.begin_nested():
+                    added = await _add_job(session, board, company, job, seen)
             except InvalidPosting as error:
                 logger.info(
                     "posting_skipped",
                     extra={"ats": board.ats, "board": board.token, "error": str(error)},
                 )
                 continue
-            count += 1
+            except Exception as error:
+                # Board JSON is outside input. Log the kind of failure only, never content.
+                logger.warning(
+                    "posting_failed",
+                    extra={"ats": board.ats, "board": board.token, "error": type(error).__name__},
+                )
+                continue
+            count += added
         await _mark_polled(session, company, seen)
         await session.commit()
     logger.info("board_polled", extra={"ats": board.ats, "board": board.token, "jobs": count})
     return count
+
+
+async def _add_job(
+    session: AsyncSession, board: Board, company: Company, job: Any, seen: datetime
+) -> int:
+    posting = to_posting(board, job)
+    if posting is None:
+        return 0
+    posting = replace(posting, company_id=company.id)
+    # Public board JSON only: no user data goes in raw_postings.
+    session.add(
+        RawPosting(
+            source=board.ats, source_job_id=posting.source_job_id, payload=job, fetched_at=seen
+        )
+    )
+    await add_posting(session, posting, now=seen)
+    return 1
 
 
 async def _mark_polled(session: AsyncSession, company: Company, seen: datetime) -> None:
@@ -111,5 +129,20 @@ async def poll_due_boards(
     async with sessions() as session:
         due = await boards_due(session, seen)
     for company in due:
-        await poll_board(sessions, client, company, now=seen)
+        try:
+            await poll_board(sessions, client, company, now=seen)
+        except Exception as error:
+            # One failing board must not stop the rest. Marked polled, it goes to the back
+            # of the queue and is tried again after POLL_EVERY.
+            logger.warning(
+                "board_failed",
+                extra={
+                    "ats": company.ats_type,
+                    "board": company.board_token,
+                    "error": type(error).__name__,
+                },
+            )
+            async with sessions() as session:
+                await _mark_polled(session, company, seen)
+                await session.commit()
     return len(due)
