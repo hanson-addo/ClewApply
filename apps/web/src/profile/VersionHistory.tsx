@@ -24,8 +24,8 @@ export function VersionHistory({
         <p className="profile-history-empty">Each time you save, Clew keeps a copy here.</p>
       ) : (
         <ol className="profile-history-list">
-          {versions.map((version, index) => {
-            const number = versions.length - index;
+          {versions.map((version) => {
+            const number = version.number;
             return (
               <li key={version.id}>
                 <button
@@ -65,8 +65,13 @@ export function VersionView({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
+    // Focus goes back to the History entry that opened this when it closes.
+    const opener = document.activeElement;
     const dialog = ref.current;
     if (dialog && !dialog.open) dialog.showModal();
+    return () => {
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
   }, []);
 
   const basics = (version.data.basics ?? {}) as Record<string, unknown>;

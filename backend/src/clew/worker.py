@@ -10,7 +10,10 @@ from typing import Any, ClassVar
 
 from arq import Retry
 from arq.connections import RedisSettings
+from arq.cron import cron
 
+from clew.catalog.merge import close_vanished_jobs
+from clew.catalog_cleanup import delete_old_raw_postings
 from clew.config import get_settings
 from clew.db.session import get_sessionmaker
 from clew.resumes.parser import get_resume_parser
@@ -40,6 +43,14 @@ async def parse_resume(ctx: dict[str, Any], parse_id: str, user_id: str) -> None
         raise Retry(defer=RETRY_SECONDS * attempt) from None
 
 
+async def clean_raw_postings(ctx: dict[str, Any]) -> None:
+    await delete_old_raw_postings(get_sessionmaker())
+
+
+async def close_jobs(ctx: dict[str, Any]) -> None:
+    await close_vanished_jobs(get_sessionmaker())
+
+
 def _redis_settings() -> RedisSettings:
     url = get_settings().redis_url
     if url is None:
@@ -49,6 +60,11 @@ def _redis_settings() -> RedisSettings:
 
 class WorkerSettings:
     functions: ClassVar[list[Any]] = [parse_resume]
+    # Daily, at a quiet hour (UTC).
+    cron_jobs: ClassVar[list[Any]] = [
+        cron(clean_raw_postings, hour=9, minute=0),
+        cron(close_jobs, hour=9, minute=30),
+    ]
     max_tries = MAX_TRIES
     job_timeout = 300
     # Results stay in Redis only briefly and hold nothing (the job returns None).

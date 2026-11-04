@@ -153,11 +153,6 @@ export function versionDate(iso: string, now = new Date()): string {
 }
 
 /** Versions come newest first, so the oldest is version 1. */
-export function versionNumber(versions: VersionSummary[], id: string): number {
-  const index = versions.findIndex((v) => v.id === id);
-  return index === -1 ? 0 : versions.length - index;
-}
-
 export function sectionBySlug(slug: string | undefined) {
   return SECTIONS.find((s) => s.slug === slug);
 }
@@ -213,7 +208,6 @@ export function withFieldText(entry: Entry, spec: FieldSpec, text: string): Entr
   let value: unknown = text;
   if (spec.kind === "lines") value = text.split("\n");
   if (spec.kind === "csv") value = text.split(",");
-  if (spec.kind === "date" || spec.key === "location.countryCode") value = text;
   return setPath(entry, spec.key, value);
 }
 
@@ -394,7 +388,12 @@ export function errorsFromApi(detail: unknown): FieldErrors {
         : second !== undefined
           ? `${section}.${String(second)}`
           : String(section);
-    errors[id] = "This doesn't look right. Check it and try again.";
+    // The server's date-order message is written for people; other 422s aren't.
+    const { type, msg } = item as { type?: unknown; msg?: unknown };
+    errors[id] =
+      type === "date_order" && typeof msg === "string"
+        ? msg
+        : "This doesn't look right. Check it and try again.";
   }
   return errors;
 }

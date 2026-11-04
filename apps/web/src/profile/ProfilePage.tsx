@@ -1,6 +1,6 @@
 import { useClerk } from "@clerk/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Navigate, NavLink, useNavigate, useParams } from "react-router";
+import { Navigate, NavLink, useBlocker, useNavigate, useParams } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
@@ -22,7 +22,6 @@ import {
   type ProfileVersion,
   type SectionId,
   type VersionSummary,
-  versionNumber,
 } from "./model";
 import { SectionEditor } from "./SectionEditor";
 import { VersionHistory, VersionView } from "./VersionHistory";
@@ -239,25 +238,36 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dirty, ask, draft, loaded]);
 
-  // Links out of the profile (the header's Home link, for example) ask first.
+  // Any navigation out of the profile asks first: header links, the browser's Back and
+  // Forward buttons, and redirects. Moving between profile sections keeps the draft.
+  const dirtyNow = useRef(dirty);
+  const leaving = useRef(false);
   useEffect(() => {
-    if (!dirty) return;
-    const onClick = (event: MouseEvent) => {
-      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey) return;
-      const link = (event.target as Element | null)?.closest?.("a[href]");
-      if (!(link instanceof HTMLAnchorElement) || link.target === "_blank") return;
-      if (link.getAttribute("href")?.startsWith("#")) return;
-      const url = new URL(link.href, window.location.href);
-      if (url.origin !== window.location.origin || url.pathname.startsWith("/profile")) return;
-      event.preventDefault();
-      event.stopPropagation();
-      void readyToLeave().then((ok) => {
-        if (ok) void navigate(url.pathname + url.search + url.hash);
+    dirtyNow.current = dirty;
+  });
+  const blocker = useBlocker(
+    useCallback(
+      ({ nextLocation }: { nextLocation: { pathname: string } }) =>
+        dirtyNow.current && !leaving.current && !nextLocation.pathname.startsWith("/profile"),
+      [],
+    ),
+  );
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    // Asked from a callback, not the effect body: the question dialog sets state.
+    void Promise.resolve()
+      .then(readyToLeave)
+      .then((ok) => {
+        if (ok) {
+          leaving.current = true;
+          blocker.proceed();
+        } else {
+          blocker.reset();
+        }
       });
-    };
-    document.addEventListener("click", onClick, true);
-    return () => document.removeEventListener("click", onClick, true);
-  }, [dirty, navigate, readyToLeave]);
+    // Ask once each time a navigation is blocked.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocker.state]);
 
   // --- Actions -----------------------------------------------------------------------------
 
@@ -306,7 +316,7 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
 
   const restore = async (version: ProfileVersion) => {
     if (!loaded) return;
-    const number = versionNumber(loaded.versions, version.id);
+    const number = version.number;
     setViewing(null);
     const choice = await ask({
       title: `Restore version ${number}?`,
@@ -331,7 +341,9 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
   };
 
   const signOutSafely = async () => {
-    if (await readyToLeave()) void signOut({ redirectUrl: "/sign-in" });
+    if (!(await readyToLeave())) return;
+    leaving.current = true;
+    void signOut({ redirectUrl: "/sign-in" });
   };
 
   const goToError = (id: string) => {
@@ -509,7 +521,7 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
         {viewing && loaded && (
           <VersionView
             version={viewing}
-            number={versionNumber(loaded.versions, viewing.id)}
+            number={viewing.number}
             onClose={() => setViewing(null)}
             onRestore={() => void restore(viewing)}
           />

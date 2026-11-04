@@ -735,10 +735,15 @@
           "is_current": {
             "title": "Is Current",
             "type": "boolean"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
           }
         },
         "required": [
           "id",
+          "number",
           "data",
           "change_summary",
           "created_at",
@@ -773,10 +778,15 @@
           "is_current": {
             "title": "Is Current",
             "type": "boolean"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
           }
         },
         "required": [
           "id",
+          "number",
           "change_summary",
           "created_at",
           "is_current"

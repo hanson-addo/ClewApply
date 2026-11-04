@@ -434,6 +434,8 @@ export interface components {
             id: string;
             /** Is Current */
             is_current: boolean;
+            /** Number */
+            number: number;
         };
         /** ProfileVersionSummary */
         ProfileVersionSummary: {
@@ -451,6 +453,8 @@ export interface components {
             id: string;
             /** Is Current */
             is_current: boolean;
+            /** Number */
+            number: number;
         };
         /** Project */
         Project: {

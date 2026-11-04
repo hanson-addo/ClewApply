@@ -205,6 +205,31 @@ def test_no_key_means_no_parser(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 @pytest.mark.parametrize(
+    ("env", "expected"),
+    [("production", "https://api.anthropic.com"), ("test", "http://127.0.0.1:8787")],
+)
+def test_only_local_and_test_runs_follow_anthropic_base_url(
+    monkeypatch: pytest.MonkeyPatch, env: str, expected: str
+) -> None:
+    from clew.config import get_settings
+
+    monkeypatch.setenv("CLEW_ENV", env)
+    monkeypatch.setenv("CLEW_CLERK_ISSUER", "https://clew-test.clerk.accounts.dev")
+    monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
+    monkeypatch.setenv("CLEW_ANTHROPIC_API_KEY", "test-key-not-real")
+    monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:8787")
+    get_settings.cache_clear()
+    get_resume_parser.cache_clear()
+    try:
+        parser = get_resume_parser()
+        assert isinstance(parser, AnthropicParser)
+        assert str(parser._client.base_url).rstrip("/") == expected
+    finally:
+        get_settings.cache_clear()
+        get_resume_parser.cache_clear()
+
+
+@pytest.mark.parametrize(
     "text",
     [
         "Driver's license D1234567 (OH).",

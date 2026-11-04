@@ -106,7 +106,9 @@ async def test_each_save_adds_a_version_and_old_ones_stay_unchanged(
     second = await save(api, alice, profile(name="Jordan Q. Testperson"), change_summary="Name")
     assert second["id"] != first["id"]
 
+    assert (first["number"], second["number"]) == (1, 2)
     old = (await api.get(f"/profile/versions/{first['id']}", headers=alice)).json()
+    assert old["number"] == 1
     assert old["data"] == first["data"]
     assert old["data"]["basics"]["name"] == "Jordan Testperson"
     assert old["is_current"] is False
@@ -126,6 +128,7 @@ async def test_saving_the_same_data_adds_no_version(
     first = await save(api, alice, profile())
     again = await save(api, alice, profile())
     assert again["id"] == first["id"]
+    assert again["number"] == first["number"] == 1
     assert len((await api.get("/profile/versions", headers=alice)).json()) == 1
 
 
@@ -134,6 +137,8 @@ async def test_list_limit(api: AsyncClient, alice: dict[str, str]) -> None:
         await save(api, alice, profile(name=f"Jordan {n}"))
     listed = (await api.get("/profile/versions?limit=2", headers=alice)).json()
     assert len(listed) == 2
+    # Numbers come from the server, so a page that doesn't reach version 1 still shows them.
+    assert [v["number"] for v in listed] == [3, 2]
     assert (await api.get("/profile/versions?limit=101", headers=alice)).status_code == 422
 
 
@@ -181,7 +186,9 @@ async def test_first_saves_racing_make_one_profile(
     assert [r.status_code for r in responses] == [200, 200, 200]
     uid = await user_id(alice, api)
     assert await db.scalar(select(func.count()).where(Profile.user_id == uid)) == 1
-    assert len((await api.get("/profile/versions", headers=alice)).json()) == 3
+    listed = (await api.get("/profile/versions", headers=alice)).json()
+    # Racing saves still get distinct numbers in save order.
+    assert [v["number"] for v in listed] == [3, 2, 1]
 
 
 async def test_another_user_cannot_read_your_profile(
@@ -379,3 +386,43 @@ async def test_control_characters_are_422_not_500(
 async def test_tabs_and_newlines_are_fine(api: AsyncClient, alice: dict[str, str]) -> None:
     saved = await save(api, alice, {"basics": {"summary": "Line one\nLine two\twith a tab"}})
     assert saved["data"]["basics"]["summary"] == "Line one\nLine two\twith a tab"
+
+
+@pytest.mark.parametrize(
+    ("section", "start", "end"),
+    [
+        ("work", "2021-06", "2021-05"),
+        ("volunteer", "2020", "2019-12"),
+        ("education", "2018-09-01", "2018-08-31"),
+        ("projects", "2022-03", "2021"),
+    ],
+)
+async def test_end_before_start_is_refused(
+    api: AsyncClient, alice: dict[str, str], section: str, start: str, end: str
+) -> None:
+    entries = [{"startDate": "2010", "endDate": "2011"}, {"startDate": start, "endDate": end}]
+    data = profile()
+    data[section] = entries
+    response = await api.put("/profile", headers=alice, json={"data": data})
+    assert response.status_code == 422
+    assert response.json()["detail"] == [
+        {
+            "type": "date_order",
+            "loc": ["body", "data", section, 1, "endDate"],
+            "msg": "End date must be after the start date.",
+            "input": end,
+        }
+    ]
+    assert (await api.get("/profile/versions", headers=alice)).json() == []
+
+
+@pytest.mark.parametrize(
+    ("start", "end"),
+    [("2021", "2021-06"), ("2021-06", "2021"), ("2021-06", "2021-06-30"), ("2021-06", None)],
+)
+async def test_dates_compare_on_the_part_both_have(
+    api: AsyncClient, alice: dict[str, str], start: str, end: str | None
+) -> None:
+    await save(
+        api, alice, profile(work=[{"name": "Example Corp", "startDate": start, "endDate": end}])
+    )

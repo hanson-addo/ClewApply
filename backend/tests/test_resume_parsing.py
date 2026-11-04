@@ -22,7 +22,7 @@ from clew.resumes.parser import ParsedResume, ParseFailed, ParserUnavailable, to
 from clew.resumes.parsing import ParseError, RetryLater, run_parse
 from clew.scanning import get_malware_scanner
 from clew.storage import get_object_store
-from tests.file_helpers import EICAR, text_docx, text_pdf
+from tests.file_helpers import infected_docx, text_docx, text_pdf
 from tests.resume_fixtures import expected_profile, resume_text
 from tests.test_auth import verifier
 from tests.test_resume_parser import sure_of_everything
@@ -204,8 +204,8 @@ async def test_newly_detected_malware_fails_the_parse_and_blocks_download(
 ) -> None:
     resume_id = await upload_resume(api, alice)
     # Signatures updated since the upload: the stored file is now flagged.
-    for key, (data, content_type) in store.objects.items():
-        store.objects[key] = (data + EICAR, content_type)
+    for key, (_, content_type) in store.objects.items():
+        store.objects[key] = (infected_docx(), content_type)
     await run_jobs(queue, store, scanner, parser)
 
     state = await parse_state(api, alice, resume_id)

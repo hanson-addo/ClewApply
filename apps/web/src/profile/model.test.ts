@@ -15,7 +15,6 @@ import {
   stripControl,
   validateProfile,
   versionDate,
-  versionNumber,
   withFieldText,
   type ProfileData,
 } from "./model";
@@ -127,9 +126,15 @@ describe("helpers", () => {
         { loc: ["body", "data", "work", 1, "url"], msg: "bad" },
         { loc: ["body", "data", "basics", "email"], msg: "bad" },
         { loc: ["body", "change_summary"], msg: "bad" },
+        {
+          type: "date_order",
+          loc: ["body", "data", "education", 0, "endDate"],
+          msg: "End date must be after the start date.",
+        },
       ]),
     ).toEqual({
       "work.1.url": "This doesn't look right. Check it and try again.",
+      "education.0.endDate": "End date must be after the start date.",
       "basics.email": "This doesn't look right. Check it and try again.",
     });
     expect(errorsFromApi("nope")).toEqual({});
@@ -147,13 +152,7 @@ describe("helpers", () => {
     expect(entryName(work, {}, 1)).toBe("Role 2");
   });
 
-  it("numbers versions oldest first and dates them", () => {
-    const versions = [
-      { id: "b", created_at: "2026-10-19T15:00:00Z", change_summary: null, is_current: true },
-      { id: "a", created_at: "2026-10-18T15:00:00Z", change_summary: null, is_current: false },
-    ];
-    expect(versionNumber(versions, "b")).toBe(2);
-    expect(versionNumber(versions, "a")).toBe(1);
+  it("dates versions", () => {
     const now = new Date("2026-10-19T18:00:00Z");
     expect(versionDate("2026-10-19T17:30:00Z", now)).toMatch(/^today, /);
     expect(versionDate("2026-01-05T12:00:00Z", now)).toMatch(/^Jan 5, 2026, /);
