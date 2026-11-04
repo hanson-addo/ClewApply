@@ -348,6 +348,88 @@
         "title": "Education",
         "type": "object"
       },
+      "FollowRequest": {
+        "additionalProperties": false,
+        "properties": {
+          "ats_type": {
+            "enum": [
+              "greenhouse",
+              "lever",
+              "ashby"
+            ],
+            "title": "Ats Type",
+            "type": "string"
+          },
+          "board_token": {
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$",
+            "title": "Board Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ats_type",
+          "board_token"
+        ],
+        "title": "FollowRequest",
+        "type": "object"
+      },
+      "FollowedCompany": {
+        "properties": {
+          "ats_type": {
+            "enum": [
+              "greenhouse",
+              "lever",
+              "ashby"
+            ],
+            "title": "Ats Type",
+            "type": "string"
+          },
+          "board_token": {
+            "title": "Board Token",
+            "type": "string"
+          },
+          "company_id": {
+            "title": "Company Id",
+            "type": "string"
+          },
+          "followed_at": {
+            "format": "date-time",
+            "title": "Followed At",
+            "type": "string"
+          },
+          "last_polled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Polled At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "company_id",
+          "name",
+          "ats_type",
+          "board_token",
+          "verified",
+          "followed_at",
+          "last_polled_at"
+        ],
+        "title": "FollowedCompany",
+        "type": "object"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1628,6 +1710,148 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/companies/follow": {
+      "post": {
+        "description": "Follows a company's public board. Following one already followed changes nothing.",
+        "operationId": "follow_companies_follow_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FollowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FollowedCompany"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "409": {
+            "description": "Already following the most companies allowed"
+          },
+          "422": {
+            "description": "Unknown ATS or a malformed board token"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Follow",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/companies/follow/{ats_type}/{board_token}": {
+      "delete": {
+        "description": "Stops following a company's board. Jobs already in the feed stay until they close.",
+        "operationId": "unfollow_companies_follow__ats_type___board_token__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "ats_type",
+            "required": true,
+            "schema": {
+              "enum": [
+                "greenhouse",
+                "lever",
+                "ashby"
+              ],
+              "title": "Ats Type",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "board_token",
+            "required": true,
+            "schema": {
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$",
+              "title": "Board Token",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "Not following that board"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Unfollow",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
+    "/companies/follows": {
+      "get": {
+        "description": "Companies the signed-in user follows, by name.",
+        "operationId": "list_follows_companies_follows_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FollowedCompany"
+                  },
+                  "title": "Response List Follows Companies Follows Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Follows",
+        "tags": [
+          "companies"
+        ]
+      }
+    },
     "/health": {
       "get": {
         "description": "The process is up. Does not touch the database.",

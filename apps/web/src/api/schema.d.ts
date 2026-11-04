@@ -4,6 +4,66 @@
  */
 
 export interface paths {
+    "/companies/follow": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Follow
+         * @description Follows a company's public board. Following one already followed changes nothing.
+         */
+        post: operations["follow_companies_follow_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/follow/{ats_type}/{board_token}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Unfollow
+         * @description Stops following a company's board. Jobs already in the feed stay until they close.
+         */
+        delete: operations["unfollow_companies_follow__ats_type___board_token__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/follows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Follows
+         * @description Companies the signed-in user follows, by name.
+         */
+        get: operations["list_follows_companies_follows_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -303,6 +363,39 @@ export interface components {
             studyType?: string | null;
             /** Url */
             url?: string | null;
+        };
+        /** FollowRequest */
+        FollowRequest: {
+            /**
+             * Ats Type
+             * @enum {string}
+             */
+            ats_type: "greenhouse" | "lever" | "ashby";
+            /** Board Token */
+            board_token: string;
+        };
+        /** FollowedCompany */
+        FollowedCompany: {
+            /**
+             * Ats Type
+             * @enum {string}
+             */
+            ats_type: "greenhouse" | "lever" | "ashby";
+            /** Board Token */
+            board_token: string;
+            /** Company Id */
+            company_id: string;
+            /**
+             * Followed At
+             * Format: date-time
+             */
+            followed_at: string;
+            /** Last Polled At */
+            last_polled_at: string | null;
+            /** Name */
+            name: string;
+            /** Verified */
+            verified: boolean;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -733,6 +826,122 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    follow_companies_follow_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FollowRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowedCompany"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already following the most companies allowed */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Unknown ATS or a malformed board token */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    unfollow_companies_follow__ats_type___board_token__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                ats_type: "greenhouse" | "lever" | "ashby";
+                board_token: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not following that board */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_follows_companies_follows_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FollowedCompany"][];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     health_health_get: {
         parameters: {
             query?: never;

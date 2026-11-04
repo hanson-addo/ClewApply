@@ -2,6 +2,7 @@
 
 import logging
 import re
+import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 
@@ -22,7 +23,7 @@ CLOSE_AFTER_DAYS = 7
 ATS_SOURCES = frozenset({"greenhouse", "lever", "ashby"})
 
 
-_WEB_LINK = re.compile(r"^https?://[^\s]+$", re.IGNORECASE)
+_WEB_LINK = re.compile(r"https?://\S+", re.IGNORECASE)
 
 
 class InvalidPosting(ValueError):
@@ -52,6 +53,9 @@ class Posting:
     posted_at: datetime | None = None
     salary_min: int | None = None
     salary_max: int | None = None
+    # The board's own company, for postings read from a company board. Unset for sources
+    # that only name the company (USAJobs, alert emails), which are matched by name.
+    company_id: uuid.UUID | None = None
 
 
 async def add_posting(session: AsyncSession, posting: Posting, now: datetime | None = None) -> Job:
@@ -62,8 +66,12 @@ async def add_posting(session: AsyncSession, posting: Posting, now: datetime | N
     A listing seen before only has its last_seen_at moved on. A new listing whose dedup key
     matches an existing job becomes another source of that job; otherwise it starts a new
     job. Inserts use ON CONFLICT, so two workers adding the same job end with one row.
+
+    Postings from an unverified board (one a user followed, not one Clew checked) are keyed
+    by their company's id, so they never merge into another company's jobs or become their
+    Apply link.
     """
-    if not _WEB_LINK.match(posting.url):
+    if not _WEB_LINK.fullmatch(posting.url):
         # The link becomes the feed's Apply button, so only web links are kept.
         raise InvalidPosting("not_a_web_link")
     seen = now or datetime.now(UTC)
@@ -72,16 +80,19 @@ async def add_posting(session: AsyncSession, posting: Posting, now: datetime | N
             JobSource.source == posting.source, JobSource.source_job_id == posting.source_job_id
         )
     )
+    company = await _posting_company(session, posting)
     if known is not None:
+        job = await session.get_one(Job, known.job_id)
+        if not company.verified and job.company_id != company.id:
+            raise InvalidPosting("listed_by_another_board")
         known.last_seen_at = seen
         known.url = posting.url
-        job = await session.get_one(Job, known.job_id)
         _reopen(job, seen)
         await session.flush()
         return job
 
-    company = await _company(session, posting.company)
-    key = dedup_key(posting.company, posting.title, posting.location)
+    scope = None if company.verified else f"unverified {company.id}"
+    key = dedup_key(posting.company, posting.title, posting.location, scope=scope)
     job = await _job(session, posting, company, key)
     _reopen(job, seen)
 
@@ -103,11 +114,19 @@ async def add_posting(session: AsyncSession, posting: Posting, now: datetime | N
     return job
 
 
+async def _posting_company(session: AsyncSession, posting: Posting) -> Company:
+    if posting.company_id is not None:
+        return await session.get_one(Company, posting.company_id)
+    return await _company(session, posting.company)
+
+
 async def _company(session: AsyncSession, name: str) -> Company:
+    """The company a source names. Unverified boards never hold a plain normalized name
+    (theirs carries the board), so a name always finds a verified company."""
     name_norm = normalize_company(name)
     await session.execute(
         insert(Company)
-        .values(name=name.strip(), name_norm=name_norm)
+        .values(name=name.strip(), name_norm=name_norm, verified=True)
         .on_conflict_do_nothing(index_elements=[Company.name_norm])
     )
     return (await session.scalars(select(Company).where(Company.name_norm == name_norm))).one()

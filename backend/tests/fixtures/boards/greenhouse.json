@@ -1,0 +1,35 @@
+{
+  "jobs": [
+    {
+      "id": 4001001,
+      "title": "Sr. Thread Engineer",
+      "location": {"name": "Austin, TX"},
+      "absolute_url": "https://boards.greenhouse.io/labyrinthlogistics/jobs/4001001",
+      "updated_at": "2026-10-30T12:00:00-04:00",
+      "first_published": "2026-10-28T09:00:00-04:00",
+      "content": "&lt;p&gt;Wind &lt;strong&gt;thread&lt;/strong&gt; through the maze.&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Maps&lt;/li&gt;&lt;li&gt;Knots &amp;amp; loops&lt;/li&gt;&lt;/ul&gt;"
+    },
+    {
+      "id": 4001002,
+      "title": "Maze Mapper",
+      "location": {"name": "Remote"},
+      "absolute_url": "https://boards.greenhouse.io/labyrinthlogistics/jobs/4001002",
+      "updated_at": "2026-10-31T08:00:00Z"
+    },
+    {
+      "id": 4001003,
+      "title": "Thread Engineer",
+      "location": {"name": "London, United Kingdom"},
+      "absolute_url": "https://boards.greenhouse.io/labyrinthlogistics/jobs/4001003",
+      "updated_at": "2026-10-31T08:00:00Z"
+    },
+    {
+      "id": 4001004,
+      "title": "Exit Planner",
+      "location": {"name": "Denver, CO"},
+      "absolute_url": "javascript:alert(1)",
+      "updated_at": "2026-10-31T08:00:00Z"
+    }
+  ],
+  "meta": {"total": 4}
+}
