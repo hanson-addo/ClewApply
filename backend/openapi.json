@@ -412,6 +412,10 @@
           "name": {
             "title": "Name",
             "type": "string"
+          },
+          "verified": {
+            "title": "Verified",
+            "type": "boolean"
           }
         },
         "required": [
@@ -419,6 +423,7 @@
           "name",
           "ats_type",
           "board_token",
+          "verified",
           "followed_at",
           "last_polled_at"
         ],

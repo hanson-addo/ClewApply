@@ -42,6 +42,8 @@ class FollowedCompany(BaseModel):
     name: str
     ats_type: Ats
     board_token: str
+    # False for a board Clew hasn't checked. Its jobs show only to the people following it.
+    verified: bool
     followed_at: datetime
     # None until the worker has read the board once.
     last_polled_at: datetime | None
@@ -60,6 +62,7 @@ async def _followed(session: AsyncSession, user_id: object) -> list[FollowedComp
             name=company.name,
             ats_type=company.ats_type,
             board_token=company.board_token or "",
+            verified=company.verified,
             followed_at=followed_at,
             last_polled_at=company.last_polled_at,
         )

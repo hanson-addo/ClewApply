@@ -394,6 +394,8 @@ export interface components {
             last_polled_at: string | null;
             /** Name */
             name: string;
+            /** Verified */
+            verified: boolean;
         };
         /** HTTPValidationError */
         HTTPValidationError: {

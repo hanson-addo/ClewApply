@@ -4,6 +4,7 @@ shaped like each ATS's public API; no test calls the real APIs."""
 import json
 import uuid
 from collections.abc import AsyncIterator, Callable
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,7 @@ from clew.catalog.boards import (
 )
 from clew.catalog.companies import STARTER_BOARDS, board_company, ensure_starter_boards
 from clew.catalog.ingest import POLL_EVERY, boards_due, poll_board, poll_due_boards
+from clew.catalog.merge import InvalidPosting, Posting, add_posting
 from clew.models import Company, Job, JobSource, RawPosting
 from clew.worker import WorkerSettings, poll_boards
 
@@ -152,7 +154,9 @@ def test_board_urls(ats: str, url: str) -> None:
     assert board_url(ats, "labyrinthlogistics") == url  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("token", ["../admin", "a/b", "evil.example.com/x?", "", "-x", "a b"])
+@pytest.mark.parametrize(
+    "token", ["../admin", "a/b", "evil.example.com/x?", "", "-x", "a b", "labyrinth\n"]
+)
 def test_tokens_cant_change_the_path(token: str) -> None:
     with pytest.raises(ValueError, match="bad_board_token"):
         board_url("greenhouse", token)
@@ -215,10 +219,21 @@ def token() -> str:
 
 
 async def new_board(
-    sessions: async_sessionmaker[AsyncSession], ats: str, name: str | None = None
+    sessions: async_sessionmaker[AsyncSession],
+    ats: str,
+    name: str | None = None,
+    *,
+    slug: str | None = None,
+    verified: bool = False,
 ) -> Company:
     async with sessions() as session:
-        company = await board_company(session, ats, token(), name)  # type: ignore[arg-type]
+        company = await board_company(
+            session,
+            ats,  # type: ignore[arg-type]
+            slug or token(),
+            name,
+            verified=verified,
+        )
         await session.commit()
         return company
 
@@ -304,16 +319,141 @@ async def test_only_due_boards_are_polled(sessions: async_sessionmaker[AsyncSess
         assert (await session.get_one(Company, fresh.id)).last_polled_at == NOW - timedelta(hours=1)
 
 
-async def test_a_board_attaches_to_a_company_known_by_name(
+async def test_a_verified_board_attaches_to_a_company_known_by_name(
     sessions: async_sessionmaker[AsyncSession],
 ) -> None:
     name = f"Minotaur {uuid.uuid4().hex[:6]}"
     async with sessions() as session:
-        session.add(Company(name=f"{name}, Inc.", name_norm=name.lower()))
+        session.add(Company(name=f"{name}, Inc.", name_norm=name.lower(), verified=True))
         await session.commit()
-    company = await new_board(sessions, "greenhouse", name)
+    company = await new_board(sessions, "greenhouse", name, verified=True)
     assert company.name == f"{name}, Inc."
-    assert company.poll is True
+    assert company.poll is True and company.verified is True
+
+
+# --- Boards users follow are unverified ---------------------------------------------------------
+
+
+async def known_company(sessions: async_sessionmaker[AsyncSession]) -> tuple[Company, str]:
+    """A verified company known by name, and a board slug whose name matches it."""
+    hex6 = uuid.uuid4().hex[:6]
+    async with sessions() as session:
+        company = Company(name=f"Minotaur {hex6}", name_norm=f"minotaur {hex6}", verified=True)
+        session.add(company)
+        await session.commit()
+    return company, f"minotaur-{hex6}"
+
+
+async def test_a_followed_board_never_joins_a_company_known_by_name(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    known, slug = await known_company(sessions)
+    followed = await new_board(sessions, "lever", slug=slug)
+    assert followed.id != known.id
+    assert followed.verified is False and followed.poll is True
+    async with sessions() as session:
+        untouched = await session.get_one(Company, known.id)
+        assert (untouched.ats_type, untouched.board_token) == (None, None)
+
+
+async def test_a_followed_board_never_takes_another_companys_name(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    known, slug = await known_company(sessions)
+    followed = await new_board(sessions, "ashby", slug=slug)
+    assert followed.name == f"{known.name} (Ashby board, unverified)"
+    assert followed.name_norm != known.name_norm
+
+    hex6 = uuid.uuid4().hex[:6]
+    free = await new_board(sessions, "ashby", slug=f"ariadne-{hex6}")
+    assert free.name == f"Ariadne {hex6.capitalize()}"
+    assert free.name_norm == f"ariadne {hex6} (ashby ariadne-{hex6})"
+
+
+def listing(company: Company | None, name: str, **values: object) -> Posting:
+    fields: dict[str, object] = {
+        "source": "lever" if company else "usajobs",
+        "source_job_id": uuid.uuid4().hex,
+        "url": f"https://jobs.example.com/{uuid.uuid4().hex[:8]}",
+        "company": name,
+        "title": "Maze Mapper",
+        "location": "Austin, TX",
+        "company_id": company.id if company else None,
+    }
+    fields.update(values)
+    return Posting(**fields)  # type: ignore[arg-type]
+
+
+async def primary_links(session: AsyncSession, job: Job) -> list[tuple[str, bool]]:
+    rows = await session.execute(
+        select(JobSource.source, JobSource.is_primary)
+        .where(JobSource.job_id == job.id)
+        .order_by(JobSource.first_seen_at)
+    )
+    return [(source, primary) for source, primary in rows]
+
+
+async def test_unverified_jobs_never_merge_into_verified_ones(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    known, slug = await known_company(sessions)
+    followed = await new_board(sessions, "lever", slug=slug)
+    async with sessions() as session:
+        real = await add_posting(session, listing(None, known.name), now=NOW)
+        fake = await add_posting(
+            session, listing(followed, known.name), now=NOW + timedelta(hours=1)
+        )
+        assert fake.id != real.id
+        assert fake.company_id == followed.id
+        # The verified job keeps its own Apply link; the lever source didn't join it.
+        assert await primary_links(session, real) == [("usajobs", True)]
+        assert await primary_links(session, fake) == [("lever", True)]
+        await session.rollback()
+
+
+async def test_an_unverified_board_cant_take_over_another_jobs_listing(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    known, slug = await known_company(sessions)
+    verified = await new_board(sessions, "lever", verified=True)
+    followed = await new_board(sessions, "lever", slug=slug)
+    async with sessions() as session:
+        real = listing(verified, known.name)
+        await add_posting(session, real, now=NOW)
+        with pytest.raises(InvalidPosting, match="listed_by_another_board"):
+            await add_posting(session, replace(real, company_id=followed.id), now=NOW)
+        await session.rollback()
+
+
+async def test_a_verified_board_merges_and_becomes_the_apply_link(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    known, _ = await known_company(sessions)
+    board_co = await new_board(sessions, "greenhouse", known.name, verified=True)
+    assert board_co.id == known.id
+    async with sessions() as session:
+        job = await add_posting(session, listing(None, known.name), now=NOW)
+        same = await add_posting(
+            session, listing(board_co, known.name, source="greenhouse"), now=NOW
+        )
+        assert same.id == job.id
+        assert await primary_links(session, job) == [("usajobs", False), ("greenhouse", True)]
+        await session.rollback()
+
+
+async def test_a_followed_board_on_the_starter_list_becomes_verified(
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    hex6 = uuid.uuid4().hex[:6]
+    slug = f"theseus-{hex6}"
+    followed = await new_board(sessions, "greenhouse", slug=slug)
+    assert followed.verified is False
+    starter = await new_board(
+        sessions, "greenhouse", f"Theseus {hex6} Inc.", slug=slug, verified=True
+    )
+    assert starter.id == followed.id
+    assert starter.verified is True
+    assert (starter.name, starter.name_norm) == (f"Theseus {hex6} Inc.", f"theseus {hex6}")
 
 
 async def test_starter_boards_are_seeded_once(
@@ -330,6 +470,10 @@ async def test_starter_boards_are_seeded_once(
                 )
             )
             assert count == 1
+            starter = await session.scalar(
+                select(Company).where(Company.ats_type == ats, Company.board_token == starter_token)
+            )
+            assert starter is not None and starter.verified is True
 
 
 def test_worker_polls_boards_hourly() -> None:

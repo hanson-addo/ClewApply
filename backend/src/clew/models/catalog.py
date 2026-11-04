@@ -85,6 +85,10 @@ class Company(Base):
     # these boards. Never turned off by an unfollow, since others may still follow it.
     poll: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     last_polled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    # False for a board a user followed that Clew hasn't checked: anyone can make a board
+    # with any name, so its jobs stay apart from verified jobs and, in the feed, show only
+    # to its followers. Starter boards and companies named by other sources are verified.
+    verified: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default="false")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )

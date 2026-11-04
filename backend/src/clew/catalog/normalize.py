@@ -155,7 +155,14 @@ def state_code(part: str) -> str | None:
     return _STATES.get(part.lower())
 
 
-def dedup_key(company: str, title: str, location: str | None) -> str:
-    """Equal keys mean the same job: normalized company + title + location, hashed."""
-    parts = (normalize_company(company), normalize_title(title), parse_location(location).key)
+def dedup_key(company: str, title: str, location: str | None, scope: str | None = None) -> str:
+    """Equal keys mean the same job: normalized company + title + location, hashed. A
+    `scope` keeps a set of jobs apart from every other (an unverified board's own jobs)."""
+    parts: tuple[str, ...] = (
+        normalize_company(company),
+        normalize_title(title),
+        parse_location(location).key,
+    )
+    if scope is not None:
+        parts = (scope, *parts)
     return hashlib.sha256("\x1f".join(parts).encode()).hexdigest()

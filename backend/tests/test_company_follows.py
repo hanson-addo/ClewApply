@@ -10,6 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.api import companies
 from clew.auth.deps import get_token_verifier
+from clew.catalog.companies import STARTER_BOARDS, ensure_starter_boards
 from clew.db.session import bind_user
 from clew.main import create_app
 from clew.models import Company, CompanyFollow
@@ -57,6 +58,7 @@ async def test_follow_list_and_unfollow(api: AsyncClient, alice: dict[str, str])
     assert followed["board_token"] == token
     assert followed["name"] == f"Labyrinth {token.split('-')[1].capitalize()}"
     assert followed["last_polled_at"] is None
+    assert followed["verified"] is False
 
     listed = (await api.get("/companies/follows", headers=alice)).json()
     assert [f["board_token"] for f in listed] == [token]
@@ -77,6 +79,20 @@ async def test_following_marks_the_board_for_polling(
     )
     company = await db.scalar(select(Company).where(Company.board_token == token))
     assert company is not None and company.poll is True and company.ats_type == "ashby"
+
+
+async def test_following_a_starter_board_follows_the_verified_company(
+    api: AsyncClient, alice: dict[str, str], db: AsyncSession
+) -> None:
+    await ensure_starter_boards(db)
+    await db.commit()
+    ats, token, name = STARTER_BOARDS[0]
+    followed = (
+        await api.post(
+            "/companies/follow", headers=alice, json={"ats_type": ats, "board_token": token}
+        )
+    ).json()
+    assert (followed["name"], followed["verified"]) == (name, True)
 
 
 async def test_following_twice_changes_nothing(api: AsyncClient, alice: dict[str, str]) -> None:

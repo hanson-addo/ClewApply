@@ -56,7 +56,7 @@ class Board:
 
 
 def board_url(ats: Ats, token: str) -> str:
-    if not BOARD_TOKEN.match(token):
+    if not BOARD_TOKEN.fullmatch(token):
         raise ValueError("bad_board_token")
     return _URLS[ats].format(token=token)
 

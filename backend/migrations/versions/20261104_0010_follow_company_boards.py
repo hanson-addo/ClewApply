@@ -26,6 +26,11 @@ def upgrade() -> None:
     op.add_column(
         "companies", sa.Column("last_polled_at", sa.DateTime(timezone=True), nullable=True)
     )
+    op.add_column(
+        "companies", sa.Column("verified", sa.Boolean(), server_default="false", nullable=False)
+    )
+    # Companies so far came from sources that name them (no followed boards yet).
+    op.execute("UPDATE companies SET verified = true")
     op.create_index(
         "ix_companies_poll", "companies", ["last_polled_at"], postgresql_where=sa.text("poll")
     )
@@ -58,5 +63,6 @@ def downgrade() -> None:
     op.drop_index("ix_company_follows_company_id", table_name="company_follows")
     op.drop_table("company_follows")
     op.drop_index("ix_companies_poll", table_name="companies")
+    op.drop_column("companies", "verified")
     op.drop_column("companies", "last_polled_at")
     op.drop_column("companies", "poll")

@@ -1,6 +1,7 @@
 """Polls followed company boards and adds their jobs to the catalog (#19)."""
 
 import logging
+from dataclasses import replace
 from datetime import UTC, datetime, timedelta
 
 import httpx
@@ -69,6 +70,7 @@ async def poll_board(
             posting = to_posting(board, job)
             if posting is None:
                 continue
+            posting = replace(posting, company_id=company.id)
             # Public board JSON only: no user data goes in raw_postings.
             session.add(
                 RawPosting(
