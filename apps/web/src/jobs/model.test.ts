@@ -79,6 +79,7 @@ describe("outbound links", () => {
 
   it("names the Apply button by where it goes", () => {
     expect(applyLabel(JOB)).toBe("Apply on Labyrinth Logistics's site");
+    expect(applyLabel({ ...JOB, unverified_board: true })).toBe("Apply on boards.greenhouse.io");
     expect(applyLabel({ ...JOB, apply_source: "usajobs" })).toBe("Apply on USAJobs");
     expect(applyLabel({ ...JOB, apply_source: "email", apply_url: "https://www.jobs.example.test/x" })).toBe(
       "Apply on jobs.example.test",

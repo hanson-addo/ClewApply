@@ -105,7 +105,8 @@ export function domainOf(url: URL): string {
 }
 
 export function applyLabel(job: FeedJob): string {
-  if (EMPLOYER_BOARDS.has(job.apply_source)) return `Apply on ${job.company}'s site`;
+  // An unverified board may not be the company's own, so never call it "their site" (R28).
+  if (EMPLOYER_BOARDS.has(job.apply_source) && !job.unverified_board) return `Apply on ${job.company}'s site`;
   if (job.apply_source === "usajobs") return "Apply on USAJobs";
   const url = safeUrl(job.apply_url);
   return url ? `Apply on ${domainOf(url)}` : "Apply";

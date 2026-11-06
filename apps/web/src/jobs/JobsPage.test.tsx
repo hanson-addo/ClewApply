@@ -267,6 +267,23 @@ describe("job detail", () => {
     expect(screen.getByText("Maze Mapper 1 is back in your jobs.")).toBeInTheDocument();
   });
 
+  it("undoing a hidden saved job saves it again", async () => {
+    const savedOne = job(1, { saved: true });
+    serve({
+      "GET /feed": () => Response.json(page([savedOne, job(2)])),
+      [detailUrl]: () => Response.json(detail(savedOne)),
+      [`GET /jobs/${job(2).id}`]: () => Response.json(detail(job(2))),
+      [`POST /jobs/${one.id}/dismiss`]: () => new Response(null, { status: 204 }),
+      [`POST /jobs/${one.id}/save`]: () => new Response(null, { status: 204 }),
+    });
+    renderAt(`/jobs/${one.id}`);
+    await user().click(await screen.findByRole("button", { name: "Not for me" }));
+    await user().click(await screen.findByRole("button", { name: "Undo" }));
+    expect(await screen.findByText("Maze Mapper 1 is back in your jobs.")).toBeInTheDocument();
+    expect(calls).toContain(`POST /jobs/${one.id}/save`);
+    expect(calls).not.toContain(`DELETE /jobs/${one.id}/feedback`);
+  });
+
   it("clears the Undo note after 10 seconds", async () => {
     serve({
       [detailUrl]: () => Response.json(detail(one)),

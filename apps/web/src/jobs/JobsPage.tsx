@@ -155,8 +155,9 @@ export function JobsPage() {
       setToast({
         message: `Hidden ${job.title}.`,
         undo: () => {
-          void api
-            .DELETE("/jobs/{job_id}/feedback", { params: { path: { job_id: job.id } } })
+          // A saved job goes back to saved, not just un-hidden.
+          const params = { params: { path: { job_id: job.id } } };
+          void (job.saved ? api.POST("/jobs/{job_id}/save", params) : api.DELETE("/jobs/{job_id}/feedback", params))
             .then(({ response }) => {
               if (!response.ok) return setToast({ message: "We couldn't undo that. Try again." });
               setList((current) => {
