@@ -439,6 +439,10 @@
             ],
             "title": "Salary Min"
           },
+          "saved": {
+            "title": "Saved",
+            "type": "boolean"
+          },
           "seen_on": {
             "items": {
               "type": "string"
@@ -468,6 +472,7 @@
           "apply_url",
           "apply_source",
           "seen_on",
+          "saved",
           "fit_score",
           "reasons"
         ],
@@ -653,6 +658,171 @@
         "title": "Interest",
         "type": "object"
       },
+      "JobDetail": {
+        "properties": {
+          "apply_source": {
+            "title": "Apply Source",
+            "type": "string"
+          },
+          "apply_url": {
+            "title": "Apply Url",
+            "type": "string"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "dismissed": {
+            "title": "Dismissed",
+            "type": "boolean"
+          },
+          "fit_score": {
+            "title": "Fit Score",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "listings": {
+            "items": {
+              "$ref": "#/components/schemas/Listing"
+            },
+            "title": "Listings",
+            "type": "array"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "posted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posted At"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "remote_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "onsite",
+                  "hybrid",
+                  "remote"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Type"
+          },
+          "salary_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Max"
+          },
+          "salary_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Min"
+          },
+          "saved": {
+            "title": "Saved",
+            "type": "boolean"
+          },
+          "seen_on": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Seen On",
+            "type": "array"
+          },
+          "status": {
+            "enum": [
+              "open",
+              "closed"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unverified_board": {
+            "title": "Unverified Board",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "company",
+          "unverified_board",
+          "location",
+          "remote_type",
+          "salary_min",
+          "salary_max",
+          "posted_at",
+          "apply_url",
+          "apply_source",
+          "seen_on",
+          "saved",
+          "fit_score",
+          "reasons",
+          "description",
+          "status",
+          "dismissed",
+          "listings"
+        ],
+        "title": "JobDetail",
+        "type": "object"
+      },
       "Language": {
         "additionalProperties": false,
         "properties": {
@@ -682,6 +852,41 @@
           }
         },
         "title": "Language",
+        "type": "object"
+      },
+      "Listing": {
+        "properties": {
+          "first_seen_at": {
+            "format": "date-time",
+            "title": "First Seen At",
+            "type": "string"
+          },
+          "is_primary": {
+            "title": "Is Primary",
+            "type": "boolean"
+          },
+          "last_seen_at": {
+            "format": "date-time",
+            "title": "Last Seen At",
+            "type": "string"
+          },
+          "source": {
+            "title": "Source",
+            "type": "string"
+          },
+          "url": {
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "url",
+          "is_primary",
+          "first_seen_at",
+          "last_seen_at"
+        ],
+        "title": "Listing",
         "type": "object"
       },
       "Location": {
@@ -2116,6 +2321,24 @@
             }
           },
           {
+            "description": "true: only saved jobs",
+            "in": "query",
+            "name": "saved",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "true: only saved jobs",
+              "title": "Saved"
+            }
+          },
+          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -2188,6 +2411,205 @@
         "summary": "Health",
         "tags": [
           "health"
+        ]
+      }
+    },
+    "/jobs/{job_id}": {
+      "get": {
+        "description": "A job with its full description, fit, reasons and every listing. Closed and\ndismissed jobs can still be opened.",
+        "operationId": "get_job_jobs__job_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such job, or not one this user can see"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}/dismiss": {
+      "post": {
+        "description": "Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it.",
+        "operationId": "dismiss_job_jobs__job_id__dismiss_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such job, or not one this user can see"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Dismiss Job",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}/feedback": {
+      "delete": {
+        "description": "Unsaves or un-dismisses a job.",
+        "operationId": "clear_feedback_jobs__job_id__feedback_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "The job isn't saved or dismissed"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Clear Feedback",
+        "tags": [
+          "jobs"
+        ]
+      }
+    },
+    "/jobs/{job_id}/save": {
+      "post": {
+        "description": "Saves a job. Saving a dismissed job brings it back to the feed.",
+        "operationId": "save_job_jobs__job_id__save_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "job_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Job Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "No such job, or not one this user can see"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Save Job",
+        "tags": [
+          "jobs"
         ]
       }
     },

@@ -9,6 +9,7 @@ from clew.models.catalog import (
     RawPosting,
     RemoteType,
 )
+from clew.models.feedback import FeedbackAction, JobFeedback
 from clew.models.preferences import JobPreferences
 from clew.models.profile import Profile, ProfileVersion
 from clew.models.resume import Resume
@@ -19,7 +20,9 @@ from clew.models.user import User
 __all__ = [
     "Company",
     "CompanyFollow",
+    "FeedbackAction",
     "Job",
+    "JobFeedback",
     "JobPreferences",
     "JobSource",
     "JobStatus",

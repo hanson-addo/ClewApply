@@ -86,12 +86,23 @@ def title_part(wants: Wants, job: JobFacts) -> _Part:
     return _Part(weights.TITLE, best, reason)
 
 
+# When a title has several level words, the most senior decides ("Associate Director" is a
+# manager role, not an entry one).
+_LEVEL_ORDER = ("executive", "manager", "lead", "senior", "entry", "intern")
+# "Manager" in these titles names the job, not a people-manager level.
+_IC_MANAGERS = {"product", "program", "project", "account", "case", "community"}
+
+
 def job_seniority(title_norm: str) -> str | None:
     words = title_norm.split()
-    for word in words:
-        if word in _SENIORITY_WORDS:
-            return _SENIORITY_WORDS[word]
-    return None
+    levels: set[str] = set()
+    for index, word in enumerate(words):
+        level = _SENIORITY_WORDS.get(word)
+        if level == "manager" and word == "manager" and index and words[index - 1] in _IC_MANAGERS:
+            continue
+        if level is not None:
+            levels.add(level)
+    return next((level for level in _LEVEL_ORDER if level in levels), None)
 
 
 def seniority_part(wants: Wants, job: JobFacts) -> _Part:
@@ -148,7 +159,8 @@ def location_part(wants: Wants, job: JobFacts) -> _Part:
         if wants.remote_ok:
             return _Part(weights.LOCATION, 1.0, "Remote, as you prefer")
         return _Part(weights.LOCATION, 0.0)
-    if not wants.locations:
+    if not wants.locations or job.region is None:
+        # No places wanted, or one we couldn't read: neutral, since the feed keeps such jobs.
         return _Part(weights.LOCATION, 0.5)
     place = f"{job.city}, {job.region}" if job.city else job.region
     for city, region in wants.locations:
