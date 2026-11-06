@@ -64,6 +64,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feed": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feed
+         * @description Open jobs, best fit first. Dealbreakers from the user's preferences (excluded
+         *     companies and keywords, places, pay floor) filter jobs out instead of lowering them.
+         */
+        get: operations["feed_feed_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -363,6 +384,53 @@ export interface components {
             studyType?: string | null;
             /** Url */
             url?: string | null;
+        };
+        /** FeedJob */
+        FeedJob: {
+            /** Apply Source */
+            apply_source: string;
+            /** Apply Url */
+            apply_url: string;
+            /** Company */
+            company: string;
+            /** Fit Score */
+            fit_score: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Location */
+            location: string | null;
+            /** Posted At */
+            posted_at: string | null;
+            /** Reasons */
+            reasons: string[];
+            /** Remote Type */
+            remote_type: ("onsite" | "hybrid" | "remote") | null;
+            /** Salary Max */
+            salary_max: number | null;
+            /** Salary Min */
+            salary_min: number | null;
+            /** Seen On */
+            seen_on: string[];
+            /** Title */
+            title: string;
+            /** Unverified Board */
+            unverified_board: boolean;
+        };
+        /** FeedPage */
+        FeedPage: {
+            /** Has More */
+            has_more: boolean;
+            /** Jobs */
+            jobs: components["schemas"]["FeedJob"][];
+            /** Page */
+            page: number;
+            /** Per Page */
+            per_page: number;
+            /** Total */
+            total: number;
         };
         /** FollowRequest */
         FollowRequest: {
@@ -935,6 +1003,50 @@ export interface operations {
             };
             /** @description Not signed in */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    feed_feed_get: {
+        parameters: {
+            query?: {
+                /** @description true: remote only; false: no remote */
+                remote?: boolean | null;
+                /** @description A US state */
+                region?: string | null;
+                min_salary?: number | null;
+                posted_within_days?: number | null;
+                source?: ("greenhouse" | "lever" | "ashby" | "usajobs" | "email") | null;
+                page?: number;
+                per_page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedPage"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description A filter is out of range, or the state isn't in the US */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };
