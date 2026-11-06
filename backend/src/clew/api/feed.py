@@ -209,7 +209,9 @@ async def feed(
     min_salary: Annotated[int | None, Query(ge=0, le=2_000_000)] = None,
     posted_within_days: Annotated[int | None, Query(ge=1, le=90)] = None,
     source: Source | None = None,
-    saved: Annotated[bool | None, Query(description="true: only saved jobs")] = None,
+    saved: Annotated[
+        bool | None, Query(description="true: only saved jobs; false or omitted: all jobs")
+    ] = None,
     page: Annotated[int, Query(ge=1, le=100)] = 1,
     per_page: Annotated[int, Query(ge=1, le=50)] = 20,
 ) -> FeedPage:
