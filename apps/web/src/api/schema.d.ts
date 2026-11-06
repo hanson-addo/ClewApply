@@ -1169,7 +1169,7 @@ export interface operations {
                 min_salary?: number | null;
                 posted_within_days?: number | null;
                 source?: ("greenhouse" | "lever" | "ashby" | "usajobs" | "email") | null;
-                /** @description true: only saved jobs */
+                /** @description true: only saved jobs; false or omitted: all jobs */
                 saved?: boolean | null;
                 page?: number;
                 per_page?: number;

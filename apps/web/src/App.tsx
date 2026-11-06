@@ -4,6 +4,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router";
 import { clerkAppearance } from "./auth/clerkAppearance";
 import { RequireSignIn } from "./auth/RequireSignIn";
 import { config } from "./config";
+import { JobsPage } from "./jobs/JobsPage";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./profile/ProfilePage";
 import { SetupNeededPage } from "./pages/SetupNeededPage";
@@ -19,6 +20,14 @@ export function AppRoutes() {
         element={
           <RequireSignIn>
             <HomePage />
+          </RequireSignIn>
+        }
+      />
+      <Route
+        path="/jobs/:jobId?"
+        element={
+          <RequireSignIn>
+            <JobsPage />
           </RequireSignIn>
         }
       />

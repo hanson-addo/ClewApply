@@ -2321,7 +2321,7 @@
             }
           },
           {
-            "description": "true: only saved jobs",
+            "description": "true: only saved jobs; false or omitted: all jobs",
             "in": "query",
             "name": "saved",
             "required": false,
@@ -2334,7 +2334,7 @@
                   "type": "null"
                 }
               ],
-              "description": "true: only saved jobs",
+              "description": "true: only saved jobs; false or omitted: all jobs",
               "title": "Saved"
             }
           },
