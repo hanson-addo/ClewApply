@@ -348,6 +348,168 @@
         "title": "Education",
         "type": "object"
       },
+      "FeedJob": {
+        "properties": {
+          "apply_source": {
+            "title": "Apply Source",
+            "type": "string"
+          },
+          "apply_url": {
+            "title": "Apply Url",
+            "type": "string"
+          },
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "fit_score": {
+            "title": "Fit Score",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "posted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Posted At"
+          },
+          "reasons": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Reasons",
+            "type": "array"
+          },
+          "remote_type": {
+            "anyOf": [
+              {
+                "enum": [
+                  "onsite",
+                  "hybrid",
+                  "remote"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Remote Type"
+          },
+          "salary_max": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Max"
+          },
+          "salary_min": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Salary Min"
+          },
+          "seen_on": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Seen On",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unverified_board": {
+            "title": "Unverified Board",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "company",
+          "unverified_board",
+          "location",
+          "remote_type",
+          "salary_min",
+          "salary_max",
+          "posted_at",
+          "apply_url",
+          "apply_source",
+          "seen_on",
+          "fit_score",
+          "reasons"
+        ],
+        "title": "FeedJob",
+        "type": "object"
+      },
+      "FeedPage": {
+        "properties": {
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "jobs": {
+            "items": {
+              "$ref": "#/components/schemas/FeedJob"
+            },
+            "title": "Jobs",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "per_page": {
+            "title": "Per Page",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "jobs",
+          "page",
+          "per_page",
+          "total",
+          "has_more"
+        ],
+        "title": "FeedPage",
+        "type": "object"
+      },
       "FollowRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1849,6 +2011,161 @@
         "summary": "List Follows",
         "tags": [
           "companies"
+        ]
+      }
+    },
+    "/feed": {
+      "get": {
+        "description": "Open jobs, best fit first. Dealbreakers from the user's preferences (excluded\ncompanies and keywords, places, pay floor) filter jobs out instead of lowering them.",
+        "operationId": "feed_feed_get",
+        "parameters": [
+          {
+            "description": "true: remote only; false: no remote",
+            "in": "query",
+            "name": "remote",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "true: remote only; false: no remote",
+              "title": "Remote"
+            }
+          },
+          {
+            "description": "A US state",
+            "in": "query",
+            "name": "region",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 40,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "A US state",
+              "title": "Region"
+            }
+          },
+          {
+            "in": "query",
+            "name": "min_salary",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 2000000,
+                  "minimum": 0,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Min Salary"
+            }
+          },
+          {
+            "in": "query",
+            "name": "posted_within_days",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maximum": 90,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Posted Within Days"
+            }
+          },
+          {
+            "in": "query",
+            "name": "source",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "greenhouse",
+                    "lever",
+                    "ashby",
+                    "usajobs",
+                    "email"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Source"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "per_page",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 50,
+              "minimum": 1,
+              "title": "Per Page",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "422": {
+            "description": "A filter is out of range, or the state isn't in the US"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Feed",
+        "tags": [
+          "feed"
         ]
       }
     },

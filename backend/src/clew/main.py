@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from clew import __version__
-from clew.api import companies, health, me, preferences, profile, resume_parse, resumes
+from clew.api import companies, feed, health, me, preferences, profile, resume_parse, resumes
 from clew.config import get_settings
 from clew.db.role_check import app_role_problems
 from clew.db.session import get_engine
@@ -64,6 +64,7 @@ def create_app() -> FastAPI:
     app.include_router(profile.router)
     app.include_router(preferences.router)
     app.include_router(companies.router)
+    app.include_router(feed.router)
     app.include_router(resumes.router)
     app.include_router(resume_parse.router)
     return app
