@@ -105,6 +105,87 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/jobs/{job_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Job
+         * @description A job with its full description, fit, reasons and every listing. Closed and
+         *     dismissed jobs can still be opened.
+         */
+        get: operations["get_job_jobs__job_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/dismiss": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Dismiss Job
+         * @description Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it.
+         */
+        post: operations["dismiss_job_jobs__job_id__dismiss_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Clear Feedback
+         * @description Unsaves or un-dismisses a job.
+         */
+        delete: operations["clear_feedback_jobs__job_id__feedback_delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/jobs/{job_id}/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save Job
+         * @description Saves a job. Saving a dismissed job brings it back to the feed.
+         */
+        post: operations["save_job_jobs__job_id__save_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/me": {
         parameters: {
             query?: never;
@@ -412,6 +493,8 @@ export interface components {
             salary_max: number | null;
             /** Salary Min */
             salary_min: number | null;
+            /** Saved */
+            saved: boolean;
             /** Seen On */
             seen_on: string[];
             /** Title */
@@ -490,12 +573,78 @@ export interface components {
             /** Name */
             name?: string | null;
         };
+        /** JobDetail */
+        JobDetail: {
+            /** Apply Source */
+            apply_source: string;
+            /** Apply Url */
+            apply_url: string;
+            /** Company */
+            company: string;
+            /** Description */
+            description: string | null;
+            /** Dismissed */
+            dismissed: boolean;
+            /** Fit Score */
+            fit_score: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Listings */
+            listings: components["schemas"]["Listing"][];
+            /** Location */
+            location: string | null;
+            /** Posted At */
+            posted_at: string | null;
+            /** Reasons */
+            reasons: string[];
+            /** Remote Type */
+            remote_type: ("onsite" | "hybrid" | "remote") | null;
+            /** Salary Max */
+            salary_max: number | null;
+            /** Salary Min */
+            salary_min: number | null;
+            /** Saved */
+            saved: boolean;
+            /** Seen On */
+            seen_on: string[];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "open" | "closed";
+            /** Title */
+            title: string;
+            /** Unverified Board */
+            unverified_board: boolean;
+        };
         /** Language */
         Language: {
             /** Fluency */
             fluency?: string | null;
             /** Language */
             language?: string | null;
+        };
+        /** Listing */
+        Listing: {
+            /**
+             * First Seen At
+             * Format: date-time
+             */
+            first_seen_at: string;
+            /** Is Primary */
+            is_primary: boolean;
+            /**
+             * Last Seen At
+             * Format: date-time
+             */
+            last_seen_at: string;
+            /** Source */
+            source: string;
+            /** Url */
+            url: string;
         };
         /** Location */
         Location: {
@@ -1020,6 +1169,8 @@ export interface operations {
                 min_salary?: number | null;
                 posted_within_days?: number | null;
                 source?: ("greenhouse" | "lever" | "ashby" | "usajobs" | "email") | null;
+                /** @description true: only saved jobs */
+                saved?: boolean | null;
                 page?: number;
                 per_page?: number;
             };
@@ -1070,6 +1221,180 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Health"];
+                };
+            };
+        };
+    };
+    get_job_jobs__job_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobDetail"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such job, or not one this user can see */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    dismiss_job_jobs__job_id__dismiss_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such job, or not one this user can see */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    clear_feedback_jobs__job_id__feedback_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The job isn't saved or dismissed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_job_jobs__job_id__save_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                job_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such job, or not one this user can see */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
                 };
             };
         };

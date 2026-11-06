@@ -76,6 +76,10 @@ def test_title_with_no_wanted_titles_is_neutral() -> None:
         ("software engineering intern", "intern"),
         ("vice president operations", "executive"),
         ("software engineer", None),
+        ("associate director", "manager"),
+        ("senior product manager", "senior"),
+        ("product manager", None),
+        ("engineering manager product", "manager"),
     ],
 )
 def test_job_seniority(title: str, level: str | None) -> None:
@@ -120,6 +124,8 @@ def test_location() -> None:
     assert location_part(austin, remote).reason == "Remote, as you prefer"
     assert location_part(Wants(remote_ok=False), remote).value == 0.0
     assert location_part(Wants(), job()).value == 0.5
+    # A place we couldn't read is neutral, not a miss.
+    assert location_part(austin, job(city=None, region=None, remote_type=None)).value == 0.5
 
 
 def test_salary() -> None:

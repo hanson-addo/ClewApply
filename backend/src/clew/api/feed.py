@@ -5,13 +5,25 @@ the people following that board, and carry `unverified_board` so the card can sa
 Nothing here is logged: preferences and profile skills are personal data.
 """
 
+import logging
 import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel
-from sqlalchemy import ColumnElement, and_, exists, false, func, or_, select, true
+from sqlalchemy import (
+    ColumnElement,
+    ScalarSelect,
+    Select,
+    and_,
+    exists,
+    false,
+    func,
+    or_,
+    select,
+    true,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.auth.deps import CurrentUser
@@ -22,13 +34,17 @@ from clew.feed.score import Fit, JobFacts, Wants, fit, skill_terms
 from clew.models import (
     Company,
     CompanyFollow,
+    FeedbackAction,
     Job,
+    JobFeedback,
     JobPreferences,
     JobSource,
     JobStatus,
     Profile,
     ProfileVersion,
 )
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["feed"])
 
@@ -61,6 +77,8 @@ class FeedJob(BaseModel):
     apply_source: str
     # Every site listing the job, best first.
     seen_on: list[str]
+    # The user saved this job.
+    saved: bool
     fit_score: int
     reasons: list[str]
 
@@ -74,7 +92,9 @@ class FeedPage(BaseModel):
     has_more: bool
 
 
-async def _wants(session: AsyncSession, user_id: uuid.UUID) -> tuple[Wants, JobPreferences | None]:
+async def wants_for(
+    session: AsyncSession, user_id: uuid.UUID
+) -> tuple[Wants, JobPreferences | None]:
     prefs = await session.scalar(select(JobPreferences).where(JobPreferences.user_id == user_id))
     data = await session.scalar(
         select(ProfileVersion.data)
@@ -108,7 +128,7 @@ def _skills(data: dict[str, Any]) -> tuple[str, ...]:
     return tuple(names)
 
 
-def _visible(user_id: uuid.UUID) -> ColumnElement[bool]:
+def visible(user_id: uuid.UUID) -> ColumnElement[bool]:
     """Verified companies, plus unverified boards this user follows (R28)."""
     follows = exists().where(
         CompanyFollow.company_id == Company.id, CompanyFollow.user_id == user_id
@@ -189,86 +209,42 @@ async def feed(
     min_salary: Annotated[int | None, Query(ge=0, le=2_000_000)] = None,
     posted_within_days: Annotated[int | None, Query(ge=1, le=90)] = None,
     source: Source | None = None,
+    saved: Annotated[bool | None, Query(description="true: only saved jobs")] = None,
     page: Annotated[int, Query(ge=1, le=100)] = 1,
     per_page: Annotated[int, Query(ge=1, le=50)] = 20,
 ) -> FeedPage:
     """Open jobs, best fit first. Dealbreakers from the user's preferences (excluded
     companies and keywords, places, pay floor) filter jobs out instead of lowering them."""
     now = datetime.now(UTC)
-    wants, prefs = await _wants(session, user.id)
+    wants, prefs = await wants_for(session, user.id)
     rules = [
         Job.status == JobStatus.OPEN,
-        _visible(user.id),
         *_dealbreakers(prefs),
         *_filters(remote, region, min_salary, posted_within_days, source, now),
     ]
-    newest = func.coalesce(Job.posted_at, Job.created_at)
+    if saved is True:
+        rules.append(feedback_action(user.id) == FeedbackAction.SAVED)
+    else:
+        # Dismissed jobs leave the feed.
+        rules.append(feedback_action(user.id).is_distinct_from(FeedbackAction.DISMISSED))
     rows = (
         await session.execute(
-            select(
-                Job.id,
-                Job.title,
-                Job.title_norm,
-                Job.location,
-                Job.city,
-                Job.region,
-                Job.remote_type,
-                Job.salary_min,
-                Job.salary_max,
-                Job.posted_at,
-                newest.label("newest"),
-                func.left(Job.description, SKILL_TEXT_CHARS).label("text"),
-                Company.name,
-                Company.verified,
-            )
-            .join(Company, Company.id == Job.company_id)
+            job_rows(user.id)
             .where(and_(true(), *rules))
-            .order_by(newest.desc(), Job.id)
+            .order_by(NEWEST.desc(), Job.id)
             .limit(CANDIDATES)
         )
     ).all()
 
     terms = skill_terms(wants.skills)
-    scored: list[tuple[Fit, Any]] = []
-    for row in rows:
-        facts = JobFacts(
-            title_norm=row.title_norm,
-            city=row.city,
-            region=row.region,
-            remote_type=row.remote_type,
-            salary_min=row.salary_min,
-            salary_max=row.salary_max,
-            posted_at=row.posted_at,
-            text=f"{row.title}\n{row.text or ''}".lower(),
-        )
-        scored.append((fit(wants, facts, now, terms), row))
+    scored = [(fit(wants, job_facts(row), now, terms), row) for row in rows]
     scored.sort(key=lambda item: (-item[0].score, -item[1].newest.timestamp(), item[1].id))
 
     start = (page - 1) * per_page
     shown = scored[start : start + per_page]
-    links = await _links(session, [row.id for _, row in shown])
-    jobs = [
-        FeedJob(
-            id=row.id,
-            title=row.title,
-            company=row.name,
-            unverified_board=not row.verified,
-            location=row.location,
-            remote_type=row.remote_type,
-            salary_min=row.salary_min,
-            salary_max=row.salary_max,
-            posted_at=row.posted_at,
-            apply_url=links[row.id][0],
-            apply_source=links[row.id][1],
-            seen_on=links[row.id][2],
-            fit_score=job_fit.score,
-            reasons=job_fit.reasons,
-        )
-        for job_fit, row in shown
-        if row.id in links
-    ]
+    links = await job_links(session, [row.id for _, row in shown])
     return FeedPage(
-        jobs=jobs,
+        jobs=[feed_job(row, job_fit, links[row.id]) for job_fit, row in shown if row.id in links],
         page=page,
         per_page=per_page,
         total=len(scored),
@@ -276,7 +252,76 @@ async def feed(
     )
 
 
-async def _links(
+NEWEST = func.coalesce(Job.posted_at, Job.created_at)
+
+
+def feedback_action(user_id: uuid.UUID) -> ScalarSelect[str]:
+    return (
+        select(JobFeedback.action)
+        .where(JobFeedback.job_id == Job.id, JobFeedback.user_id == user_id)
+        .scalar_subquery()
+    )
+
+
+def job_rows(user_id: uuid.UUID) -> Select[*tuple[Any, ...]]:
+    """The columns a feed card needs, for jobs this user may see."""
+    return (
+        select(
+            Job.id,
+            Job.title,
+            Job.title_norm,
+            Job.location,
+            Job.city,
+            Job.region,
+            Job.remote_type,
+            Job.salary_min,
+            Job.salary_max,
+            Job.posted_at,
+            NEWEST.label("newest"),
+            func.left(Job.description, SKILL_TEXT_CHARS).label("text"),
+            Company.name,
+            Company.verified,
+            feedback_action(user_id).label("feedback"),
+        )
+        .join(Company, Company.id == Job.company_id)
+        .where(visible(user_id))
+    )
+
+
+def job_facts(row: Any) -> JobFacts:
+    return JobFacts(
+        title_norm=row.title_norm,
+        city=row.city,
+        region=row.region,
+        remote_type=row.remote_type,
+        salary_min=row.salary_min,
+        salary_max=row.salary_max,
+        posted_at=row.posted_at,
+        text=f"{row.title}\n{row.text or ''}".lower(),
+    )
+
+
+def feed_job(row: Any, job_fit: Fit, link: tuple[str, str, list[str]]) -> FeedJob:
+    return FeedJob(
+        id=row.id,
+        title=row.title,
+        company=row.name,
+        unverified_board=not row.verified,
+        location=row.location,
+        remote_type=row.remote_type,
+        salary_min=row.salary_min,
+        salary_max=row.salary_max,
+        posted_at=row.posted_at,
+        apply_url=link[0],
+        apply_source=link[1],
+        seen_on=link[2],
+        saved=row.feedback == FeedbackAction.SAVED,
+        fit_score=job_fit.score,
+        reasons=job_fit.reasons,
+    )
+
+
+async def job_links(
     session: AsyncSession, job_ids: list[uuid.UUID]
 ) -> dict[uuid.UUID, tuple[str, str, list[str]]]:
     """Each job's Apply link and source, and every source listing it, best first."""
@@ -288,12 +333,20 @@ async def _links(
         )
     )
     primary: dict[uuid.UUID, tuple[str, str]] = {}
+    best: dict[uuid.UUID, tuple[str, str]] = {}
     sources: dict[uuid.UUID, set[str]] = {}
     for job_id, source, url, is_primary in rows:
         sources.setdefault(job_id, set()).add(source)
         if is_primary:
             primary[job_id] = (url, source)
-    return {
-        job_id: (url, source, sorted(sources[job_id], key=lambda s: (source_rank(s), s)))
-        for job_id, (url, source) in primary.items()
-    }
+        held = best.get(job_id)
+        if held is None or (source_rank(source), source) < (source_rank(held[1]), held[1]):
+            best[job_id] = (url, source)
+    links: dict[uuid.UUID, tuple[str, str, list[str]]] = {}
+    for job_id, listed in sources.items():
+        if job_id not in primary:
+            # add_posting always picks one, so this shouldn't happen; use the best source.
+            logger.warning("job_without_primary", extra={"job_id": str(job_id)})
+        url, source = primary.get(job_id) or best[job_id]
+        links[job_id] = (url, source, sorted(listed, key=lambda s: (source_rank(s), s)))
+    return links
