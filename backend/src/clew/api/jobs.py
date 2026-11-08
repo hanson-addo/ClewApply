@@ -15,6 +15,7 @@ from sqlalchemy import delete, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from clew.api.applications import track_saved_job, untrack_saved_job
 from clew.api.feed import FeedJob, feed_job, job_facts, job_links, job_rows, wants_for
 from clew.auth.deps import CurrentUser
 from clew.catalog.merge import source_rank
@@ -108,6 +109,11 @@ async def _record(
             set_={"action": action, "created_at": statement.excluded.created_at},
         )
     )
+    # Saved jobs show up under Saved in Applications (#26).
+    if action == FeedbackAction.SAVED:
+        await track_saved_job(session, user_id, job_id)
+    else:
+        await untrack_saved_job(session, user_id, job_id)
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -118,7 +124,8 @@ async def _record(
     responses=RESPONSES,
 )
 async def save_job(job_id: uuid.UUID, user: CurrentUser, session: Session) -> Response:
-    """Saves a job. Saving a dismissed job brings it back to the feed."""
+    """Saves a job and adds it to Saved in Applications, unless it's tracked already.
+    Saving a dismissed job brings it back to the feed."""
     return await _record(session, user.id, job_id, FeedbackAction.SAVED)
 
 
@@ -128,7 +135,8 @@ async def save_job(job_id: uuid.UUID, user: CurrentUser, session: Session) -> Re
     responses=RESPONSES,
 )
 async def dismiss_job(job_id: uuid.UUID, user: CurrentUser, session: Session) -> Response:
-    """Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it."""
+    """Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it, and removes
+    its application if that is still only saved."""
     return await _record(session, user.id, job_id, FeedbackAction.DISMISSED)
 
 
@@ -141,7 +149,8 @@ async def dismiss_job(job_id: uuid.UUID, user: CurrentUser, session: Session) ->
     },
 )
 async def clear_feedback(job_id: uuid.UUID, user: CurrentUser, session: Session) -> Response:
-    """Unsaves or un-dismisses a job."""
+    """Unsaves or un-dismisses a job. Unsaving removes its application if that is still
+    only saved."""
     result = await session.execute(
         delete(JobFeedback)
         .where(JobFeedback.user_id == user.id, JobFeedback.job_id == job_id)
@@ -149,5 +158,6 @@ async def clear_feedback(job_id: uuid.UUID, user: CurrentUser, session: Session)
     )
     if result.first() is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, NO_FEEDBACK)
+    await untrack_saved_job(session, user.id, job_id)
     await session.commit()
     return Response(status_code=status.HTTP_204_NO_CONTENT)

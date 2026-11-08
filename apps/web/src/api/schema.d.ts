@@ -4,6 +4,77 @@
  */
 
 export interface paths {
+    "/applications": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List Applications
+         * @description Every application, most recently changed first.
+         */
+        get: operations["list_applications_applications_get"];
+        put?: never;
+        /**
+         * Add Application
+         * @description Adds an application, for a job in the feed or one added by hand.
+         */
+        post: operations["add_application_applications_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/applications/{application_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Application */
+        get: operations["get_application_applications__application_id__get"];
+        put?: never;
+        post?: never;
+        /**
+         * Delete Application
+         * @description Deletes the application for good. If its job was saved in the feed, it is unsaved
+         *     too, so the feed and the board agree.
+         */
+        delete: operations["delete_application_applications__application_id__delete"];
+        options?: never;
+        head?: never;
+        /**
+         * Change Application
+         * @description Changes the title, company, link, applied date, notes, or what was sent.
+         */
+        patch: operations["change_application_applications__application_id__patch"];
+        trace?: never;
+    };
+    "/applications/{application_id}/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change Status
+         * @description Moves the application. A rejected or withdrawn one can be reopened to any status,
+         *     keeping its notes, what was sent and when it was applied.
+         */
+        patch: operations["change_status_applications__application_id__status_patch"];
+        trace?: never;
+    };
     "/companies/follow": {
         parameters: {
             query?: never;
@@ -137,7 +208,8 @@ export interface paths {
         put?: never;
         /**
          * Dismiss Job
-         * @description Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it.
+         * @description Dismisses a job: it leaves the feed. Dismissing a saved job unsaves it, and removes
+         *     its application if that is still only saved.
          */
         post: operations["dismiss_job_jobs__job_id__dismiss_post"];
         delete?: never;
@@ -158,7 +230,8 @@ export interface paths {
         post?: never;
         /**
          * Clear Feedback
-         * @description Unsaves or un-dismisses a job.
+         * @description Unsaves or un-dismisses a job. Unsaving removes its application if that is still
+         *     only saved.
          */
         delete: operations["clear_feedback_jobs__job_id__feedback_delete"];
         options?: never;
@@ -177,7 +250,8 @@ export interface paths {
         put?: never;
         /**
          * Save Job
-         * @description Saves a job. Saving a dismissed job brings it back to the feed.
+         * @description Saves a job and adds it to Saved in Applications, unless it's tracked already.
+         *     Saving a dismissed job brings it back to the feed.
          */
         post: operations["save_job_jobs__job_id__save_post"];
         delete?: never;
@@ -386,6 +460,76 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ApplicationChange
+         * @description Fields to change; the ones left out stay as they are. Send null to clear `url`,
+         *     `applied_at`, `resume_id` or `profile_version`.
+         */
+        ApplicationChange: {
+            /** Applied At */
+            applied_at?: string | null;
+            /** Company */
+            company?: string | null;
+            /** Notes */
+            notes?: string | null;
+            /** Profile Version */
+            profile_version?: number | null;
+            /** Resume Id */
+            resume_id?: string | null;
+            /** Title */
+            title?: string | null;
+            /** Url */
+            url?: string | null;
+        };
+        /** ApplicationList */
+        ApplicationList: {
+            /** Applications */
+            applications: components["schemas"]["ApplicationOut"][];
+        };
+        /** ApplicationOut */
+        ApplicationOut: {
+            /** Applied At */
+            applied_at: string | null;
+            /** Closed At */
+            closed_at: string | null;
+            /** Company */
+            company: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Job Id */
+            job_id: string | null;
+            /** Job Status */
+            job_status: ("open" | "closed") | null;
+            /** Notes */
+            notes: string;
+            /** Profile Version */
+            profile_version: number | null;
+            /** Resume Id */
+            resume_id: string | null;
+            status: components["schemas"]["ApplicationStatus"];
+            /** Title */
+            title: string;
+            /**
+             * Updated At
+             * Format: date-time
+             */
+            updated_at: string;
+            /** Url */
+            url: string | null;
+        };
+        /**
+         * ApplicationStatus
+         * @enum {string}
+         */
+        ApplicationStatus: "saved" | "applied" | "interview" | "offer" | "rejected" | "withdrawn";
         /** Award */
         Award: {
             /** Awarder */
@@ -670,6 +814,34 @@ export interface components {
             id: string;
             /** Plan */
             plan: string;
+        };
+        /**
+         * NewApplication
+         * @description Either `job_id` (a job from the feed; its title, company and link are copied) or
+         *     `title` and `company` (a job added by hand).
+         */
+        NewApplication: {
+            /** Applied At */
+            applied_at?: string | null;
+            /** Company */
+            company?: string | null;
+            /** Job Id */
+            job_id?: string | null;
+            /**
+             * Notes
+             * @default
+             */
+            notes: string;
+            /** Profile Version */
+            profile_version?: number | null;
+            /** Resume Id */
+            resume_id?: string | null;
+            /** @default applied */
+            status: components["schemas"]["ApplicationStatus"];
+            /** Title */
+            title?: string | null;
+            /** Url */
+            url?: string | null;
         };
         /**
          * ParseStatus
@@ -979,6 +1151,10 @@ export interface components {
             /** Username */
             username?: string | null;
         };
+        /** StatusChange */
+        StatusChange: {
+            status: components["schemas"]["ApplicationStatus"];
+        };
         /** ValidationError */
         ValidationError: {
             /** Context */
@@ -1043,6 +1219,271 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    list_applications_applications_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationList"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    add_application_applications_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NewApplication"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The job isn't in this user's feed */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Already tracked (detail: already_tracked) or too many */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Missing title or company, a bad link, or a resume or version that isn't the user's */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    get_application_applications__application_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such application, or not this user's */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_application_applications__application_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such application, or not this user's */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_application_applications__application_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ApplicationChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such application, or not this user's */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    change_status_applications__application_id__status_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                application_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApplicationOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description No such application, or not this user's */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     follow_companies_follow_post: {
         parameters: {
             query?: never;

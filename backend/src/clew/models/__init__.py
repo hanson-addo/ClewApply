@@ -1,5 +1,6 @@
 """All tables, imported here so Alembic sees every model."""
 
+from clew.models.application import Application, ApplicationStatus
 from clew.models.catalog import (
     Company,
     CompanyFollow,
@@ -18,6 +19,8 @@ from clew.models.usage import UsageEvent, UsageKind
 from clew.models.user import User
 
 __all__ = [
+    "Application",
+    "ApplicationStatus",
     "Company",
     "CompanyFollow",
     "FeedbackAction",
