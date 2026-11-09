@@ -9,13 +9,14 @@ job removes that application while it is still only saved. Applications are priv
 user (row-level security), and their notes are never logged.
 """
 
+import re
 import uuid
 from datetime import UTC, datetime
 from typing import Annotated, Any, Literal, cast
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status
 from pydantic import AfterValidator, BaseModel, Field, StringConstraints
-from sqlalchemy import delete, func, select
+from sqlalchemy import Select, delete, func, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -33,6 +34,7 @@ from clew.models import (
     Resume,
 )
 from clew.models.application import CLOSED, SENT
+from clew.profile.schema import reject_control_characters
 
 router = APIRouter(tags=["applications"])
 
@@ -52,22 +54,32 @@ RESPONSES: dict[int | str, dict[str, Any]] = {
 }
 
 
+_WEB_LINK = re.compile(r"https?://\S+", re.IGNORECASE)
+
+
 def _http_url(value: str | None) -> str | None:
     if value is None:
         return None
-    if not value.lower().startswith(("https://", "http://")) or len(value) < 9:
-        raise ValueError("The link must start with http:// or https://")
+    if not _WEB_LINK.fullmatch(value):
+        raise ValueError("The link must start with http:// or https:// and have no spaces")
     return value
 
 
-Title = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300)]
-CompanyName = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
+Plain = AfterValidator(reject_control_characters)
+
+
+Title = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=300), Plain
+]
+CompanyName = Annotated[
+    str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200), Plain
+]
 Link = Annotated[
     str | None,
     StringConstraints(strip_whitespace=True, max_length=2048),
     AfterValidator(_http_url),
 ]
-Notes = Annotated[str, Field(max_length=5000)]
+Notes = Annotated[str, Field(max_length=5000), Plain]
 Version = Annotated[int, Field(ge=1)]
 
 
@@ -88,6 +100,10 @@ class ApplicationOut(BaseModel):
     closed_at: datetime | None
     notes: str
     resume_id: uuid.UUID | None
+    # The sent file's name, and whether the user has since deleted it (then there's nothing
+    # to download, but the record of what was sent stays).
+    resume_name: str | None
+    resume_deleted: bool
     profile_version: int | None
     created_at: datetime
     updated_at: datetime
@@ -144,7 +160,18 @@ def move(application: Application, to: ApplicationStatus, now: datetime) -> None
         application.closed_at = None
 
 
-def _out(application: Application, job_status: str | None) -> ApplicationOut:
+def _rows() -> Select[*tuple[Any, ...]]:
+    """Applications with their job's state and the sent resume's name."""
+    return (
+        select(Application, Job.status, Resume.filename, Resume.deleted_at)
+        .outerjoin(Job, Job.id == Application.job_id)
+        .outerjoin(Resume, Resume.id == Application.resume_id)
+    )
+
+
+def _out(row: Any) -> ApplicationOut:
+    application: Application = row[0]
+    job_status: str | None = row[1]
     return ApplicationOut(
         id=application.id,
         job_id=application.job_id,
@@ -157,6 +184,8 @@ def _out(application: Application, job_status: str | None) -> ApplicationOut:
         closed_at=application.closed_at,
         notes=application.notes,
         resume_id=application.resume_id,
+        resume_name=row[2] if application.resume_id else None,
+        resume_deleted=application.resume_id is not None and row[3] is not None,
         profile_version=application.profile_version,
         created_at=application.created_at,
         updated_at=application.updated_at,
@@ -185,19 +214,15 @@ async def _check_sent(
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, NO_VERSION)
 
 
-async def _load(
-    session: AsyncSession, user_id: uuid.UUID, application_id: uuid.UUID
-) -> tuple[Application, str | None]:
+async def _load(session: AsyncSession, user_id: uuid.UUID, application_id: uuid.UUID) -> Any:
     row = (
         await session.execute(
-            select(Application, Job.status)
-            .outerjoin(Job, Job.id == Application.job_id)
-            .where(Application.id == application_id, Application.user_id == user_id)
+            _rows().where(Application.id == application_id, Application.user_id == user_id)
         )
     ).first()
     if row is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, NOT_FOUND)
-    return row[0], row[1]
+    return row
 
 
 async def _save(session: AsyncSession, application: Application) -> None:
@@ -265,13 +290,12 @@ async def untrack_saved_job(session: AsyncSession, user_id: uuid.UUID, job_id: u
 async def list_applications(user: CurrentUser, session: Session) -> ApplicationList:
     """Every application, most recently changed first."""
     rows = await session.execute(
-        select(Application, Job.status)
-        .outerjoin(Job, Job.id == Application.job_id)
+        _rows()
         .where(Application.user_id == user.id)
         .order_by(Application.updated_at.desc(), Application.id)
         .limit(MAX_APPLICATIONS)
     )
-    return ApplicationList(applications=[_out(app, job_status) for app, job_status in rows])
+    return ApplicationList(applications=[_out(row) for row in rows])
 
 
 @router.post(
@@ -323,7 +347,8 @@ async def add_application(
         company=company,
         url=url,
         status=ApplicationStatus.SAVED,
-        applied_at=body.applied_at,
+        # A Saved application hasn't been sent, so it has no applied date.
+        applied_at=None if body.status == ApplicationStatus.SAVED else body.applied_at,
         notes=body.notes,
         resume_id=body.resume_id,
         profile_version=body.profile_version,
@@ -331,25 +356,26 @@ async def add_application(
     move(application, body.status, datetime.now(UTC))
     session.add(application)
     await _save(session, application)
-    job_status = await session.scalar(select(Job.status).where(Job.id == body.job_id))
-    return _out(application, job_status)
+    return _out(await _load(session, user.id, application.id))
 
 
 @router.get("/applications/{application_id}", responses=RESPONSES)
 async def get_application(
     application_id: uuid.UUID, user: CurrentUser, session: Session
 ) -> ApplicationOut:
-    application, job_status = await _load(session, user.id, application_id)
-    return _out(application, job_status)
+    return _out(await _load(session, user.id, application_id))
 
 
 @router.patch("/applications/{application_id}", responses=RESPONSES)
 async def change_application(
     application_id: uuid.UUID, body: ApplicationChange, user: CurrentUser, session: Session
 ) -> ApplicationOut:
-    """Changes the title, company, link, applied date, notes, or what was sent."""
-    application, job_status = await _load(session, user.id, application_id)
-    sent = body.model_fields_set
+    """Changes the title, company, link, applied date, notes, or what was sent. The applied
+    date is ignored while the application is Saved."""
+    application = (await _load(session, user.id, application_id))[0]
+    sent = set(body.model_fields_set)
+    if application.status == ApplicationStatus.SAVED:
+        sent.discard("applied_at")
     if ("title" in sent and body.title is None) or ("company" in sent and body.company is None):
         raise HTTPException(
             status.HTTP_422_UNPROCESSABLE_CONTENT, "The title and company can't be empty."
@@ -365,7 +391,7 @@ async def change_application(
     for field in sent:
         setattr(application, field, getattr(body, field))
     await _save(session, application)
-    return _out(application, job_status)
+    return _out(await _load(session, user.id, application_id))
 
 
 @router.patch("/applications/{application_id}/status", responses=RESPONSES)
@@ -374,10 +400,10 @@ async def change_status(
 ) -> ApplicationOut:
     """Moves the application. A rejected or withdrawn one can be reopened to any status,
     keeping its notes, what was sent and when it was applied."""
-    application, job_status = await _load(session, user.id, application_id)
+    application = (await _load(session, user.id, application_id))[0]
     move(application, body.status, datetime.now(UTC))
     await _save(session, application)
-    return _out(application, job_status)
+    return _out(await _load(session, user.id, application_id))
 
 
 @router.delete(

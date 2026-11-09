@@ -1,6 +1,7 @@
 import { ClerkProvider } from "@clerk/react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 
+import { ApplicationsPage } from "./applications/ApplicationsPage";
 import { clerkAppearance } from "./auth/clerkAppearance";
 import { RequireSignIn } from "./auth/RequireSignIn";
 import { config } from "./config";
@@ -28,6 +29,14 @@ export function AppRoutes() {
         element={
           <RequireSignIn>
             <JobsPage />
+          </RequireSignIn>
+        }
+      />
+      <Route
+        path="/applications/:applicationId?"
+        element={
+          <RequireSignIn>
+            <ApplicationsPage />
           </RequireSignIn>
         }
       />

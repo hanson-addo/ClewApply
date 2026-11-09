@@ -101,8 +101,15 @@ async def test_add_by_hand_and_read_back(api: AsyncClient, alice: dict[str, str]
 
 
 async def test_add_by_hand_as_saved_with_a_date(api: AsyncClient, alice: dict[str, str]) -> None:
-    saved = await add_by_hand(api, alice, status="saved")
+    saved = await add_by_hand(api, alice, status="saved", applied_at="2026-10-20T09:00:00Z")
+    # A Saved application hasn't been sent, so the date is ignored.
     assert saved["applied_at"] is None
+    edited = await api.patch(
+        f"/applications/{saved['id']}", headers=alice, json={"applied_at": "2026-10-21T09:00:00Z"}
+    )
+    assert edited.json()["applied_at"] is None
+    notes = "Line one\nLine two\twith a tab"
+    assert (await add_by_hand(api, alice, notes=notes))["notes"] == notes
     when = "2026-10-20T09:00:00Z"
     dated = await add_by_hand(api, alice, applied_at=when)
     assert dated["applied_at"].startswith("2026-10-20T09:00:00")
@@ -116,6 +123,10 @@ async def test_add_by_hand_as_saved_with_a_date(api: AsyncClient, alice: dict[st
         {"title": "   ", "company": "Minotaur Freight"},
         {"title": "Thread Winder", "company": "Minotaur Freight", "url": "javascript:alert(1)"},
         {"title": "Thread Winder", "company": "Minotaur Freight", "url": "ftp://x.example.test"},
+        {"title": "Thread Winder", "company": "Minotaur Freight", "url": "https://a.test/x y"},
+        {"title": "Thread\x07 Winder", "company": "Minotaur Freight"},
+        {"title": "Thread Winder", "company": "Minotaur\x00 Freight"},
+        {"title": "Thread Winder", "company": "Minotaur Freight", "notes": "bell\x07"},
         {"title": "Thread Winder", "company": "Minotaur Freight", "status": "ghosted"},
         {"title": "x" * 301, "company": "Minotaur Freight"},
         {"title": "Thread Winder", "company": "Minotaur Freight", "notes": "n" * 5001},
@@ -193,7 +204,17 @@ async def test_edit_notes_link_and_what_was_sent(
     assert changed.status_code == 200, changed.text
     body = changed.json()
     assert (body["notes"], body["url"], body["resume_id"]) == ("Called back.", None, str(resume.id))
+    assert (body["resume_name"], body["resume_deleted"]) == ("resume.pdf", False)
     assert body["title"] == app["title"]
+
+    # After the user deletes the file, the record of what was sent stays, marked deleted.
+    async with sessions() as session:
+        await session.execute(
+            update(Resume).where(Resume.id == resume.id).values(deleted_at=datetime.now(UTC))
+        )
+        await session.commit()
+    [listed] = await board(api, alice)
+    assert (listed["resume_id"], listed["resume_deleted"]) == (str(resume.id), True)
 
     # Removing the file row clears only the link to it.
     async with sessions() as session:
