@@ -43,6 +43,7 @@ export function ApplicationsPage() {
   const [announcement, setAnnouncement] = useState("");
   const selects = useRef(new Map<string, HTMLSelectElement>());
   const tabs = useRef(new Map<Column, HTMLButtonElement>());
+  const addButton = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     document.title = "Applications · Clew";
@@ -79,10 +80,12 @@ export function ApplicationsPage() {
     );
 
   const move = async (app: Application, to: Status) => {
-    const { data } = await api.PATCH("/applications/{application_id}/status", {
-      params: { path: { application_id: app.id } },
-      body: { status: to },
-    });
+    const { data } = await api
+      .PATCH("/applications/{application_id}/status", {
+        params: { path: { application_id: app.id } },
+        body: { status: to },
+      })
+      .catch(() => ({ data: undefined }));
     if (!data) return setAnnouncement(`We couldn't move ${app.title}. Try again.`);
     const column = columnOf(data.status);
     replace(data);
@@ -93,10 +96,20 @@ export function ApplicationsPage() {
   };
 
   const onTabKey = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
-    const step = event.key === "ArrowRight" ? 1 : event.key === "ArrowLeft" ? -1 : 0;
-    if (!step) return;
+    const last = COLUMNS.length - 1;
+    const target =
+      event.key === "ArrowRight"
+        ? (index + 1) % COLUMNS.length
+        : event.key === "ArrowLeft"
+          ? (index + last) % COLUMNS.length
+          : event.key === "Home"
+            ? 0
+            : event.key === "End"
+              ? last
+              : null;
+    if (target === null) return;
     event.preventDefault();
-    const next = COLUMNS[(index + step + COLUMNS.length) % COLUMNS.length]?.id ?? "saved";
+    const next = COLUMNS[target]?.id ?? "saved";
     setTab(next);
     tabs.current.get(next)?.focus();
   };
@@ -143,7 +156,7 @@ export function ApplicationsPage() {
           <h1 id="apps-heading" tabIndex={-1}>
             Applications
           </h1>
-          <button type="button" className="button button-primary" onClick={() => setAdding(true)}>
+          <button ref={addButton} type="button" className="button button-primary" onClick={() => setAdding(true)}>
             Add an application
           </button>
         </div>
@@ -239,13 +252,18 @@ export function ApplicationsPage() {
 
         {adding && (
           <AddApplicationDialog
-            onClose={() => setAdding(false)}
+            onClose={() => {
+              setAdding(false);
+              requestAnimationFrame(() => addButton.current?.focus());
+            }}
             onAdded={(app) => {
               setAdding(false);
               replace(app);
               const column = columnOf(app.status);
               setTab(column);
               setAnnouncement(`Added ${app.title} to ${columnLabel(column)}.`);
+              // Focus goes to the new card's Status select.
+              requestAnimationFrame(() => selects.current.get(app.id)?.focus());
             }}
           />
         )}

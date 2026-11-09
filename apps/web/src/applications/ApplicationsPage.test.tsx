@@ -138,6 +138,10 @@ describe("board", () => {
     expect(screen.getByRole("tab", { name: "Applied 1" })).toHaveAttribute("aria-selected", "true");
     await user().keyboard("{ArrowLeft}{ArrowLeft}");
     expect(screen.getByRole("tab", { name: "Closed 2" })).toHaveFocus();
+    await user().keyboard("{Home}");
+    expect(screen.getByRole("tab", { name: "Saved 1" })).toHaveFocus();
+    await user().keyboard("{End}");
+    expect(screen.getByRole("tab", { name: "Closed 2" })).toHaveAttribute("aria-selected", "true");
   });
 
   it("welcomes a brand-new account with one message", async () => {
@@ -173,7 +177,11 @@ describe("adding by hand", () => {
     });
     renderAt("/applications");
     await user().click(await screen.findByRole("button", { name: "Add an application" }));
-    const dialog = screen.getByRole("dialog", { name: "Add an application" });
+    let dialog = screen.getByRole("dialog", { name: "Add an application" });
+    await user().click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "Add an application" })).toHaveFocus());
+    await user().click(screen.getByRole("button", { name: "Add an application" }));
+    dialog = screen.getByRole("dialog", { name: "Add an application" });
 
     await user().type(within(dialog).getByLabelText("Link to the posting (optional)"), "javascript:alert(1)");
     await user().click(within(dialog).getByRole("button", { name: "Add application" }));
@@ -201,6 +209,9 @@ describe("adding by hand", () => {
     });
     expect(within(column(/^Applied/)).getByRole("link", { name: "Thread Winder" })).toBeInTheDocument();
     expect(screen.getByText("Added Thread Winder to Applied.")).toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getByRole("combobox", { name: "Status of Thread Winder" })).toHaveFocus(),
+    );
   });
 });
 
@@ -269,6 +280,23 @@ describe("one application", () => {
     await waitFor(() => expect(router.state.location.pathname).toBe("/applications"));
     expect(screen.queryByRole("link", { name: "Maze Mapper 2" })).not.toBeInTheDocument();
     expect(screen.getByText("Deleted Maze Mapper 2.")).toBeInTheDocument();
+  });
+
+  it("keeps the buttons working after a dropped connection", async () => {
+    serve({
+      ...handlers,
+      [detailUrl]: () => Response.json(sent),
+      [`PATCH /applications/${sent.id}`]: () => {
+        throw new TypeError("Failed to fetch");
+      },
+    });
+    renderAt(`/applications/${sent.id}`);
+    const notes = await screen.findByRole("textbox", { name: "Notes" });
+    await user().type(notes, " and Monday");
+    await user().click(screen.getByRole("button", { name: "Save notes" }));
+    expect(await screen.findByText("We couldn't save your notes. Try again.")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Save notes" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Delete application" })).toBeEnabled();
   });
 
   it("says when an application is gone", async () => {

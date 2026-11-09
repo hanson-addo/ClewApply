@@ -86,27 +86,38 @@ export function ApplicationDetail({
     onAnnounce(message);
   };
 
-  const changeStatus = async (to: Status) => {
+  /** Runs a call with the buttons disabled. A thrown network error counts as a failure,
+   *  and the buttons always come back. */
+  const run = async (call: () => Promise<boolean>, failed: string) => {
     setBusy(true);
-    const { data } = await api.PATCH("/applications/{application_id}/status", { ...path, body: { status: to } });
-    setBusy(false);
-    if (!data) return onAnnounce("We couldn't move that. Try again.");
-    updated(data, `${data.title} moved to ${columnLabel(columnOf(data.status))}.`);
+    try {
+      if (!(await call())) onAnnounce(failed);
+    } catch {
+      onAnnounce(failed);
+    } finally {
+      setBusy(false);
+    }
   };
 
-  const saveNotes = async () => {
-    setBusy(true);
-    const { data } = await api.PATCH("/applications/{application_id}", { ...path, body: { notes } });
-    setBusy(false);
-    if (!data) return onAnnounce("We couldn't save your notes. Try again.");
-    updated(data, "Notes saved.");
-  };
+  const changeStatus = (to: Status) =>
+    run(async () => {
+      const { data } = await api.PATCH("/applications/{application_id}/status", { ...path, body: { status: to } });
+      if (data) updated(data, `${data.title} moved to ${columnLabel(columnOf(data.status))}.`);
+      return Boolean(data);
+    }, "We couldn't move that. Try again.");
+
+  const saveNotes = () =>
+    run(async () => {
+      const { data } = await api.PATCH("/applications/{application_id}", { ...path, body: { notes } });
+      if (data) updated(data, "Notes saved.");
+      return Boolean(data);
+    }, "We couldn't save your notes. Try again.");
 
   const download = async () => {
     if (!app.resume_id) return;
-    const { data } = await api.GET("/resumes/{resume_id}/download", {
-      params: { path: { resume_id: app.resume_id } },
-    });
+    const { data } = await api
+      .GET("/resumes/{resume_id}/download", { params: { path: { resume_id: app.resume_id } } })
+      .catch(() => ({ data: undefined }));
     const link = data ? safeUrl(data.url) : null;
     if (!link) return onAnnounce("We couldn't get that file. Try again.");
     window.location.assign(link.href);
@@ -121,11 +132,12 @@ export function ApplicationDetail({
       ],
     });
     if (answer !== "delete") return;
-    setBusy(true);
-    const { response } = await api.DELETE("/applications/{application_id}", path);
-    setBusy(false);
-    if (!response.ok) return onAnnounce("We couldn't delete that. Try again.");
-    onDeleted(app);
+    let deleted = false;
+    await run(async () => {
+      deleted = (await api.DELETE("/applications/{application_id}", path)).response.ok;
+      return deleted;
+    }, "We couldn't delete that. Try again.");
+    if (deleted) onDeleted(app);
   };
 
   return (
