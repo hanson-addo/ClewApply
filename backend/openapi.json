@@ -192,6 +192,10 @@
             ],
             "title": "Profile Version"
           },
+          "resume_deleted": {
+            "title": "Resume Deleted",
+            "type": "boolean"
+          },
           "resume_id": {
             "anyOf": [
               {
@@ -203,6 +207,17 @@
               }
             ],
             "title": "Resume Id"
+          },
+          "resume_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resume Name"
           },
           "status": {
             "$ref": "#/components/schemas/ApplicationStatus"
@@ -240,6 +255,8 @@
           "closed_at",
           "notes",
           "resume_id",
+          "resume_name",
+          "resume_deleted",
           "profile_version",
           "created_at",
           "updated_at"
@@ -2627,7 +2644,7 @@
         ]
       },
       "patch": {
-        "description": "Changes the title, company, link, applied date, notes, or what was sent.",
+        "description": "Changes the title, company, link, applied date, notes, or what was sent. The applied\ndate is ignored while the application is Saved.",
         "operationId": "change_application_applications__application_id__patch",
         "parameters": [
           {

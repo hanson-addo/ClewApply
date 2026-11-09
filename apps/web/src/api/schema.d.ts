@@ -49,7 +49,8 @@ export interface paths {
         head?: never;
         /**
          * Change Application
-         * @description Changes the title, company, link, applied date, notes, or what was sent.
+         * @description Changes the title, company, link, applied date, notes, or what was sent. The applied
+         *     date is ignored while the application is Saved.
          */
         patch: operations["change_application_applications__application_id__patch"];
         trace?: never;
@@ -512,8 +513,12 @@ export interface components {
             notes: string;
             /** Profile Version */
             profile_version: number | null;
+            /** Resume Deleted */
+            resume_deleted: boolean;
             /** Resume Id */
             resume_id: string | null;
+            /** Resume Name */
+            resume_name: string | null;
             status: components["schemas"]["ApplicationStatus"];
             /** Title */
             title: string;
