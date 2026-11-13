@@ -16,6 +16,7 @@ from arq.cron import cron
 from clew.catalog.companies import ensure_starter_boards
 from clew.catalog.ingest import POLL_RUN_TIMEOUT, poll_due_boards
 from clew.catalog.merge import close_vanished_jobs
+from clew.catalog.usajobs import USAJOBS_RUN_TIMEOUT_SECONDS, client_headers, poll_usajobs
 from clew.catalog_cleanup import delete_old_raw_postings
 from clew.config import get_settings
 from clew.db.session import get_sessionmaker
@@ -63,6 +64,16 @@ async def poll_boards(ctx: dict[str, Any]) -> None:
         await poll_due_boards(sessions, client)
 
 
+async def read_usajobs(ctx: dict[str, Any]) -> None:
+    settings = get_settings()
+    if settings.usajobs_api_key is None or settings.usajobs_email is None:
+        logger.info("usajobs_not_configured")
+        return
+    headers = client_headers(settings.usajobs_api_key.get_secret_value(), settings.usajobs_email)
+    async with httpx.AsyncClient(headers=headers) as client:
+        await poll_usajobs(get_sessionmaker(), client)
+
+
 def _redis_settings() -> RedisSettings:
     url = get_settings().redis_url
     if url is None:
@@ -78,6 +89,8 @@ class WorkerSettings:
         cron(close_jobs, hour=9, minute=30),
         # Hourly; each board is read again once POLL_EVERY has passed.
         cron(poll_boards, minute=15, timeout=POLL_RUN_TIMEOUT.total_seconds()),
+        # Daily: every open public USAJobs listing, before close_jobs looks for gone ones.
+        cron(read_usajobs, hour=7, minute=0, timeout=USAJOBS_RUN_TIMEOUT_SECONDS),
     ]
     max_tries = MAX_TRIES
     job_timeout = 300
