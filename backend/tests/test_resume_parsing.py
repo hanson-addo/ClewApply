@@ -14,10 +14,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.api.resume_parse import DAILY_PARSE_LIMIT, MESSAGES, TRY_AGAIN
 from clew.auth.deps import get_token_verifier
+from clew.consent import POLICY_VERSION
 from clew.db.session import get_sessionmaker
 from clew.jobs import QueueUnavailable, get_job_queue
 from clew.main import create_app
-from clew.models import ParseStatus, Resume, ResumeParse
+from clew.models import AiConsentEvent, ParseStatus, Resume, ResumeParse
 from clew.resumes.parser import ParsedResume, ParseFailed, ParserUnavailable, to_parsed_resume
 from clew.resumes.parsing import ParseError, RetryLater, run_parse
 from clew.scanning import get_malware_scanner
@@ -97,10 +98,25 @@ def bob() -> dict[str, str]:
     return as_user(f"user_parse_bob_{uuid.uuid4().hex[:8]}")
 
 
+async def agree(api: AsyncClient, who: dict[str, str], agreed: bool = True) -> dict[str, Any]:
+    body = {"agreed": agreed, "policy_version": POLICY_VERSION}
+    response = await api.put("/me/ai-consent", headers=who, json=body)
+    assert response.status_code == 200, response.text
+    result: dict[str, Any] = response.json()
+    return result
+
+
 async def upload_resume(
-    api: AsyncClient, who: dict[str, str], data: bytes | None = None, name: str = "cv.pdf"
+    api: AsyncClient,
+    who: dict[str, str],
+    data: bytes | None = None,
+    name: str = "cv.pdf",
+    *,
+    consent: bool = True,
 ) -> str:
     data = data if data is not None else text_pdf(resume_text("software-engineer"))
+    if consent:
+        await agree(api, who)
     response = await api.post("/resumes", headers=who, files=upload(name, data))
     assert response.status_code == 201, response.text
     resume_id: str = response.json()["id"]
@@ -564,6 +580,163 @@ async def test_usage_events_are_append_only_for_the_app(
         delete(UsageEvent).where(UsageEvent.user_id == alice_id),
         update(UsageEvent).where(UsageEvent.user_id == alice_id).values(kind="x"),
         delete(ResumeParse).where(ResumeParse.user_id == alice_id),
+    ):
+        await bind_user(app_db, alice_id)
+        with pytest.raises(DBAPIError, match="permission denied"):
+            await app_db.execute(statement)
+        await app_db.rollback()
+
+
+# --- AI reading consent (#75) -----------------------------------------------------------------
+
+
+async def test_consent_starts_off_and_can_be_given_and_withdrawn(
+    api: AsyncClient, alice: dict[str, str], db: AsyncSession
+) -> None:
+    state = (await api.get("/me/ai-consent", headers=alice)).json()
+    assert state == {
+        "agreed": False,
+        "agreed_at": None,
+        "agreed_policy_version": None,
+        "policy_version": POLICY_VERSION,
+    }
+    agreed = await agree(api, alice)
+    assert agreed["agreed"] is True
+    assert agreed["agreed_policy_version"] == POLICY_VERSION
+    assert agreed["agreed_at"] is not None
+    # Agreeing again adds nothing; each change of mind adds one record.
+    await agree(api, alice)
+    withdrawn = await agree(api, alice, agreed=False)
+    assert withdrawn["agreed"] is False and withdrawn["agreed_at"] is None
+    await agree(api, alice, agreed=False)
+
+    alice_id = uuid.UUID((await api.get("/me", headers=alice)).json()["id"])
+    events = (
+        await db.scalars(
+            select(AiConsentEvent.agreed)
+            .where(AiConsentEvent.user_id == alice_id)
+            .order_by(AiConsentEvent.created_at)
+        )
+    ).all()
+    assert events == [True, False]
+
+
+async def test_agreeing_needs_the_current_policy_version(
+    api: AsyncClient, alice: dict[str, str]
+) -> None:
+    body = {"agreed": True, "policy_version": "2020-01"}
+    response = await api.put("/me/ai-consent", headers=alice, json=body)
+    assert response.status_code == 409
+    assert response.json()["detail"] == "policy_changed"
+    assert (await api.get("/me/ai-consent", headers=alice)).json()["agreed"] is False
+
+
+async def test_consent_to_an_older_policy_asks_again(
+    api: AsyncClient, alice: dict[str, str], db: AsyncSession, queue: FakeQueue
+) -> None:
+    alice_id = uuid.UUID((await api.get("/me", headers=alice)).json()["id"])
+    db.add(AiConsentEvent(user_id=alice_id, agreed=True, policy_version="2020-01"))
+    await db.commit()
+    state = (await api.get("/me/ai-consent", headers=alice)).json()
+    assert state["agreed"] is False
+    assert state["agreed_policy_version"] == "2020-01"
+    assert state["agreed_at"] is not None
+    await upload_resume(api, alice, consent=False)
+    assert queue.jobs == []
+
+
+async def test_upload_without_consent_keeps_the_file_and_reads_nothing(
+    api: AsyncClient,
+    alice: dict[str, str],
+    queue: FakeQueue,
+    store: MemoryStore,
+    scanner: FakeScanner,
+    parser: FakeParser,
+) -> None:
+    data = text_pdf(resume_text("software-engineer"))
+    response = await api.post("/resumes", headers=alice, files=upload("cv.pdf", data))
+    assert response.status_code == 201
+    assert response.json()["reading"] is False
+    resume_id = response.json()["id"]
+    assert queue.jobs == []
+    assert (await api.get(f"/resumes/{resume_id}/parse", headers=alice)).status_code == 404
+    refused = await api.post(f"/resumes/{resume_id}/parse", headers=alice)
+    assert refused.status_code == 403
+    assert refused.json()["detail"] == "You haven't agreed to let Clew's AI read your resume."
+
+    # Agreeing later, then pressing "Read my resume".
+    await agree(api, alice)
+    started = await api.post(f"/resumes/{resume_id}/parse", headers=alice)
+    assert started.status_code == 202
+    assert started.json()["status"] == "pending"
+    await run_jobs(queue, store, scanner, parser)
+    assert (await parse_state(api, alice, resume_id))["status"] == "done"
+    assert len(parser.texts) == 1
+
+
+async def test_upload_with_consent_says_it_is_reading(
+    api: AsyncClient, alice: dict[str, str], queue: FakeQueue
+) -> None:
+    await agree(api, alice)
+    data = text_pdf(resume_text("software-engineer"))
+    response = await api.post("/resumes", headers=alice, files=upload("cv.pdf", data))
+    assert response.json()["reading"] is True
+    assert len(queue.jobs) == 1
+
+
+async def test_withdrawing_drops_a_queued_read(
+    api: AsyncClient,
+    alice: dict[str, str],
+    queue: FakeQueue,
+    store: MemoryStore,
+    scanner: FakeScanner,
+    parser: FakeParser,
+) -> None:
+    resume_id = await upload_resume(api, alice)
+    await agree(api, alice, agreed=False)
+    await run_jobs(queue, store, scanner, parser)
+    assert parser.texts == []
+    state = await parse_state(api, alice, resume_id)
+    assert state["status"] == "failed"
+    assert state["message"] == MESSAGES[ParseError.NO_CONSENT]
+
+
+async def test_withdrawing_while_the_file_is_read_stops_it_reaching_the_ai(
+    api: AsyncClient,
+    alice: dict[str, str],
+    queue: FakeQueue,
+    store: MemoryStore,
+    scanner: FakeScanner,
+    parser: FakeParser,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from clew.resumes.isolation import run_isolated
+
+    async def withdraw_midway(*args: Any) -> Any:
+        text = await run_isolated(*args)
+        await agree(api, alice, agreed=False)
+        return text
+
+    monkeypatch.setattr("clew.resumes.parsing.run_isolated", withdraw_midway)
+    resume_id = await upload_resume(api, alice)
+    await run_jobs(queue, store, scanner, parser)
+    assert parser.texts == []
+    assert (await parse_state(api, alice, resume_id))["message"] == MESSAGES[ParseError.NO_CONSENT]
+
+
+async def test_consent_records_are_append_only_for_the_app(
+    api: AsyncClient, alice: dict[str, str], app_db: AsyncSession
+) -> None:
+    from sqlalchemy import delete
+    from sqlalchemy.exc import DBAPIError
+
+    from clew.db.session import bind_user
+
+    await agree(api, alice)
+    alice_id = uuid.UUID((await api.get("/me", headers=alice)).json()["id"])
+    for statement in (
+        delete(AiConsentEvent).where(AiConsentEvent.user_id == alice_id),
+        update(AiConsentEvent).where(AiConsentEvent.user_id == alice_id).values(agreed=False),
     ):
         await bind_user(app_db, alice_id)
         with pytest.raises(DBAPIError, match="permission denied"):

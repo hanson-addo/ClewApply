@@ -10,6 +10,7 @@ from clew import __version__
 from clew.api import (
     applications,
     companies,
+    consent,
     feed,
     health,
     jobs,
@@ -72,6 +73,7 @@ def create_app() -> FastAPI:
     )
     app.include_router(health.router)
     app.include_router(me.router)
+    app.include_router(consent.router)
     app.include_router(profile.router)
     app.include_router(preferences.router)
     app.include_router(companies.router)

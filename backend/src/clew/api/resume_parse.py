@@ -13,6 +13,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.auth.deps import CurrentUser
+from clew.consent import NO_CONSENT, has_ai_consent
 from clew.db.session import get_session
 from clew.jobs import JobQueue, QueueUnavailable, get_job_queue
 from clew.models import ParseStatus, Resume, ResumeParse, UsageEvent, UsageKind
@@ -50,6 +51,7 @@ MESSAGES = {
     ParseError.UNAVAILABLE: TRY_AGAIN,
     ParseError.BUSY: "We're still reading your other resume. Try this one again when it's done.",
     ParseError.DAILY_LIMIT: "You've reached today's limit for reading resumes. Try again tomorrow.",
+    ParseError.NO_CONSENT: NO_CONSENT,
 }
 
 Session = Annotated[AsyncSession, Depends(get_session)]
@@ -218,6 +220,7 @@ async def get_parse(resume_id: uuid.UUID, user: CurrentUser, session: Session) -
     status_code=status.HTTP_202_ACCEPTED,
     responses={
         401: {"description": "Not signed in"},
+        403: {"description": "The user hasn't agreed to AI reading (PUT /me/ai-consent)"},
         404: {"description": "No such resume for this user"},
         409: {"description": "The file hasn't passed the virus check"},
         429: {"description": "Another resume is being read, or the daily limit is reached"},
@@ -226,9 +229,11 @@ async def get_parse(resume_id: uuid.UUID, user: CurrentUser, session: Session) -
 async def restart_parse(
     resume_id: uuid.UUID, user: CurrentUser, session: Session, queue: Queue
 ) -> ResumeParseOut:
-    """Reads the resume again after a failure. A parse that is in progress or done is
-    returned as it is."""
+    """Reads the resume, the first time after an upload made without AI consent, or again
+    after a failure. A parse that is in progress or done is returned as it is."""
     resume = await _own_resume(session, resume_id, user.id)
+    if not await has_ai_consent(session, user.id):
+        raise HTTPException(status.HTTP_403_FORBIDDEN, NO_CONSENT)
     if resume.scan_status != ScanVerdict.CLEAN:
         raise HTTPException(status.HTTP_409_CONFLICT, MESSAGES[ParseError.NOT_SCANNED])
     parse = await _own_parse(session, resume_id, user.id)

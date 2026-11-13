@@ -1,6 +1,68 @@
 {
   "components": {
     "schemas": {
+      "AiConsentIn": {
+        "properties": {
+          "agreed": {
+            "title": "Agreed",
+            "type": "boolean"
+          },
+          "policy_version": {
+            "maxLength": 32,
+            "title": "Policy Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agreed",
+          "policy_version"
+        ],
+        "title": "AiConsentIn",
+        "type": "object"
+      },
+      "AiConsentOut": {
+        "properties": {
+          "agreed": {
+            "title": "Agreed",
+            "type": "boolean"
+          },
+          "agreed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed At"
+          },
+          "agreed_policy_version": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agreed Policy Version"
+          },
+          "policy_version": {
+            "title": "Policy Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "agreed",
+          "agreed_at",
+          "agreed_policy_version",
+          "policy_version"
+        ],
+        "title": "AiConsentOut",
+        "type": "object"
+      },
       "ApplicationChange": {
         "description": "Fields to change; the ones left out stay as they are. Send null to clear `url`,\n`applied_at`, `resume_id` or `profile_version`.",
         "properties": {
@@ -2069,6 +2131,10 @@
             "title": "Id",
             "type": "string"
           },
+          "reading": {
+            "title": "Reading",
+            "type": "boolean"
+          },
           "size_bytes": {
             "title": "Size Bytes",
             "type": "integer"
@@ -2079,7 +2145,8 @@
           "filename",
           "content_type",
           "size_bytes",
-          "created_at"
+          "created_at",
+          "reading"
         ],
         "title": "ResumeOut",
         "type": "object"
@@ -3341,6 +3408,87 @@
         ]
       }
     },
+    "/me/ai-consent": {
+      "get": {
+        "description": "Whether Clew's AI may read this user's resumes.",
+        "operationId": "get_ai_consent_me_ai_consent_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Ai Consent",
+        "tags": [
+          "account"
+        ]
+      },
+      "put": {
+        "description": "Agree to, or withdraw, AI reading. Each change is kept as a new record. Withdrawing\nstops every read that hasn't reached the AI yet; a resume already sent can't be\nrecalled, and drafts already made are kept.",
+        "operationId": "set_ai_consent_me_ai_consent_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiConsentIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiConsentOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "409": {
+            "description": "policy_version isn't the current one (detail: policy_changed)"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Set Ai Consent",
+        "tags": [
+          "account"
+        ]
+      }
+    },
     "/preferences": {
       "get": {
         "description": "The signed-in user's job preferences, or the defaults before the first save.",
@@ -3639,7 +3787,7 @@
     },
     "/resumes": {
       "post": {
-        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,\nand the file is virus-scanned before it is stored. Reading it into a draft profile starts\nstraight away; follow it with GET /resumes/{id}/parse.",
+        "description": "Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,\nand the file is virus-scanned before it is stored. If the user has agreed to AI reading\n(GET /me/ai-consent), reading it into a draft profile starts straight away; follow it\nwith GET /resumes/{id}/parse.",
         "operationId": "upload_resume_resumes_post",
         "requestBody": {
           "content": {
@@ -3805,7 +3953,7 @@
         ]
       },
       "post": {
-        "description": "Reads the resume again after a failure. A parse that is in progress or done is\nreturned as it is.",
+        "description": "Reads the resume, the first time after an upload made without AI consent, or again\nafter a failure. A parse that is in progress or done is returned as it is.",
         "operationId": "restart_parse_resumes__resume_id__parse_post",
         "parameters": [
           {
@@ -3832,6 +3980,9 @@
           },
           "401": {
             "description": "Not signed in"
+          },
+          "403": {
+            "description": "The user hasn't agreed to AI reading (PUT /me/ai-consent)"
           },
           "404": {
             "description": "No such resume for this user"
