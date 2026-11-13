@@ -193,8 +193,9 @@ export function UploadStep() {
         Let Clew&apos;s AI read my resume and fill in my profile.
       </label>
       <p id={`${id}-consent-text`} className="field-hint upload-consent-text">
-        Clew uses Anthropic&apos;s AI to read your resume and fill in your profile. Anthropic may
-        keep the text for up to 30 days and doesn&apos;t use it to train its models.{" "}
+        Clew uses Anthropic&apos;s AI to read your resume and fill in your profile. Anthropic
+        doesn&apos;t use it to train its models and deletes it within 30 days, unless it&apos;s
+        flagged under Anthropic&apos;s usage policies or the law requires keeping it longer.{" "}
         <a href="/privacy" target="_blank" rel="noopener noreferrer">
           Privacy policy<span className="clew-sr-only">, opens in a new tab</span>
         </a>

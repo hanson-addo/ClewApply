@@ -109,7 +109,7 @@ describe("upload step", () => {
     const box = await screen.findByRole("checkbox", { name: /Let Clew's AI read my resume/ });
     await waitFor(() => expect(box).toBeEnabled());
     expect(box).not.toBeChecked();
-    expect(box).toHaveAccessibleDescription(/Anthropic may keep the text for up to 30 days/);
+    expect(box).toHaveAccessibleDescription(/deletes it within 30 days, unless it's flagged/);
     expect(screen.getByRole("link", { name: "Privacy policy, opens in a new tab" })).toHaveAttribute(
       "target",
       "_blank",
