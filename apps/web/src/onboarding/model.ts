@@ -41,6 +41,12 @@ const PAUSED: UploadProblem = {
   action: "retry",
   byHand: true,
 };
+const TOO_MANY: UploadProblem = {
+  title: "You've uploaded a lot of files recently",
+  body: "Try again in an hour. Your earlier uploads are still saved.",
+  action: "choose",
+  byHand: true,
+};
 export const NETWORK: UploadProblem = {
   title: "The upload didn't finish",
   body: "Check your connection and try again. Nothing was saved.",
@@ -60,6 +66,7 @@ export function uploadProblem(status: number): UploadProblem {
   if (status === 413) return TOO_LARGE;
   if (status === 415) return WRONG_TYPE;
   if (status === 422) return FLAGGED;
+  if (status === 429) return TOO_MANY;
   if (status === 503) return PAUSED;
   return NETWORK;
 }

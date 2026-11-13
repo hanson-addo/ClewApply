@@ -38,6 +38,7 @@ export function UploadStep() {
   const [consent, setConsent] = useState<Consent | null>(null);
   const [consentError, setConsentError] = useState<string | null>(null);
   const [consentBusy, setConsentBusy] = useState(false);
+  const [readError, setReadError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [status, setStatus] = useState("");
   const [dragging, setDragging] = useState(false);
@@ -59,20 +60,25 @@ export function UploadStep() {
     }
   });
 
+  const [consentLoad, setConsentLoad] = useState<"loading" | "failed" | "ready">("loading");
+  const [consentTry, setConsentTry] = useState(0);
+
   useEffect(() => {
     let cancelled = false;
     api
       .GET("/me/ai-consent")
       .then(({ data }) => {
-        if (!cancelled && data) setConsent(data);
+        if (cancelled) return;
+        if (data) setConsent(data);
+        setConsentLoad(data ? "ready" : "failed");
       })
       .catch(() => {
-        // The box stays unticked; ticking it tries again.
+        if (!cancelled) setConsentLoad("failed");
       });
     return () => {
       cancelled = true;
     };
-  }, [api]);
+  }, [api, consentTry]);
 
   const agreed = consent?.agreed ?? false;
 
@@ -145,17 +151,21 @@ export function UploadStep() {
 
   const readNow = async (resumeId: string, name: string, size: string) => {
     try {
-      const { data, response } = await api.POST("/resumes/{resume_id}/parse", {
+      const { data, error } = await api.POST("/resumes/{resume_id}/parse", {
         params: { path: { resume_id: resumeId } },
       });
-      if (data || response.status === 429 || response.status === 409) {
+      if (data) {
+        setReadError(null);
         setPhase({ kind: "reading", name, size, resumeId });
         setStatus("Reading your resume. This usually takes under a minute.");
-      } else {
-        setConsentError("We couldn't start reading it. Try again.");
+        return;
       }
+      // 409 (not checked for viruses yet) and 429 (busy or daily limit) carry a message
+      // written for the user.
+      const detail = (error as { detail?: unknown } | undefined)?.detail;
+      setReadError(typeof detail === "string" && detail ? detail : "We couldn't start reading it. Try again.");
     } catch {
-      setConsentError("We couldn't start reading it. Check your connection and try again.");
+      setReadError("We couldn't start reading it. Check your connection and try again.");
     }
   };
 
@@ -197,6 +207,17 @@ export function UploadStep() {
       )}
       {consent && !consent.agreed && consent.agreed_policy_version && (
         <p className="field-hint">Our privacy policy changed. Please read it and tick again.</p>
+      )}
+      {consentLoad === "failed" && (
+        <p className="field-error" role="alert">
+          We couldn&apos;t load this setting.{" "}
+          <button type="button" className="button button-ghost" onClick={() => {
+              setConsentLoad("loading");
+              setConsentTry((n) => n + 1);
+            }}>
+            Try again
+          </button>
+        </p>
       )}
       {consentError && (
         <p className="field-error" role="alert">
@@ -348,6 +369,11 @@ export function UploadStep() {
               >
                 Read my resume
               </button>
+              {readError && (
+                <p className="field-error" role="alert">
+                  {readError}
+                </p>
+              )}
               <Link to={`/onboarding/review?resume=${phase.resumeId}&manual=1`} className="button button-secondary">
                 Enter my details by hand
               </Link>

@@ -183,6 +183,41 @@ describe("upload step", () => {
     expect(calls.map((c) => c.key)).toContain(`POST /resumes/${RESUME_ID}/parse`);
   });
 
+  it("offers to load the consent setting again when it fails", async () => {
+    let tries = 0;
+    serve({
+      "GET /me/ai-consent": () =>
+        ++tries === 1 ? Response.json({ detail: "x" }, { status: 500 }) : Response.json(NOT_AGREED),
+    });
+    renderAt("/onboarding/upload");
+    const box = await screen.findByRole("checkbox", { name: /Let Clew's AI/ });
+    expect(await screen.findByText(/We couldn't load this setting/)).toBeInTheDocument();
+    expect(box).toBeDisabled();
+    await user().click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => expect(box).toBeEnabled());
+    expect(screen.queryByText(/We couldn't load this setting/)).not.toBeInTheDocument();
+  });
+
+  it("shows why a read couldn't start", async () => {
+    serve({
+      "GET /me/ai-consent": () => Response.json(AGREED),
+      "POST /resumes": () =>
+        Response.json(
+          { id: RESUME_ID, filename: "resume.pdf", content_type: "application/pdf", size_bytes: 2048, created_at: "2026-11-13T12:00:00Z", reading: false },
+          { status: 201 },
+        ),
+      [`POST /resumes/${RESUME_ID}/parse`]: () =>
+        Response.json({ detail: "You've reached today's limit. Try again tomorrow." }, { status: 429 }),
+    });
+    renderAt("/onboarding/upload");
+    const box = await screen.findByRole("checkbox", { name: /Let Clew's AI/ });
+    await waitFor(() => expect(box).toBeEnabled());
+    await user().upload(screen.getByLabelText("Choose a file"), pdf());
+    await user().click(await screen.findByRole("button", { name: "Read my resume" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("You've reached today's limit");
+    expect(screen.getByRole("button", { name: "Read my resume" })).toBeInTheDocument();
+  });
+
   it("refuses a file that's too big or the wrong type before sending it", async () => {
     renderAt("/onboarding/upload");
     const input = await screen.findByLabelText("Choose a file");

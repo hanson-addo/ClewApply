@@ -184,7 +184,7 @@ export function ReviewStep() {
         body: {
           data: cleaned,
           base_version_id: existing.baseId,
-          change_summary: "From your resume upload",
+          change_summary: byHand ? "Entered during setup" : "From your resume upload",
         },
       });
       if (data) {
