@@ -63,7 +63,8 @@ function serve(overrides: Record<string, Handler> = {}) {
         salary_floor: null,
         seniority: [],
         excluded_companies: [],
-        excluded_keywords: [],
+        excluded_keywords: ["night shift"],
+        updated_at: "2026-11-13T12:00:00Z",
       }),
     ...overrides,
   };
@@ -355,7 +356,8 @@ describe("preferences step", () => {
     await user().click(screen.getByRole("button", { name: "Show my jobs" }));
 
     await waitFor(() => expect(router.state.location.pathname).toBe("/jobs"));
-    expect(calls.find((c) => c.key === "PUT /preferences")?.body).toMatchObject({
+    // Exactly the fields the PUT takes: the GET's updated_at would be refused with a 422.
+    expect(calls.find((c) => c.key === "PUT /preferences")?.body).toEqual({
       titles: ["Maze Mapper", "Thread Engineer"],
       locations: [
         { city: "Austin", region: "TX" },
@@ -363,6 +365,9 @@ describe("preferences step", () => {
       ],
       remote_ok: false,
       salary_floor: 90000,
+      seniority: [],
+      excluded_companies: [],
+      excluded_keywords: ["night shift"],
     });
   });
 

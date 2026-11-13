@@ -64,8 +64,12 @@ export function PreferencesStep() {
     setSaving(true);
     try {
       const { data, response } = await api.PUT("/preferences", {
+        // Fields are listed one by one: the GET answer also has updated_at, which the
+        // PUT refuses.
         body: {
-          ...loaded.saved,
+          seniority: loaded.saved.seniority ?? [],
+          excluded_companies: loaded.saved.excluded_companies ?? [],
+          excluded_keywords: loaded.saved.excluded_keywords ?? [],
           titles: listFrom(titles, { commas: true }).slice(0, 20),
           locations: listFrom(places)
             .map(parseLocation)
