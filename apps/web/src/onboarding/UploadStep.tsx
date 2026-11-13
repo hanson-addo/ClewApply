@@ -38,6 +38,8 @@ export function UploadStep() {
   const [consent, setConsent] = useState<Consent | null>(null);
   const [consentError, setConsentError] = useState<string | null>(null);
   const [consentBusy, setConsentBusy] = useState(false);
+  // What the box shows while its change is saving; it goes back if the save fails.
+  const [pendingAgree, setPendingAgree] = useState<boolean | null>(null);
   const [readError, setReadError] = useState<string | null>(null);
   const [phase, setPhase] = useState<Phase>({ kind: "idle" });
   const [status, setStatus] = useState("");
@@ -97,6 +99,7 @@ export function UploadStep() {
 
   const setAgreement = async (agree: boolean) => {
     setConsentBusy(true);
+    setPendingAgree(agree);
     setConsentError(null);
     try {
       const { data } = await api.PUT("/me/ai-consent", {
@@ -108,6 +111,7 @@ export function UploadStep() {
       setConsentError("We couldn't save that. Check your connection and try again.");
     } finally {
       setConsentBusy(false);
+      setPendingAgree(null);
     }
   };
 
@@ -185,7 +189,7 @@ export function UploadStep() {
         <input
           id={`${id}-consent`}
           type="checkbox"
-          checked={agreed}
+          checked={pendingAgree ?? agreed}
           disabled={consentBusy || busy || consent === null}
           aria-describedby={`${id}-consent-text`}
           onChange={(event) => void setAgreement(event.target.checked)}

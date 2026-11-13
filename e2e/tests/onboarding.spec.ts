@@ -30,7 +30,8 @@ test("upload a resume and confirm the profile (UP-09)", async ({ page, request }
   await expect(consent).toBeEnabled();
   const { violations } = await new AxeBuilder({ page }).analyze();
   expect(violations.filter((v) => v.impact === "critical" || v.impact === "serious")).toEqual([]);
-  await consent.check();
+  await consent.click();
+  await expect(consent).toBeChecked();
   await expect(page.getByText(/You agreed on/)).toBeVisible();
 
   await page.getByLabel("Choose a file").setInputFiles({
