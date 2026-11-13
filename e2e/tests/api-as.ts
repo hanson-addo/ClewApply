@@ -46,3 +46,17 @@ export async function uploadResume(
     timeout: 60_000,
   });
 }
+
+/** Lets Clew's AI read resumes for the user signed in on `page` (#75), as ticking the box
+ *  on the upload screen does. */
+export async function agreeToAiReading(page: Page, request: APIRequestContext): Promise<void> {
+  const headers = await bearer(page);
+  const current = await request.get(`${API_URL}/me/ai-consent`, { headers });
+  expect(current.status()).toBe(200);
+  const { policy_version } = (await current.json()) as { policy_version: string };
+  const response = await request.put(`${API_URL}/me/ai-consent`, {
+    headers,
+    data: { agreed: true, policy_version },
+  });
+  expect(response.status(), await response.text()).toBe(200);
+}

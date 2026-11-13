@@ -2,7 +2,7 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API_URL, hasClerk, hasParsing, realParserKey } from "../env";
-import { bearer, signInForApi, uploadResume } from "./api-as";
+import { agreeToAiReading, bearer, signInForApi, uploadResume } from "./api-as";
 import { oversizedDocx, textPdf } from "./files";
 
 // Reading an uploaded resume into a draft profile (#71, test plan §3.4), through the real
@@ -42,6 +42,12 @@ const DOCX_TYPE = "application/vnd.openxmlformats-officedocument.wordprocessingm
 const RESUME = ["Ariadne Testuser", "Thread engineer at Labyrinth Logistics, 2021 to now"];
 // The stand-in AI holds its answer for a while when it sees this, so a parse stays running.
 const SLOW = [...RESUME, "SLOW-STUB"];
+
+/** A new user who has ticked "Let Clew's AI read my resume". */
+async function signInAndAgree(page: Page, request: APIRequestContext, label: string) {
+  await signInForApi(page, request, label);
+  await agreeToAiReading(page, request);
+}
 
 async function upload(page: Page, request: APIRequestContext, file: Buffer, type = PDF_TYPE) {
   const name = type === PDF_TYPE ? "resume.pdf" : "resume.docx";
@@ -90,7 +96,7 @@ test.describe("with the stand-in AI", () => {
     page,
     request,
   }) => {
-    await signInForApi(page, request, "parse-happy");
+    await signInAndAgree(page, request, "parse-happy");
     const id = await upload(page, request, textPdf(SLOW));
 
     const first = (await (await getParse(page, request, id)).json()) as Parse;
@@ -117,7 +123,7 @@ test.describe("with the stand-in AI", () => {
     page,
     request,
   }) => {
-    await signInForApi(page, request, "parse-busy");
+    await signInAndAgree(page, request, "parse-busy");
     const first = await upload(page, request, textPdf(SLOW));
     await waitFor(page, request, first, (parse) => parse.status === "running");
 
@@ -142,15 +148,37 @@ for (const [label, file, type, message] of [
   ["a Word file too big to read", oversizedDocx(), DOCX_TYPE, UNREADABLE],
 ] as const) {
   test(`${label} fails with a message saying what to do`, async ({ page, request }) => {
-    await signInForApi(page, request, "parse-fail");
+    await signInAndAgree(page, request, "parse-fail");
     const id = await upload(page, request, file, type);
     const parse = await waitFor(page, request, id, finished);
     expect(parse).toMatchObject({ status: "failed", message, result: null });
   });
 }
 
+test("without AI consent, an upload is kept but not read until the user agrees", async ({
+  page,
+  request,
+}) => {
+  await signInForApi(page, request, "parse-consent");
+  const response = await uploadResume(page, request, "resume.pdf", textPdf(RESUME), PDF_TYPE);
+  expect(response.status(), await response.text()).toBe(201);
+  const { id, reading } = (await response.json()) as { id: string; reading: boolean };
+  expect(reading).toBe(false);
+  expect((await getParse(page, request, id)).status()).toBe(404);
+  const refused = await restart(page, request, id);
+  expect(refused.status()).toBe(403);
+  expect(((await refused.json()) as { detail: string }).detail).toBe(
+    "You haven't agreed to let Clew's AI read your resume.",
+  );
+
+  await agreeToAiReading(page, request);
+  expect((await restart(page, request, id)).status()).toBe(202);
+  const parse = await waitFor(page, request, id, finished);
+  expect(parse.status, parse.message ?? "").toBe("done");
+});
+
 test("a failed read can be started again", async ({ page, request }) => {
-  await signInForApi(page, request, "parse-restart");
+  await signInAndAgree(page, request, "parse-restart");
   const id = await upload(page, request, textPdf(RESUME, { encrypted: true }));
   expect((await waitFor(page, request, id, finished)).status).toBe("failed");
 
@@ -167,7 +195,7 @@ test("a failed read can be started again", async ({ page, request }) => {
 
 test("reading is capped at 10 starts a day (429)", async ({ page, request }) => {
   test.setTimeout(180_000);
-  await signInForApi(page, request, "parse-daily");
+  await signInAndAgree(page, request, "parse-daily");
   // The upload is the first start. A file that fails fast keeps each round short.
   const id = await upload(page, request, textPdf(RESUME, { encrypted: true }));
   await waitFor(page, request, id, finished);
@@ -188,8 +216,8 @@ test("another user can't see or start reading your resume", async ({ browser, re
     const bob = await bobContext.newPage();
     await setupClerkTestingToken({ page: alice });
     await setupClerkTestingToken({ page: bob });
-    await signInForApi(alice, request, "parse-alice");
-    await signInForApi(bob, request, "parse-bob");
+    await signInAndAgree(alice, request, "parse-alice");
+    await signInAndAgree(bob, request, "parse-bob");
 
     const id = await upload(alice, request, textPdf(RESUME));
     expect((await getParse(bob, request, id)).status()).toBe(404);
@@ -210,7 +238,7 @@ test("reading routes refuse requests without a session", async ({ request }) => 
 test("the real AI reads a made-up resume into a draft profile", async ({ page, request }) => {
   test.skip(!realParserKey, "Set CLEW_E2E_ANTHROPIC_API_KEY to call the real AI");
   test.setTimeout(150_000);
-  await signInForApi(page, request, "parse-real");
+  await signInAndAgree(page, request, "parse-real");
   const id = await upload(page, request, textPdf(RESUME));
   const parse = await waitFor(page, request, id, finished, 120_000);
   expect(parse.status, parse.message ?? "").toBe("done");
