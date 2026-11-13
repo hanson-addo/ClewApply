@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.api.resume_parse import start_parse
 from clew.auth.deps import CurrentUser
+from clew.consent import has_ai_consent
 from clew.db.session import get_session
 from clew.jobs import JobQueue, get_job_queue
 from clew.limits import TOO_LARGE
@@ -61,6 +62,9 @@ class ResumeOut(BaseModel):
     content_type: str
     size_bytes: int
     created_at: datetime
+    # True when reading it with AI started (the user has agreed to AI reading); follow it
+    # with GET /resumes/{id}/parse. False: start it later with POST /resumes/{id}/parse.
+    reading: bool
 
 
 class DownloadLink(BaseModel):
@@ -88,8 +92,9 @@ async def upload_resume(
     queue: Queue,
 ) -> ResumeOut:
     """Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,
-    and the file is virus-scanned before it is stored. Reading it into a draft profile starts
-    straight away; follow it with GET /resumes/{id}/parse."""
+    and the file is virus-scanned before it is stored. If the user has agreed to AI reading
+    (GET /me/ai-consent), reading it into a draft profile starts straight away; follow it
+    with GET /resumes/{id}/parse."""
     data = await file.read(MAX_RESUME_BYTES + 1)
     if len(data) > MAX_RESUME_BYTES:
         raise HTTPException(status.HTTP_413_CONTENT_TOO_LARGE, TOO_LARGE)
@@ -123,13 +128,16 @@ async def upload_resume(
     session.add(resume)
     await session.commit()
     await session.refresh(resume)
-    await start_parse(session, queue, resume.id, user.id)
+    reading = await has_ai_consent(session, user.id)
+    if reading:
+        await start_parse(session, queue, resume.id, user.id)
     return ResumeOut(
         id=resume.id,
         filename=resume.filename,
         content_type=resume.content_type,
         size_bytes=resume.size_bytes,
         created_at=resume.created_at,
+        reading=reading,
     )
 
 

@@ -281,6 +281,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/me/ai-consent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Ai Consent
+         * @description Whether Clew's AI may read this user's resumes.
+         */
+        get: operations["get_ai_consent_me_ai_consent_get"];
+        /**
+         * Set Ai Consent
+         * @description Agree to, or withdraw, AI reading. Each change is kept as a new record. Withdrawing
+         *     stops every read that hasn't reached the AI yet; a resume already sent can't be
+         *     recalled, and drafts already made are kept.
+         */
+        put: operations["set_ai_consent_me_ai_consent_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/preferences": {
         parameters: {
             query?: never;
@@ -402,8 +428,9 @@ export interface paths {
         /**
          * Upload Resume
          * @description Upload a resume (PDF or DOCX, up to 10 MB). The type is checked from the file's content,
-         *     and the file is virus-scanned before it is stored. Reading it into a draft profile starts
-         *     straight away; follow it with GET /resumes/{id}/parse.
+         *     and the file is virus-scanned before it is stored. If the user has agreed to AI reading
+         *     (GET /me/ai-consent), reading it into a draft profile starts straight away; follow it
+         *     with GET /resumes/{id}/parse.
          */
         post: operations["upload_resume_resumes_post"];
         delete?: never;
@@ -447,8 +474,8 @@ export interface paths {
         put?: never;
         /**
          * Restart Parse
-         * @description Reads the resume again after a failure. A parse that is in progress or done is
-         *     returned as it is.
+         * @description Reads the resume, the first time after an upload made without AI consent, or again
+         *     after a failure. A parse that is in progress or done is returned as it is.
          */
         post: operations["restart_parse_resumes__resume_id__parse_post"];
         delete?: never;
@@ -461,6 +488,24 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AiConsentIn */
+        AiConsentIn: {
+            /** Agreed */
+            agreed: boolean;
+            /** Policy Version */
+            policy_version: string;
+        };
+        /** AiConsentOut */
+        AiConsentOut: {
+            /** Agreed */
+            agreed: boolean;
+            /** Agreed At */
+            agreed_at: string | null;
+            /** Agreed Policy Version */
+            agreed_policy_version: string | null;
+            /** Policy Version */
+            policy_version: string;
+        };
         /**
          * ApplicationChange
          * @description Fields to change; the ones left out stay as they are. Send null to clear `url`,
@@ -1120,6 +1165,8 @@ export interface components {
              * Format: uuid
              */
             id: string;
+            /** Reading */
+            reading: boolean;
             /** Size Bytes */
             size_bytes: number;
         };
@@ -1879,6 +1926,80 @@ export interface operations {
             };
         };
     };
+    get_ai_consent_me_ai_consent_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConsentOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    set_ai_consent_me_ai_consent_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AiConsentIn"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AiConsentOut"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description policy_version isn't the current one (detail: policy_changed) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_preferences_preferences_get: {
         parameters: {
             query?: never;
@@ -2327,6 +2448,13 @@ export interface operations {
             };
             /** @description Not signed in */
             401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The user hasn't agreed to AI reading (PUT /me/ai-consent) */
+            403: {
                 headers: {
                     [name: string]: unknown;
                 };

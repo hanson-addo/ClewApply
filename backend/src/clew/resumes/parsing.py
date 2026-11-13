@@ -13,6 +13,7 @@ from typing import Any
 from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from clew.consent import has_ai_consent
 from clew.db.session import bind_user
 from clew.models import ParseStatus, Resume, ResumeParse
 from clew.resumes.files import MAX_RESUME_BYTES
@@ -40,6 +41,8 @@ class ParseError(StrEnum):
     # Refused before starting (threat model R26).
     BUSY = "busy"
     DAILY_LIMIT = "daily_limit"
+    # The user hasn't agreed to AI reading, or withdrew before the text was sent (#75).
+    NO_CONSENT = "no_consent"
 
 
 class RetryLater(Exception):
@@ -78,6 +81,9 @@ async def run_parse(
         if resume.scan_status != ScanVerdict.CLEAN:
             await _finish(session, parse_id, user_id, error=ParseError.NOT_SCANNED)
             return
+        if not await has_ai_consent(session, user_id):
+            await _finish(session, parse_id, user_id, error=ParseError.NO_CONSENT)
+            return
         await session.execute(
             update(ResumeParse)
             .where(ResumeParse.id == parse_id, ResumeParse.user_id == user_id)
@@ -97,7 +103,12 @@ async def run_parse(
             error = ParseError.INFECTED
         else:
             text = await run_isolated(extract_text, data, content_type)
-            result = (await parser.parse(text)).model_dump(mode="json", exclude_none=True)
+            # Checked again right before the text leaves Clew: the user may have withdrawn
+            # while the file was fetched and read.
+            if await _consented(sessions, user_id):
+                result = (await parser.parse(text)).model_dump(mode="json", exclude_none=True)
+            else:
+                error = ParseError.NO_CONSENT
     except (StorageUnavailable, ScannerUnavailable, ParserUnavailable, RetryLater):
         if not final_attempt:
             async with sessions() as session:
@@ -127,6 +138,12 @@ async def run_parse(
             )
         await _finish(session, parse_id, user_id, error=error, result=result)
     logger.info("resume_parsed", extra={"outcome": error.value if error else "done"})
+
+
+async def _consented(sessions: async_sessionmaker[AsyncSession], user_id: uuid.UUID) -> bool:
+    async with sessions() as session:
+        await bind_user(session, user_id)
+        return await has_ai_consent(session, user_id)
 
 
 async def _finish(
