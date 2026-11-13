@@ -44,6 +44,9 @@ export function ApplicationsPage() {
   const selects = useRef(new Map<string, HTMLSelectElement>());
   const tabs = useRef(new Map<Column, HTMLButtonElement>());
   const addButton = useRef<HTMLButtonElement>(null);
+  // The card whose Status select takes focus once the board has re-rendered. A moved card
+  // is a new element in its new column, so focus can only move after React commits it.
+  const focusCard = useRef<string | null>(null);
 
   useEffect(() => {
     document.title = "Applications · Clew";
@@ -64,6 +67,13 @@ export function ApplicationsPage() {
       cancelled = true;
     };
   }, [api, attempt]);
+
+  useEffect(() => {
+    const id = focusCard.current;
+    if (!id) return;
+    focusCard.current = null;
+    selects.current.get(id)?.focus();
+  }, [board, tab]);
 
   const apps = useMemo(() => (board.status === "ready" ? board.apps : []), [board]);
   const byColumn = useMemo(() => {
@@ -88,11 +98,11 @@ export function ApplicationsPage() {
       .catch(() => ({ data: undefined }));
     if (!data) return setAnnouncement(`We couldn't move ${app.title}. Try again.`);
     const column = columnOf(data.status);
+    // Focus stays on the card's Status select, now in its new column.
+    focusCard.current = data.id;
     replace(data);
     setTab(column);
     setAnnouncement(`${data.title} moved to ${columnLabel(column)}.`);
-    // Focus stays on the card's Status select, now in its new column.
-    requestAnimationFrame(() => selects.current.get(data.id)?.focus());
   };
 
   const onTabKey = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -258,12 +268,12 @@ export function ApplicationsPage() {
             }}
             onAdded={(app) => {
               setAdding(false);
+              // Focus goes to the new card's Status select.
+              focusCard.current = app.id;
               replace(app);
               const column = columnOf(app.status);
               setTab(column);
               setAnnouncement(`Added ${app.title} to ${columnLabel(column)}.`);
-              // Focus goes to the new card's Status select.
-              requestAnimationFrame(() => selects.current.get(app.id)?.focus());
             }}
           />
         )}
