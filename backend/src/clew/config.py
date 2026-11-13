@@ -4,6 +4,7 @@ Settings fail closed: a deploy that forgets CLEW_ENV runs as production, and a
 missing CLEW_DATABASE_URL stops startup instead of falling back to defaults.
 """
 
+import re
 from functools import lru_cache
 from typing import Literal
 
@@ -43,6 +44,11 @@ class Settings(BaseSettings):
     # use, or every parse fails as parse_failed with a 400 from the API.
     parser_model: str = "claude-haiku-5-5"
     parser_timeout_seconds: float = 60.0
+    # USAJobs Search API (developer.usajobs.gov). The key goes in the Authorization-Key header
+    # and the email it was issued to goes in User-Agent, as the API asks. Without both, the
+    # worker skips USAJobs.
+    usajobs_api_key: SecretStr | None = None
+    usajobs_email: str | None = None
 
     @field_validator("cors_origins")
     @classmethod
@@ -68,12 +74,21 @@ class Settings(BaseSettings):
         "s3_access_key_id",
         "clamav_host",
         "redis_url",
+        "usajobs_email",
     )
     @classmethod
     def blank_is_unset(cls, value: str | None) -> str | None:
         return value or None
 
-    @field_validator("anthropic_api_key", mode="before")
+    @field_validator("usajobs_email")
+    @classmethod
+    def email_is_one_address(cls, email: str | None) -> str | None:
+        # It goes in a request header, so one plain address only.
+        if email is not None and not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+            raise ValueError("CLEW_USAJOBS_EMAIL must be one email address")
+        return email
+
+    @field_validator("anthropic_api_key", "usajobs_api_key", mode="before")
     @classmethod
     def blank_secret_is_unset(cls, value: object) -> object:
         return None if value == "" else value

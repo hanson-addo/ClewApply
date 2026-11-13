@@ -1,0 +1,55 @@
+{
+  "LanguageCode": "EN",
+  "SearchParameters": {},
+  "SearchResult": {
+    "SearchResultCount": 1,
+    "SearchResultCountAll": 5,
+    "SearchResultItems": [
+      {
+        "MatchedObjectId": "900000005",
+        "MatchedObjectDescriptor": {
+          "PositionID": "LAB-900000005",
+          "PositionTitle": "Thread Inspector",
+          "PositionURI": "https://www.usajobs.gov:443/job/900000005",
+          "ApplyURI": [
+            "https://www.usajobs.gov:443/job/900000005/apply"
+          ],
+          "PositionLocationDisplay": "Multiple Locations",
+          "PositionLocation": [
+            {
+              "LocationName": "Austin, Texas",
+              "CountryCode": "United States"
+            },
+            {
+              "LocationName": "Tampa, Florida",
+              "CountryCode": "United States"
+            }
+          ],
+          "OrganizationName": "Bureau of Thread Management",
+          "DepartmentName": "Department of the Labyrinth",
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "55000",
+              "MaximumRange": "72000",
+              "RateIntervalCode": "PA",
+              "Description": "Per Year"
+            }
+          ],
+          "PublicationStartDate": "2026-11-03T00:00:00.0000",
+          "ApplicationCloseDate": "2026-12-01T23:59:59.9970",
+          "QualificationSummary": "You must be able to follow a thread.",
+          "UserArea": {
+            "Details": {
+              "JobSummary": null,
+              "RemoteIndicator": false
+            }
+          }
+        }
+      }
+    ],
+    "UserArea": {
+      "NumberOfPages": "2",
+      "IsRadialSearch": false
+    }
+  }
+}

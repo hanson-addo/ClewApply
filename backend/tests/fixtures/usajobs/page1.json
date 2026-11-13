@@ -1,0 +1,154 @@
+{
+  "LanguageCode": "EN",
+  "SearchParameters": {},
+  "SearchResult": {
+    "SearchResultCount": 4,
+    "SearchResultCountAll": 5,
+    "SearchResultItems": [
+      {
+        "MatchedObjectId": "900000001",
+        "MatchedObjectDescriptor": {
+          "PositionID": "LAB-900000001",
+          "PositionTitle": "Maze Cartographer",
+          "PositionURI": "https://www.usajobs.gov:443/job/900000001",
+          "ApplyURI": [
+            "https://www.usajobs.gov:443/job/900000001/apply"
+          ],
+          "PositionLocationDisplay": "Denver, Colorado",
+          "PositionLocation": [
+            {
+              "LocationName": "Denver, Colorado",
+              "CountryCode": "United States"
+            }
+          ],
+          "OrganizationName": "Bureau of Thread Management",
+          "DepartmentName": "Department of the Labyrinth",
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "70000.00",
+              "MaximumRange": "91000.00",
+              "RateIntervalCode": "PA",
+              "Description": "Per Year"
+            }
+          ],
+          "PublicationStartDate": "2026-11-01T00:00:00.0000",
+          "ApplicationCloseDate": "2026-12-01T23:59:59.9970",
+          "QualificationSummary": "You must be able to follow a thread.",
+          "UserArea": {
+            "Details": {
+              "JobSummary": "<p>Map every turn of the maze.</p><ul><li>Field work</li></ul>",
+              "RemoteIndicator": false
+            }
+          }
+        }
+      },
+      {
+        "MatchedObjectId": "900000002",
+        "MatchedObjectDescriptor": {
+          "PositionID": "LAB-900000002",
+          "PositionTitle": "Thread Liaison",
+          "PositionURI": "https://www.usajobs.gov:443/job/900000002",
+          "ApplyURI": [
+            "https://www.usajobs.gov:443/job/900000002/apply"
+          ],
+          "PositionLocationDisplay": "Ramstein, Germany",
+          "PositionLocation": [
+            {
+              "LocationName": "Ramstein, Germany",
+              "CountryCode": "Germany"
+            }
+          ],
+          "OrganizationName": "Bureau of Thread Management",
+          "DepartmentName": "Department of the Labyrinth",
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "60000",
+              "MaximumRange": "80000",
+              "RateIntervalCode": "PA",
+              "Description": "Per Year"
+            }
+          ],
+          "PublicationStartDate": "2026-11-01T00:00:00.0000",
+          "ApplicationCloseDate": "2026-12-01T23:59:59.9970",
+          "QualificationSummary": "You must be able to follow a thread.",
+          "UserArea": {
+            "Details": {
+              "JobSummary": null,
+              "RemoteIndicator": false
+            }
+          }
+        }
+      },
+      {
+        "MatchedObjectId": "900000003",
+        "MatchedObjectDescriptor": {
+          "PositionID": "LAB-900000003",
+          "PositionTitle": "Remote Knot Analyst",
+          "PositionURI": "https://www.usajobs.gov:443/job/900000003",
+          "ApplyURI": [
+            "https://www.usajobs.gov:443/job/900000003/apply"
+          ],
+          "PositionLocationDisplay": "Washington, District of Columbia",
+          "PositionLocation": [
+            {
+              "LocationName": "Washington, District of Columbia",
+              "CountryCode": "United States"
+            }
+          ],
+          "OrganizationName": "Office of Knots",
+          "DepartmentName": "Department of the Labyrinth",
+          "PositionRemuneration": [
+            {
+              "MinimumRange": "25.00",
+              "MaximumRange": "32.00",
+              "RateIntervalCode": "PH"
+            }
+          ],
+          "PublicationStartDate": "2026-11-01T00:00:00.0000",
+          "ApplicationCloseDate": "2026-12-01T23:59:59.9970",
+          "QualificationSummary": "You must be able to follow a thread.",
+          "UserArea": {
+            "Details": {
+              "JobSummary": null,
+              "RemoteIndicator": true
+            }
+          }
+        }
+      },
+      {
+        "MatchedObjectId": "900000004",
+        "MatchedObjectDescriptor": {
+          "PositionID": "LAB-900000004",
+          "PositionTitle": "Lantern Keeper",
+          "PositionURI": "javascript:alert(1)",
+          "ApplyURI": [
+            "https://www.usajobs.gov:443/job/900000004/apply"
+          ],
+          "PositionLocationDisplay": "Austin, Texas",
+          "PositionLocation": [
+            {
+              "LocationName": "Austin, Texas",
+              "CountryCode": "United States"
+            }
+          ],
+          "OrganizationName": "Office of Knots",
+          "DepartmentName": "Department of the Labyrinth",
+          "PositionRemuneration": [],
+          "PublicationStartDate": "2026-11-01T00:00:00.0000",
+          "ApplicationCloseDate": "2026-12-01T23:59:59.9970",
+          "QualificationSummary": "You must be able to follow a thread.",
+          "UserArea": {
+            "Details": {
+              "JobSummary": null,
+              "RemoteIndicator": false
+            }
+          }
+        }
+      }
+    ],
+    "UserArea": {
+      "NumberOfPages": "2",
+      "IsRadialSearch": false
+    }
+  }
+}
