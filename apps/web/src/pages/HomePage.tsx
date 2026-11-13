@@ -1,5 +1,6 @@
 import { useClerk } from "@clerk/react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
@@ -75,9 +76,11 @@ export function HomePage() {
           <>
             <h1>You&apos;re in.</h1>
             <p className="home-lede">
-              Next you&apos;ll add your resume, and Clew will build your profile from it. That
-              step is coming soon.
+              Next, add your resume and Clew will build your profile from it.
             </p>
+            <Link to="/onboarding/upload" className="button button-primary">
+              Add your resume
+            </Link>
           </>
         )}
       </main>
