@@ -42,8 +42,8 @@ const PAUSED: UploadProblem = {
   byHand: true,
 };
 const TOO_MANY: UploadProblem = {
-  title: "You've uploaded a lot of files recently",
-  body: "Try again in an hour. Your earlier uploads are still saved.",
+  title: "You've hit the upload limit",
+  body: "Try again later. Your earlier uploads are still saved.",
   action: "choose",
   byHand: true,
 };
@@ -62,11 +62,12 @@ export function checkFile(file: { name: string; size: number }): UploadProblem |
 }
 
 /** The problem for an upload answer that isn't 201. */
-export function uploadProblem(status: number): UploadProblem {
+export function uploadProblem(status: number, detail?: string): UploadProblem {
   if (status === 413) return TOO_LARGE;
   if (status === 415) return WRONG_TYPE;
   if (status === 422) return FLAGGED;
-  if (status === 429) return TOO_MANY;
+  // Two caps answer 429 (uploads per hour, resumes kept), and the server's message says which.
+  if (status === 429) return detail ? { ...TOO_MANY, body: detail } : TOO_MANY;
   if (status === 503) return PAUSED;
   return NETWORK;
 }

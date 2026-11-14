@@ -124,7 +124,7 @@ export function UploadStep() {
     setPhase({ kind: "sending", name, size, reading: agreed });
     setStatus("Uploading and checking for viruses. This usually takes under 30 seconds.");
     try {
-      const { data, response } = await api.POST("/resumes", {
+      const { data, error, response } = await api.POST("/resumes", {
         body: { file: file as unknown as string },
         bodySerializer: (body) => {
           const form = new FormData();
@@ -132,7 +132,10 @@ export function UploadStep() {
           return form;
         },
       });
-      if (!data) return fail(uploadProblem(response.status));
+      if (!data) {
+        const detail = (error as { detail?: unknown } | undefined)?.detail;
+        return fail(uploadProblem(response.status, typeof detail === "string" ? detail : undefined));
+      }
       rememberResume(data.id);
       if (data.reading) {
         setPhase({ kind: "reading", name, size, resumeId: data.id });
