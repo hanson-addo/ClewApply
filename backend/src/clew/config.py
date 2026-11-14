@@ -8,7 +8,7 @@ import re
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import SecretStr, field_validator, model_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -49,6 +49,13 @@ class Settings(BaseSettings):
     # worker skips USAJobs.
     usajobs_api_key: SecretStr | None = None
     usajobs_email: str | None = None
+    # Per-user caps (threat model R26, #64), so one account can't fill storage or run up
+    # scanning and parsing costs. Kept in settings so they can differ by plan later.
+    resume_uploads_per_hour: int = Field(default=10, ge=1)
+    resumes_stored_max: int = Field(default=20, ge=1)
+    profile_saves_per_hour: int = Field(default=60, ge=1)
+    # Older profile versions are deleted by `python -m clew.maintenance prune-profile-versions`.
+    profile_versions_kept: int = Field(default=200, ge=1)
 
     @field_validator("cors_origins")
     @classmethod
