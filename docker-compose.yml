@@ -64,6 +64,8 @@ services:
       - "127.0.0.1:5173:5173"
     volumes:
       - ./apps/web:/app/apps/web
+      # The shared design tokens the web app imports (@clew/design-tokens).
+      - ./packages:/app/packages:ro
       # Keeps the image's installed packages instead of any node_modules in your checkout.
       - /app/apps/web/node_modules
     depends_on:
