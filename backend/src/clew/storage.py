@@ -32,9 +32,13 @@ class ObjectStore(Protocol):
 
 
 class S3ObjectStore:
-    def __init__(self, client: "S3Client", bucket: str) -> None:
+    def __init__(
+        self, client: "S3Client", bucket: str, link_client: "S3Client | None" = None
+    ) -> None:
         self._client = client
         self._bucket = bucket
+        # Signs download links for the address browsers use, if that differs.
+        self._link_client = link_client or client
 
     async def put(self, key: str, data: bytes, content_type: str) -> None:
         try:
@@ -72,7 +76,7 @@ class S3ObjectStore:
     def download_url(self, key: str, *, filename: str, content_type: str, expires_in: int) -> str:
         # Signing is local (no network call). "attachment" makes browsers download the file
         # rather than render it, so a crafted PDF can't run in our origin (threat model R7).
-        return self._client.generate_presigned_url(
+        return self._link_client.generate_presigned_url(
             "get_object",
             Params={
                 "Bucket": self._bucket,
@@ -109,10 +113,15 @@ def get_object_store() -> ObjectStore | None:
     if settings.s3_bucket is None:
         return None
     secret = settings.s3_secret_access_key
-    client = s3_client(
-        endpoint_url=settings.s3_endpoint_url,
-        region=settings.s3_region,
-        access_key_id=settings.s3_access_key_id,
-        secret_access_key=secret.get_secret_value() if secret else None,
-    )
-    return S3ObjectStore(client, settings.s3_bucket)
+
+    def client_for(endpoint_url: str | None) -> "S3Client":
+        return s3_client(
+            endpoint_url=endpoint_url,
+            region=settings.s3_region,
+            access_key_id=settings.s3_access_key_id,
+            secret_access_key=secret.get_secret_value() if secret else None,
+        )
+
+    public = settings.s3_public_endpoint_url
+    link_client = client_for(public) if public and public != settings.s3_endpoint_url else None
+    return S3ObjectStore(client_for(settings.s3_endpoint_url), settings.s3_bucket, link_client)

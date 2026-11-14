@@ -1,6 +1,7 @@
 """Owner-run upkeep that the API's role isn't allowed to do (threat model R26, #64).
 
     uv run python -m clew.maintenance prune-profile-versions
+    uv run python -m clew.maintenance fetch-jobs   # the worker's job fetches, right now
 
 Connects with CLEW_MIGRATIONS_DATABASE_URL, the role that owns the tables, because the API
 role can only read and add profile versions, never delete them.
@@ -68,6 +69,13 @@ async def _prune_user(session: AsyncSession, user_id: uuid.UUID, keep: int) -> i
 
 
 async def _run(command: str) -> int:
+    if command == "fetch-jobs":
+        # The worker does these on a schedule; this runs them now, as the API's own role.
+        from clew.worker import poll_boards, read_usajobs
+
+        await poll_boards({})
+        await read_usajobs({})
+        return 0
     settings = get_settings()
     engine = create_async_engine(settings.migrations_database_url or settings.database_url)
     try:
@@ -81,10 +89,10 @@ async def _run(command: str) -> int:
 
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(prog="python -m clew.maintenance")
-    parser.add_argument("command", choices=["prune-profile-versions"])
+    parser.add_argument("command", choices=["prune-profile-versions", "fetch-jobs"])
     args = parser.parse_args(argv)
-    deleted = asyncio.run(_run(args.command))
-    print(f"Deleted {deleted}.")
+    count = asyncio.run(_run(args.command))
+    print("Done." if args.command == "fetch-jobs" else f"Deleted {count}.")
 
 
 if __name__ == "__main__":
