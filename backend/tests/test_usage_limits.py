@@ -7,7 +7,7 @@ from typing import Any
 
 import pytest
 from httpx import ASGITransport, AsyncClient
-from sqlalchemy import func, select, update
+from sqlalchemy import event, func, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from clew.api.profile import TOO_MANY_SAVES
@@ -137,10 +137,29 @@ async def test_profile_saves_per_hour_are_capped(
 
 
 @pytest.fixture
-async def owner_sessions(test_database: str) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+async def owner_sessions(
+    test_database: str, db: AsyncSession
+) -> AsyncIterator[async_sessionmaker[AsyncSession]]:
+    """Sessions as a plain role (no superuser, no BYPASSRLS), like a managed database's
+    owner, so forced row-level security applies to the prune as it would in production."""
+    role = f"clew_test_pruner_{uuid.uuid4().hex[:8]}"
+    await db.execute(text(f"CREATE ROLE {role} NOLOGIN NOSUPERUSER NOBYPASSRLS"))
+    await db.execute(text(f"GRANT SELECT ON users, profiles TO {role}"))
+    await db.execute(text(f"GRANT SELECT, DELETE ON profile_versions TO {role}"))
+    await db.commit()
     engine = create_async_engine(test_database)
+
+    @event.listens_for(engine.sync_engine, "connect")
+    def _as_role(connection: Any, _record: Any) -> None:
+        cursor = connection.cursor()
+        cursor.execute(f"SET ROLE {role}")
+        cursor.close()
+
     yield async_sessionmaker(engine, expire_on_commit=False)
     await engine.dispose()
+    await db.execute(text(f"REVOKE ALL ON users, profiles, profile_versions FROM {role}"))
+    await db.execute(text(f"DROP ROLE {role}"))
+    await db.commit()
 
 
 async def versions(db: AsyncSession, uid: uuid.UUID) -> list[int]:
