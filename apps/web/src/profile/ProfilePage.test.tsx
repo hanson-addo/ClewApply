@@ -303,6 +303,15 @@ describe("profile page", () => {
     expect(await screen.findByRole("alert")).toHaveTextContent("Your profile is too long to save.");
   });
 
+  it("asks to slow down when saves are capped", async () => {
+    serve({ "PUT /profile": () => Response.json({ detail: "slow down" }, { status: 429 }) });
+    const u = user();
+    await renderLoaded();
+    await u.type(screen.getByLabelText("Full name"), " Jr.");
+    await u.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent("You're saving very quickly.");
+  });
+
   it("shows the server's field errors", async () => {
     serve({
       "PUT /profile": () =>

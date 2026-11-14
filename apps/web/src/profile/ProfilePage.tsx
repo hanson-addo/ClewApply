@@ -189,6 +189,8 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
         } else {
           setFormError("Something in your profile can't be saved. Check your entries and try again.");
         }
+      } else if (response.status === 429) {
+        setFormError("You're saving very quickly. Try again in a few minutes.");
       } else if (response.status === 401) {
         setFormError("You've been signed out. Sign in again to save your changes.");
       } else {

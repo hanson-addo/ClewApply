@@ -29,7 +29,8 @@ describe("upload checks", () => {
     expect(uploadProblem(415).byHand).toBe(true);
     expect(uploadProblem(422).title).toBe("We couldn't accept this file");
     expect(uploadProblem(503)).toMatchObject({ title: "Uploads are paused for a moment", action: "retry" });
-    expect(uploadProblem(429).title).toBe("You've uploaded a lot of files recently");
+    expect(uploadProblem(429).title).toBe("You've hit the upload limit");
+    expect(uploadProblem(429, "Delete an old one.").body).toBe("Delete an old one.");
     expect(uploadProblem(500).title).toBe("The upload didn't finish");
   });
 });

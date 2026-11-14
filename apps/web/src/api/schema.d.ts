@@ -2149,6 +2149,13 @@ export interface operations {
                 };
                 content?: never;
             };
+            /** @description Too many saves in the last hour */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
         };
     };
     list_versions_profile_versions_get: {
@@ -2308,6 +2315,13 @@ export interface operations {
             };
             /** @description The virus scan found something; the file was not kept */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many uploads in the last hour, or too many resumes stored */
+            429: {
                 headers: {
                     [name: string]: unknown;
                 };

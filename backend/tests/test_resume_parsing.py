@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.api.resume_parse import DAILY_PARSE_LIMIT, MESSAGES, TRY_AGAIN
 from clew.auth.deps import get_token_verifier
+from clew.config import get_settings
 from clew.consent import POLICY_VERSION
 from clew.db.session import get_sessionmaker
 from clew.jobs import QueueUnavailable, get_job_queue
@@ -542,7 +543,10 @@ async def test_daily_parse_limit(
     store: MemoryStore,
     scanner: FakeScanner,
     parser: FakeParser,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    # Room for one more upload than the parse limit, past the hourly upload cap.
+    monkeypatch.setattr(get_settings(), "resume_uploads_per_hour", DAILY_PARSE_LIMIT + 1)
     for _ in range(DAILY_PARSE_LIMIT):
         await upload_resume(api, alice)
         await run_jobs(queue, store, scanner, parser)

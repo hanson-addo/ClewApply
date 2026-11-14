@@ -205,6 +205,8 @@ export function ReviewStep() {
         }
       } else if (response.status === 413) {
         setFormError("Your profile is too long to save. Shorten some descriptions.");
+      } else if (response.status === 429) {
+        setFormError("You're saving very quickly. Try again in a few minutes.");
       } else {
         setFormError("We couldn't save your profile. Try again in a moment.");
       }

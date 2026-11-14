@@ -13,6 +13,8 @@ from clew.db.base import Base
 
 class UsageKind(StrEnum):
     RESUME_PARSE = "resume_parse"
+    RESUME_UPLOAD = "resume_upload"
+    PROFILE_SAVE = "profile_save"
 
 
 class UsageEvent(Base):

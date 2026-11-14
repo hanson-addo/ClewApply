@@ -5,7 +5,7 @@ database (threat model R1). Profile content is never logged.
 """
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -16,9 +16,11 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.auth.deps import CurrentUser
+from clew.config import get_settings
 from clew.db.session import get_session
-from clew.models import Profile, ProfileVersion
+from clew.models import Profile, ProfileVersion, UsageEvent, UsageKind
 from clew.profile.schema import ProfileData, reject_control_characters
+from clew.usage import used_within
 
 router = APIRouter(tags=["profile"])
 
@@ -27,6 +29,7 @@ TOO_LARGE = "Profiles must be 256 KB or smaller."
 NO_PROFILE = "You haven't saved a profile yet."
 VERSION_NOT_FOUND = "Version not found."
 STALE = "Your profile changed somewhere else. Reload it and try again."
+TOO_MANY_SAVES = "You're saving very quickly. Try again in a few minutes."
 
 Session = Annotated[AsyncSession, Depends(get_session)]
 
@@ -137,6 +140,7 @@ async def get_profile(user: CurrentUser, session: Session) -> ProfileVersionOut:
         409: {"description": "base_version_id is no longer the current version"},
         413: {"description": "The profile is over 256 KB"},
         422: {"description": "The profile doesn't match the schema"},
+        429: {"description": "Too many saves in the last hour"},
     },
 )
 async def save_profile(body: ProfileSave, user: CurrentUser, session: Session) -> ProfileVersionOut:
@@ -170,6 +174,15 @@ async def save_profile(body: ProfileSave, user: CurrentUser, session: Session) -
         if current is not None and current.data == data:
             await session.commit()
             return _out(current, current.id)
+
+    # Counted under the profile row lock, so racing saves can't both pass.
+    if (
+        await used_within(session, user.id, UsageKind.PROFILE_SAVE, timedelta(hours=1))
+        >= get_settings().profile_saves_per_hour
+    ):
+        await session.rollback()
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, TOO_MANY_SAVES)
+    session.add(UsageEvent(user_id=user.id, kind=UsageKind.PROFILE_SAVE))
 
     # The profile row lock above makes this safe from two saves picking the same number.
     last = await session.scalar(

@@ -7,19 +7,21 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.api.resume_parse import start_parse
 from clew.auth.deps import CurrentUser
+from clew.config import get_settings
 from clew.consent import has_ai_consent
 from clew.db.session import get_session
 from clew.jobs import JobQueue, get_job_queue
 from clew.limits import TOO_LARGE
-from clew.models import Resume
+from clew.models import Resume, UsageEvent, UsageKind
 from clew.resumes.files import MAX_RESUME_BYTES, detect_resume_type, safe_filename
 from clew.scanning import MalwareScanner, ScannerUnavailable, ScanVerdict, get_malware_scanner
 from clew.storage import ObjectStore, StorageUnavailable, get_object_store
+from clew.usage import lock_user, used_within
 
 router = APIRouter(tags=["resumes"])
 
@@ -29,6 +31,8 @@ STORAGE_UNAVAILABLE = "File storage is unavailable. Try again in a few minutes."
 INFECTED = "We couldn't accept this file. Please try a different copy."
 SCAN_UNAVAILABLE = "We can't check files for viruses right now. Try again in a few minutes."
 NOT_SCANNED = "This file hasn't passed the virus check, so it can't be downloaded."
+TOO_MANY_UPLOADS = "You've uploaded a lot of files in the last hour. Try again later."
+TOO_MANY_STORED = "You've saved the most resumes Clew keeps. Delete an old one to add another."
 
 
 def require_object_store(
@@ -80,6 +84,7 @@ class DownloadLink(BaseModel):
         413: {"description": "The file is over 10 MB"},
         415: {"description": "The file is not a PDF or DOCX"},
         422: {"description": "The virus scan found something; the file was not kept"},
+        429: {"description": "Too many uploads in the last hour, or too many resumes stored"},
         503: {"description": "File storage or virus scanning is unavailable"},
     },
 )
@@ -101,6 +106,7 @@ async def upload_resume(
     content_type = detect_resume_type(data)
     if content_type is None:
         raise HTTPException(status.HTTP_415_UNSUPPORTED_MEDIA_TYPE, WRONG_TYPE)
+    await _count_upload(session, user.id)
 
     # Scanned before it is stored, so an infected file is never kept anywhere.
     try:
@@ -175,3 +181,28 @@ async def download_resume(
     return DownloadLink(
         url=url, expires_at=datetime.now(UTC) + timedelta(seconds=DOWNLOAD_LINK_SECONDS)
     )
+
+
+async def _count_upload(session: AsyncSession, user_id: uuid.UUID) -> None:
+    """Refuses the upload with 429 when the user is over a cap, else records it. Every
+    upload that reaches the virus scan counts toward the hourly cap, kept or not, since the
+    scan is the cost the cap protects."""
+    settings = get_settings()
+    await lock_user(session, user_id)
+    if (
+        await used_within(session, user_id, UsageKind.RESUME_UPLOAD, timedelta(hours=1))
+        >= settings.resume_uploads_per_hour
+    ):
+        await session.rollback()
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, TOO_MANY_UPLOADS)
+    stored = await session.scalar(
+        select(func.count())
+        .select_from(Resume)
+        .where(Resume.user_id == user_id, Resume.deleted_at.is_(None))
+    )
+    if (stored or 0) >= settings.resumes_stored_max:
+        await session.rollback()
+        raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, TOO_MANY_STORED)
+    session.add(UsageEvent(user_id=user_id, kind=UsageKind.RESUME_UPLOAD))
+    # Committed now, which also ends the lock, so the scan doesn't hold a transaction open.
+    await session.commit()

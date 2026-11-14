@@ -3627,6 +3627,9 @@
           },
           "422": {
             "description": "The profile doesn't match the schema"
+          },
+          "429": {
+            "description": "Too many saves in the last hour"
           }
         },
         "security": [
@@ -3821,6 +3824,9 @@
           },
           "422": {
             "description": "The virus scan found something; the file was not kept"
+          },
+          "429": {
+            "description": "Too many uploads in the last hour, or too many resumes stored"
           },
           "503": {
             "description": "File storage or virus scanning is unavailable"
