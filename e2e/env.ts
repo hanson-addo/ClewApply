@@ -48,7 +48,8 @@ process.env.CLEW_E2E_RUN_ID ??= process.env.GITHUB_RUN_ID
  * Every Clerk user this run creates starts with this, so teardown deletes only this run's users
  * and never those of another run sharing the development instance.
  */
-export const TEST_USER_PREFIX = `e2e-${process.env.CLEW_E2E_RUN_ID}-`;
+export const TEST_USER_BASE_PREFIX = "e2e-";
+export const TEST_USER_PREFIX = `${TEST_USER_BASE_PREFIX}${process.env.CLEW_E2E_RUN_ID}-`;
 
 /**
  * A fresh Clerk test address. "+clerk_test" addresses never get real email; a development
