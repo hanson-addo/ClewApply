@@ -5,6 +5,7 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from botocore.stub import Stubber
 from httpx import ASGITransport, AsyncClient
+from pydantic import SecretStr
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -365,6 +366,9 @@ def test_signed_link_uses_the_public_address(monkeypatch: pytest.MonkeyPatch) ->
     monkeypatch.setattr(settings, "s3_bucket", "clew-test")
     monkeypatch.setattr(settings, "s3_endpoint_url", "http://minio:9000")
     monkeypatch.setattr(settings, "s3_public_endpoint_url", "http://localhost:9000")
+    # Fake keys: signing is local, and CI has no credentials to fall back on.
+    monkeypatch.setattr(settings, "s3_access_key_id", "test-access-key")
+    monkeypatch.setattr(settings, "s3_secret_access_key", SecretStr("test-secret-key"))
     get_object_store.cache_clear()
     try:
         store = get_object_store()
