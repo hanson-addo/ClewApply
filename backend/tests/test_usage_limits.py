@@ -15,7 +15,7 @@ from clew.api.resumes import TOO_MANY_STORED, TOO_MANY_UPLOADS
 from clew.auth.deps import get_token_verifier
 from clew.config import get_settings
 from clew.main import create_app
-from clew.maintenance import prune_profile_versions
+from clew.maintenance import main, prune_profile_versions
 from clew.models import Profile, ProfileVersion, Resume, UsageEvent, UsageKind
 from clew.scanning import get_malware_scanner
 from clew.storage import get_object_store
@@ -210,3 +210,21 @@ async def test_upload_usage_is_recorded_as_its_own_kind(api: AsyncClient, db: As
         select(UsageEvent.kind).where(UsageEvent.user_id == await user_id(api, who))
     )
     assert list(kinds) == [UsageKind.RESUME_UPLOAD]
+
+
+def test_fetch_jobs_runs_the_worker_fetches(
+    monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    ran: list[str] = []
+
+    async def boards(ctx: dict[str, Any]) -> None:
+        ran.append("boards")
+
+    async def usajobs(ctx: dict[str, Any]) -> None:
+        ran.append("usajobs")
+
+    monkeypatch.setattr("clew.worker.poll_boards", boards)
+    monkeypatch.setattr("clew.worker.read_usajobs", usajobs)
+    main(["fetch-jobs"])
+    assert ran == ["boards", "usajobs"]
+    assert capsys.readouterr().out == "Done.\n"

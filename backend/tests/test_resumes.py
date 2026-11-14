@@ -5,10 +5,12 @@ from urllib.parse import parse_qs, urlparse
 import pytest
 from botocore.stub import Stubber
 from httpx import ASGITransport, AsyncClient
+from pydantic import SecretStr
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.auth.deps import get_token_verifier
+from clew.config import get_settings
 from clew.main import create_app
 from clew.models import Resume
 from clew.resumes.files import DOCX, MAX_RESUME_BYTES, PDF, detect_resume_type, safe_filename
@@ -356,6 +358,25 @@ def test_signed_link_downloads_as_attachment_and_expires(s3: S3ObjectStore) -> N
     assert query["X-Amz-Expires"] == ["300"]
     assert query["response-content-disposition"] == ['attachment; filename="Jordan CV.pdf"']
     assert query["response-content-type"] == [PDF]
+
+
+def test_signed_link_uses_the_public_address(monkeypatch: pytest.MonkeyPatch) -> None:
+    # In Docker the API reaches MinIO as minio:9000, but the browser opens the link.
+    settings = get_settings()
+    monkeypatch.setattr(settings, "s3_bucket", "clew-test")
+    monkeypatch.setattr(settings, "s3_endpoint_url", "http://minio:9000")
+    monkeypatch.setattr(settings, "s3_public_endpoint_url", "http://localhost:9000")
+    # Fake keys: signing is local, and CI has no credentials to fall back on.
+    monkeypatch.setattr(settings, "s3_access_key_id", "test-access-key")
+    monkeypatch.setattr(settings, "s3_secret_access_key", SecretStr("test-secret-key"))
+    get_object_store.cache_clear()
+    try:
+        store = get_object_store()
+        assert store is not None
+        url = store.download_url("resumes/abc", filename="cv.pdf", content_type=PDF, expires_in=60)
+    finally:
+        get_object_store.cache_clear()
+    assert urlparse(url).netloc == "localhost:9000"
 
 
 async def test_put_sends_the_object(s3: S3ObjectStore) -> None:

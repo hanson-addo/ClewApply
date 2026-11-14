@@ -22,33 +22,32 @@ docs/            Specs, threat model, test plans
 
 ## Run it locally
 
-You need Docker, Python 3.12 with [uv](https://docs.astral.sh/uv/), and Node 22.
+You need [Docker Desktop](https://www.docker.com/products/docker-desktop/) running. Nothing else.
 
 ```sh
-docker compose up -d                   # Postgres, MinIO file storage, ClamAV virus scanner and Redis, local only
-
-cd backend
-cp .env.example .env
-uv sync
-uv run alembic upgrade head
-uv run uvicorn clew.main:app --reload  # API on http://localhost:8000 (docs at /docs)
-uv run arq clew.worker.WorkerSettings  # In a second terminal: reads resumes, fetches jobs
-
-cd ../apps/web
-cp .env.example .env.local
-npm install
-npm run dev                            # Web app on http://localhost:5173
+cp .env.example .env    # then fill in the two Clerk values (docs/setup/clerk.md)
+docker compose up       # first run builds for a few minutes; later runs start in seconds
 ```
 
-The virus scanner downloads its signatures the first time it starts, which takes a few minutes. Resume uploads answer "try again" until it's ready.
+Open http://localhost:5173. The API is on http://localhost:8000 (docs at /docs). `docker compose up` starts Postgres, file storage (MinIO), the virus scanner (ClamAV), Redis, the API (it updates the database first), the worker and the web app. Code changes reload on their own. Stop with Ctrl+C; `docker compose down` removes the containers and keeps your data.
 
-The API logs in to Postgres as `clew_app`, a role that row-level security applies to, and migrations run as `clew`, the owner. A new Docker volume creates `clew_app` for you. If your volume is older than that, run `uv run alembic upgrade head` and then this once: `docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"`. Details are in [docs/setup/database.md](docs/setup/database.md).
+- The virus scanner downloads its signatures the first time it starts, which takes a few minutes. Until then uploads answer "try again".
+- Reading resumes needs `CLEW_ANTHROPIC_API_KEY` in `.env`. Without it, uploads still work and the app says reading is unavailable.
+- Federal jobs need `CLEW_USAJOBS_API_KEY` and `CLEW_USAJOBS_EMAIL` (a free key from developer.usajobs.gov). The worker reads USAJobs daily at 07:00 UTC and company boards hourly. To fetch now: `docker compose exec worker python -m clew.maintenance fetch-jobs`.
+- After a change to `backend/uv.lock` or `apps/web/package-lock.json`, run `docker compose up --build`.
+- Never commit `.env`; git ignores it.
 
-Reading resumes into a draft profile needs an Anthropic API key. Put it in `backend/.env` as `CLEW_ANTHROPIC_API_KEY` and never commit it. Without a key, uploads still work and the app says reading resumes is unavailable.
+The API logs in to Postgres as `clew_app`, a role that row-level security applies to, and migrations run as `clew`, the owner. A new Docker volume creates `clew_app` for you. If your volume is older than that, run this once: `docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"`. Details are in [docs/setup/database.md](docs/setup/database.md).
 
-Federal jobs come from the free USAJobs Search API. Request a key at developer.usajobs.gov, then put it in `backend/.env` as `CLEW_USAJOBS_API_KEY`, with the email it was issued to as `CLEW_USAJOBS_EMAIL`. Never commit either. The worker reads USAJobs once a day at 07:00 UTC; without the key it skips USAJobs.
+### Without Docker for the app (for running tests)
 
-Sign-in needs a Clerk development instance. The one-time setup is in [docs/setup/clerk.md](docs/setup/clerk.md). Without it, the app still runs, but signed-in pages say sign-in isn't set up.
+The checks and end-to-end tests below run the API and web app on your machine. Start only the services with `docker compose up -d postgres minio clamav redis`, then use `backend/.env.example` and `apps/web/.env.example` (copy to `backend/.env` and `apps/web/.env.local`). You need Python 3.12 with [uv](https://docs.astral.sh/uv/) and Node 22.
+
+```sh
+cd backend  && uv sync && uv run alembic upgrade head && uv run uvicorn clew.main:app --reload
+cd backend  && uv run arq clew.worker.WorkerSettings    # second terminal
+cd apps/web && npm install && npm run dev                # third terminal
+```
 
 Checks that CI runs on every pull request:
 

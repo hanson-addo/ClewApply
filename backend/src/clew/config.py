@@ -29,6 +29,9 @@ class Settings(BaseSettings):
     # Without a bucket, the resume routes answer 503. Leave the endpoint unset for AWS S3.
     s3_bucket: str | None = None
     s3_endpoint_url: str | None = None
+    # Where browsers reach the store, for signed download links, when it differs from where
+    # the API reaches it (in Docker, the API uses http://minio:9000; you use localhost).
+    s3_public_endpoint_url: str | None = None
     s3_region: str = "us-east-1"
     s3_access_key_id: str | None = None
     s3_secret_access_key: SecretStr | None = None
