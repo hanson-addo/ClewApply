@@ -1289,3 +1289,259 @@ h2[tabindex="-1"]:focus {
     display: block;
   }
 }
+
+/* --- Onboarding (docs/design/screens.md: Resume upload, Review parsed resume) ------------ */
+
+.onboarding {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: var(--clew-space-6) var(--clew-space-4);
+}
+
+.stepper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--clew-space-3);
+  margin: 0 0 var(--clew-space-6);
+  padding: 0;
+  list-style: none;
+}
+
+.stepper-step {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-2);
+  color: var(--clew-text-secondary);
+}
+
+.stepper-number {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  font-weight: var(--clew-font-weight-semibold);
+}
+
+.stepper-current {
+  font-weight: var(--clew-font-weight-semibold);
+}
+
+.stepper-current .stepper-number,
+.stepper-done .stepper-number {
+  background: var(--clew-action-primary-bg);
+  border-color: var(--clew-action-primary-bg);
+  color: var(--clew-action-primary-fg);
+}
+
+/* Phones show the current step's name only. */
+@media (max-width: 47.99rem) {
+  .stepper-step:not(.stepper-current) .stepper-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}
+
+.upload-layout,
+.review-layout {
+  display: grid;
+  gap: var(--clew-space-6);
+}
+
+@media (min-width: 64rem) {
+  .upload-layout {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
+  .review-layout {
+    grid-template-columns: minmax(0, 1fr) 18rem;
+    align-items: start;
+  }
+}
+
+/* Under lg the card comes before the privacy points. */
+@media (max-width: 63.99rem) {
+  .upload-card {
+    order: -1;
+  }
+
+  .upload-intro h1 {
+    margin-top: 0;
+  }
+}
+
+.upload-points {
+  padding-left: var(--clew-space-5);
+}
+
+.upload-points li + li {
+  margin-top: var(--clew-space-2);
+}
+
+.upload-card {
+  display: grid;
+  gap: var(--clew-space-4);
+  padding: var(--clew-space-5);
+  border: 1px solid var(--clew-border-subtle);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-bg-surface);
+}
+
+.upload-consent-text {
+  margin: 0 0 0 calc(20px + var(--clew-space-3));
+}
+
+.upload-drop {
+  display: grid;
+  justify-items: center;
+  gap: var(--clew-space-3);
+  padding: var(--clew-space-6) var(--clew-space-4);
+  border: 2px dashed var(--clew-border-control);
+  border-radius: var(--clew-radius-lg);
+  text-align: center;
+}
+
+.upload-drop-active {
+  border-color: var(--clew-control-accent);
+}
+
+/* Phones can't drag files, so only the button shows. */
+@media (max-width: 47.99rem) {
+  .upload-drop-text {
+    display: none;
+  }
+}
+
+.upload-choose {
+  cursor: pointer;
+}
+
+input:focus-visible + .upload-choose,
+.upload-drop:focus-within .upload-choose {
+  outline: 3px solid var(--clew-control-accent);
+  outline-offset: 2px;
+}
+
+.upload-problem {
+  padding: var(--clew-space-4);
+  border-left: 4px solid var(--clew-status-danger-edge);
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-status-danger-bg);
+}
+
+.upload-problem h2,
+.upload-problem h3 {
+  margin: 0 0 var(--clew-space-2);
+  font-size: 1.125rem;
+}
+
+.upload-actions,
+.review-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clew-space-3);
+}
+
+.upload-steps {
+  display: grid;
+  gap: var(--clew-space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.upload-step {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-2);
+}
+
+.upload-step-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid currentColor;
+  font-size: 0.75rem;
+}
+
+.upload-step-current .upload-step-mark {
+  border-top-color: transparent;
+  animation: upload-spin 1s linear infinite;
+}
+
+.upload-step-done .upload-step-mark {
+  border-color: var(--clew-action-primary-bg);
+  background: var(--clew-action-primary-bg);
+  color: var(--clew-action-primary-fg);
+}
+
+@keyframes upload-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-step-current .upload-step-mark {
+    animation: none;
+  }
+}
+
+.review-section {
+  margin-bottom: var(--clew-space-6);
+}
+
+.review-waiting {
+  display: grid;
+  gap: var(--clew-space-4);
+  justify-items: start;
+}
+
+.review-skeleton {
+  display: grid;
+  gap: var(--clew-space-3);
+  width: 100%;
+}
+
+.review-skeleton span {
+  display: block;
+  height: 44px;
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-bg-sunken);
+}
+
+.review-offer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clew-space-3);
+  margin-bottom: var(--clew-space-4);
+  padding: var(--clew-space-3) var(--clew-space-4);
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-bg-subtle);
+}
+
+.review-checks {
+  padding: var(--clew-space-4);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-bg-subtle);
+}
+
+.review-checks h2 {
+  margin-top: 0;
+  font-size: 1.125rem;
+}
+
+.prefs-form {
+  display: grid;
+  gap: var(--clew-space-4);
+  max-width: 36rem;
+}

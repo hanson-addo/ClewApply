@@ -6,6 +6,9 @@ import { clerkAppearance } from "./auth/clerkAppearance";
 import { RequireSignIn } from "./auth/RequireSignIn";
 import { config } from "./config";
 import { JobsPage } from "./jobs/JobsPage";
+import { PreferencesStep } from "./onboarding/PreferencesStep";
+import { ReviewStep } from "./onboarding/ReviewStep";
+import { UploadStep } from "./onboarding/UploadStep";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./profile/ProfilePage";
 import { SetupNeededPage } from "./pages/SetupNeededPage";
@@ -37,6 +40,31 @@ export function AppRoutes() {
         element={
           <RequireSignIn>
             <ApplicationsPage />
+          </RequireSignIn>
+        }
+      />
+      <Route path="/onboarding" element={<Navigate to="/onboarding/upload" replace />} />
+      <Route
+        path="/onboarding/upload"
+        element={
+          <RequireSignIn>
+            <UploadStep />
+          </RequireSignIn>
+        }
+      />
+      <Route
+        path="/onboarding/review"
+        element={
+          <RequireSignIn>
+            <ReviewStep />
+          </RequireSignIn>
+        }
+      />
+      <Route
+        path="/onboarding/preferences"
+        element={
+          <RequireSignIn>
+            <PreferencesStep />
           </RequireSignIn>
         }
       />
