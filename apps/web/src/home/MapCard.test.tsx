@@ -102,6 +102,9 @@ describe("MapCard", () => {
     expect(within(card).getByText("Unverified board")).toBeInTheDocument();
     fireEvent.click(within(card).getByRole("button", { name: "Close" }));
     expect(screen.queryByRole("group", { name: "Thread Analyst 2" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "pin Thread Analyst 1" }));
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("group", { name: "Thread Analyst 1" })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "List" }));
     expect(screen.queryByTestId("map")).not.toBeInTheDocument();
@@ -113,7 +116,7 @@ describe("MapCard", () => {
     const ask = stubLocation({ lat: 30.123456, lng: -97.987654 });
     renderCard(ready([pin(1)]));
     expect(ask).not.toHaveBeenCalled();
-    expect(screen.getByText("Your location stays on this device.")).toBeInTheDocument();
+    expect(screen.getByText("Your location isn't sent to Clew or saved.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Near me" }));
     expect(ask).toHaveBeenCalledWith(expect.any(Function), expect.any(Function), expect.objectContaining({ enableHighAccuracy: false }));
     expect(await screen.findByText("near 30.12,-97.99")).toBeInTheDocument();
@@ -137,7 +140,7 @@ describe("MapCard", () => {
     stubLocation({ denied: true });
     renderCard(ready([pin(1)]));
     fireEvent.click(screen.getByRole("button", { name: "Near me" }));
-    expect(screen.getByText(/Location is off for Clew/)).toBeInTheDocument();
+    expect(screen.getByText(/Location is off for Clew, so the map uses your saved places, or the whole US/)).toBeInTheDocument();
   });
 
   it("handles loading, errors and no placed jobs", () => {

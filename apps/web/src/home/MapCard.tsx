@@ -1,4 +1,4 @@
-import { lazy, Suspense, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 
 import { FitScore } from "../jobs/FitScore";
@@ -63,6 +63,16 @@ export function MapCard({ state }: { state: JobMapState }) {
     return rows.slice(0, LIST_SIZE);
   }, [pins, nearPoint]);
   const selected = pins.find((pin) => pin.id === selectedId);
+
+  // Escape closes the picked job's card.
+  useEffect(() => {
+    if (!selectedId) return;
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSelectedId(null);
+    };
+    document.addEventListener("keydown", close);
+    return () => document.removeEventListener("keydown", close);
+  }, [selectedId]);
 
   function findMe() {
     if (!("geolocation" in navigator)) {
@@ -165,11 +175,11 @@ export function MapCard({ state }: { state: JobMapState }) {
               {near.status === "on" ? "Find me again" : "Near me"}
             </button>
             <p className="map-note" role="status">
-              {near.status === "off" && "Your location stays on this device."}
+              {near.status === "off" && "Your location isn't sent to Clew or saved."}
               {near.status === "finding" && "Finding you…"}
               {near.status === "on" &&
                 (view === "map" ? "Showing jobs around you." : "Sorted by distance from you.")}
-              {near.status === "denied" && "Location is off for Clew, so the map uses your saved places."}
+              {near.status === "denied" && "Location is off for Clew, so the map uses your saved places, or the whole US."}
               {near.status === "unavailable" && "We couldn't find your location. Try again later."}
             </p>
           </div>
