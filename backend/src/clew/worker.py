@@ -105,8 +105,15 @@ class WorkerSettings:
     redis_settings = _redis_settings() if get_settings().redis_url else RedisSettings()
 
 
-class EndToEndWorkerSettings(WorkerSettings):
-    """For the end-to-end tests: queued jobs only, no schedule. The hourly board poll would
-    pull real jobs into the test database mid-run and push the seeded jobs out of the feed."""
-
-    cron_jobs: ClassVar[list[Any]] = []
+# For the end-to-end tests: queued jobs only, no schedule. The hourly board poll would pull
+# real jobs into the test database mid-run and push the seeded jobs out of the feed.
+# A copy, not a subclass: arq reads only a settings class's own attributes, so a subclass
+# would silently drop functions, max_tries and the rest.
+EndToEndWorkerSettings = type(
+    "EndToEndWorkerSettings",
+    (),
+    {
+        **{key: value for key, value in vars(WorkerSettings).items() if not key.startswith("__")},
+        "cron_jobs": [],
+    },
+)
