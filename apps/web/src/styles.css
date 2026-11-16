@@ -1949,6 +1949,23 @@ input:focus-visible + .upload-choose,
   color: var(--clew-text-link);
   font-weight: var(--clew-font-weight-bold);
   font-size: var(--clew-font-size-sm);
+  white-space: nowrap;
+}
+
+/* Small phones: tighter cards and smaller card titles, so a title and its link share a line. */
+@media (max-width: 30rem) {
+  .home-card {
+    padding: var(--clew-space-5) var(--clew-space-4);
+  }
+
+  .home-card-head h2 {
+    font-size: var(--clew-font-size-xl);
+  }
+
+  .match-row {
+    gap: var(--clew-space-3);
+    padding: var(--clew-space-3) var(--clew-space-1);
+  }
 }
 
 .home-empty,
@@ -1999,6 +2016,60 @@ input:focus-visible + .upload-choose,
 
 .match-arrow {
   color: var(--clew-text-secondary);
+  transition: transform var(--clew-motion-duration-base) var(--clew-motion-easing);
+}
+
+.match-row:hover .match-arrow,
+.match-row:focus-visible .match-arrow {
+  transform: translateX(4px);
+  color: var(--clew-text-accent);
+}
+
+/* --- Home motion. The global reduced-motion rule in base.css switches all of it off. --- */
+
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.home-grid > :not(.home-columns),
+.home-columns .home-card {
+  animation: home-rise 480ms var(--clew-motion-easing) both;
+}
+
+.home-grid > :nth-child(2) {
+  animation-delay: 60ms;
+}
+
+.home-columns .home-col:first-child .home-card {
+  animation-delay: 120ms;
+}
+
+.home-columns .home-col:last-child .home-card {
+  animation-delay: 180ms;
+}
+
+@keyframes ring-in {
+  from {
+    stroke-dashoffset: var(--ring-full);
+  }
+}
+
+.ring-fill {
+  animation: ring-in 900ms var(--clew-motion-easing) 200ms both;
+}
+
+@keyframes bar-in {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+.pipe-bar > span {
+  transform-origin: left;
+  animation: bar-in 700ms var(--clew-motion-easing) 240ms both;
 }
 
 .check-list li {
@@ -2076,9 +2147,24 @@ input:focus-visible + .upload-choose,
 }
 
 .home-map-teaser {
-  background: var(--clew-bg-subtle);
-  border: 2px dashed var(--clew-border-control);
-  box-shadow: none;
+  background: var(--clew-bg-surface);
+}
+
+.map-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-bottom: var(--clew-space-3);
+}
+
+.home-empty-art {
+  display: flex;
+  align-items: center;
+  gap: var(--clew-space-4);
+}
+
+.brand-art {
+  flex: none;
 }
 
 .pill-soon {
