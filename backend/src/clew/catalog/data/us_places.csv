@@ -1,0 +1,3406 @@
+region,city,lat,lng
+AK,Anchorage,61.218,-149.9
+AK,Badger,64.8,-147.533
+AK,Eagle River,61.321,-149.568
+AK,Fairbanks,64.838,-147.716
+AK,Juneau,58.302,-134.42
+AL,Alabaster,33.244,-86.816
+AL,Albertville,34.268,-86.209
+AL,Anniston,33.66,-85.832
+AL,Athens,34.802,-86.972
+AL,Auburn,32.61,-85.481
+AL,Bessemer,33.402,-86.954
+AL,Birmingham,33.521,-86.802
+AL,Center Point,33.646,-86.684
+AL,Cullman,34.175,-86.844
+AL,Daphne,30.604,-87.904
+AL,Decatur,34.606,-86.983
+AL,Dixiana,33.74,-86.649
+AL,Dothan,31.223,-85.39
+AL,East Florence,34.81,-87.649
+AL,Enterprise,31.315,-85.855
+AL,Fairhope,30.523,-87.903
+AL,Florence,34.8,-87.677
+AL,Foley,30.407,-87.684
+AL,Gadsden,34.014,-86.006
+AL,Helena,33.296,-86.844
+AL,Homewood,33.472,-86.801
+AL,Hoover,33.405,-86.811
+AL,Hueytown,33.451,-86.997
+AL,Huntsville,34.73,-86.586
+AL,Madison,34.699,-86.748
+AL,Millbrook,32.48,-86.362
+AL,Mobile,30.694,-88.043
+AL,Montgomery,32.367,-86.3
+AL,Mountain Brook,33.501,-86.752
+AL,Northport,33.229,-87.577
+AL,Opelika,32.645,-85.378
+AL,Oxford,33.614,-85.835
+AL,Pelham,33.286,-86.81
+AL,Phenix City,32.471,-85.001
+AL,Prattville,32.464,-86.46
+AL,Prichard,30.739,-88.079
+AL,Selma,32.407,-87.021
+AL,Talladega,33.436,-86.106
+AL,Tillmans Corner,30.59,-88.171
+AL,Troy,31.809,-85.97
+AL,Trussville,33.62,-86.609
+AL,Tuscaloosa,33.21,-87.569
+AL,Vestavia Hills,33.449,-86.788
+AR,Bella Vista,36.481,-94.271
+AR,Benton,34.565,-92.587
+AR,Bentonville,36.373,-94.209
+AR,Bryant,34.596,-92.489
+AR,Cabot,34.975,-92.017
+AR,Conway,35.089,-92.442
+AR,El Dorado,33.208,-92.666
+AR,Fayetteville,36.063,-94.157
+AR,Fort Smith,35.386,-94.399
+AR,Hot Springs,34.504,-93.055
+AR,Jacksonville,34.866,-92.11
+AR,Jonesboro,35.842,-90.704
+AR,Little Rock,34.746,-92.29
+AR,Maumelle,34.867,-92.404
+AR,North Little Rock,34.77,-92.267
+AR,Paragould,36.058,-90.497
+AR,Pine Bluff,34.228,-92.003
+AR,Rogers,36.332,-94.119
+AR,Russellville,35.278,-93.134
+AR,Searcy,35.251,-91.736
+AR,Sherwood,34.815,-92.224
+AR,Siloam Springs,36.188,-94.54
+AR,Springdale,36.187,-94.129
+AR,Texarkana,33.442,-94.038
+AR,Van Buren,35.437,-94.348
+AR,West Memphis,35.146,-90.185
+AZ,Ahwatukee Foothills,33.342,-111.984
+AZ,Alhambra,33.498,-112.134
+AZ,Anthem,33.867,-112.147
+AZ,Apache Junction,33.415,-111.55
+AZ,Avondale,33.436,-112.35
+AZ,Buckeye,33.37,-112.584
+AZ,Bullhead City,35.148,-114.568
+AZ,Casa Grande,32.88,-111.757
+AZ,Casas Adobes,32.323,-110.995
+AZ,Catalina Foothills,32.298,-110.919
+AZ,Central City,33.44,-112.058
+AZ,Chandler,33.306,-111.841
+AZ,Deer Valley,33.684,-112.135
+AZ,Douglas,31.345,-109.545
+AZ,Drexel Heights,32.141,-111.028
+AZ,El Mirage,33.613,-112.325
+AZ,Eloy,32.756,-111.555
+AZ,Encanto,33.479,-112.078
+AZ,Flagstaff,35.198,-111.651
+AZ,Florence,33.031,-111.387
+AZ,Flowing Wells,32.294,-111.01
+AZ,Fortuna Foothills,32.658,-114.412
+AZ,Fountain Hills,33.612,-111.717
+AZ,Gilbert,33.353,-111.789
+AZ,Glendale,33.539,-112.186
+AZ,Goodyear,33.435,-112.358
+AZ,Green Valley,31.854,-110.994
+AZ,Kingman,35.189,-114.053
+AZ,Lake Havasu City,34.484,-114.322
+AZ,Marana,32.437,-111.225
+AZ,Maricopa,33.058,-112.048
+AZ,Maryvale,33.502,-112.178
+AZ,Mesa,33.422,-111.823
+AZ,Nogales,31.34,-110.934
+AZ,Oro Valley,32.391,-110.966
+AZ,Payson,34.231,-111.325
+AZ,Peoria,33.581,-112.237
+AZ,Phoenix,33.448,-112.074
+AZ,Prescott,34.54,-112.469
+AZ,Prescott Valley,34.61,-112.316
+AZ,Queen Creek,33.249,-111.634
+AZ,Rio Rico,31.471,-110.976
+AZ,Sahuarita,31.958,-110.956
+AZ,San Luis,32.487,-114.782
+AZ,San Tan Valley,33.191,-111.528
+AZ,Scottsdale,33.509,-111.899
+AZ,Sierra Vista,31.555,-110.304
+AZ,Somerton,32.596,-114.71
+AZ,Sun City,33.598,-112.272
+AZ,Sun City West,33.662,-112.341
+AZ,Surprise,33.631,-112.333
+AZ,Tanque Verde,32.252,-110.737
+AZ,Tempe,33.415,-111.909
+AZ,Tempe Junction,33.414,-111.943
+AZ,Tucson,32.222,-110.926
+AZ,Yuma,32.725,-114.624
+CA,Adelanto,34.583,-117.409
+CA,Agoura,34.143,-118.738
+CA,Agoura Hills,34.136,-118.775
+CA,Agua Caliente,38.324,-122.488
+CA,Alameda,37.771,-122.261
+CA,Albany,37.887,-122.298
+CA,Alhambra,34.095,-118.127
+CA,Aliso Viejo,33.565,-117.727
+CA,Altadena,34.19,-118.131
+CA,Alum Rock,37.366,-121.827
+CA,American Canyon,38.175,-122.261
+CA,Anaheim,33.835,-117.915
+CA,Antelope,38.708,-121.33
+CA,Antioch,38.005,-121.806
+CA,Apple Valley,34.501,-117.186
+CA,Arcadia,34.14,-118.035
+CA,Arcata,40.867,-124.083
+CA,Arden-Arcade,38.602,-121.379
+CA,Arroyo Grande,35.119,-120.591
+CA,Artesia,33.866,-118.083
+CA,Arvin,35.209,-118.828
+CA,Ashland,37.695,-122.114
+CA,Atascadero,35.489,-120.671
+CA,Atwater,37.348,-120.609
+CA,Atwater Village,34.116,-118.256
+CA,Avocado Heights,34.036,-117.991
+CA,Azusa,34.134,-117.908
+CA,Bakersfield,35.373,-119.019
+CA,Baldwin Park,34.085,-117.961
+CA,Banning,33.926,-116.876
+CA,Barstow,34.899,-117.023
+CA,Barstow Heights,34.87,-117.056
+CA,Bay Point,38.029,-121.962
+CA,Bayside,40.842,-124.064
+CA,Bayview-Hunters Point,37.729,-122.381
+CA,Beaumont,33.929,-116.977
+CA,Bell,33.978,-118.187
+CA,Bell Gardens,33.965,-118.151
+CA,Bellflower,33.882,-118.117
+CA,Belmont,37.52,-122.276
+CA,Benicia,38.049,-122.159
+CA,Berkeley,37.872,-122.273
+CA,Beverly Hills,34.074,-118.4
+CA,Bloomington,34.07,-117.396
+CA,Blythe,33.61,-114.596
+CA,Bostonia,32.808,-116.936
+CA,Boyle Heights,34.034,-118.205
+CA,Brawley,32.979,-115.53
+CA,Brea,33.917,-117.9
+CA,Brentwood,34.052,-118.474
+CA,Buena Park,33.868,-117.998
+CA,Burbank,34.181,-118.309
+CA,Burlingame,37.584,-122.366
+CA,Calabasas,34.158,-118.638
+CA,Calexico,32.679,-115.499
+CA,Camarillo,34.216,-119.038
+CA,Cameron Park,38.669,-120.987
+CA,Campbell,37.287,-121.95
+CA,Canoga Park,34.201,-118.598
+CA,Canyon Country,34.423,-118.472
+CA,Carlsbad,33.158,-117.351
+CA,Carmichael,38.617,-121.328
+CA,Carson,33.831,-118.282
+CA,Casa de Oro-Mount Helix,32.764,-116.969
+CA,Castaic,34.489,-118.623
+CA,Castro Valley,37.694,-122.086
+CA,Cathedral City,33.78,-116.465
+CA,Ceres,37.595,-120.958
+CA,Cerritos,33.858,-118.065
+CA,Chatsworth,34.257,-118.601
+CA,Chico,39.728,-121.837
+CA,Chinatown,37.797,-122.409
+CA,Chino,34.012,-117.689
+CA,Chino Hills,33.994,-117.759
+CA,Chowchilla,37.123,-120.26
+CA,Chula Vista,32.64,-117.084
+CA,Citrus Heights,38.707,-121.281
+CA,Claremont,34.097,-117.72
+CA,Clearlake,38.958,-122.626
+CA,Clovis,36.825,-119.703
+CA,Coachella,33.68,-116.174
+CA,Coalinga,36.14,-120.36
+CA,Colton,34.074,-117.314
+CA,Compton,33.896,-118.22
+CA,Concord,37.978,-122.031
+CA,Corcoran,36.098,-119.56
+CA,Corona,33.875,-117.566
+CA,Coronado,32.686,-117.183
+CA,Costa Mesa,33.641,-117.919
+CA,Covina,34.09,-117.89
+CA,Cudahy,33.961,-118.185
+CA,Culver City,34.021,-118.396
+CA,Cupertino,37.323,-122.032
+CA,Cypress,33.817,-118.037
+CA,Daly City,37.706,-122.462
+CA,Dana Point,33.467,-117.698
+CA,Danville,37.822,-122.0
+CA,Davis,38.545,-121.741
+CA,Delano,35.769,-119.247
+CA,Desert Hot Springs,33.962,-116.504
+CA,Diamond Bar,34.029,-117.81
+CA,Dinuba,36.543,-119.387
+CA,Dixon,38.445,-121.823
+CA,Downey,33.94,-118.133
+CA,Duarte,34.139,-117.977
+CA,Dublin,37.702,-121.936
+CA,East Hemet,33.74,-116.939
+CA,East Los Angeles,34.024,-118.172
+CA,East Palo Alto,37.469,-122.141
+CA,East Rancho Dominguez,33.898,-118.195
+CA,Eastvale,33.964,-117.564
+CA,Echo Park,34.078,-118.261
+CA,El Cajon,32.795,-116.963
+CA,El Camino Real,33.697,-117.777
+CA,El Centro,32.792,-115.563
+CA,El Cerrito,37.916,-122.312
+CA,El Dorado Hills,38.686,-121.082
+CA,El Monte,34.069,-118.028
+CA,El Segundo,33.919,-118.416
+CA,Elk Grove,38.409,-121.372
+CA,Encinitas,33.037,-117.292
+CA,Encino,34.159,-118.501
+CA,Escondido,33.119,-117.086
+CA,Eureka,40.802,-124.164
+CA,Fair Oaks,38.645,-121.272
+CA,Fairfield,38.249,-122.04
+CA,Fallbrook,33.376,-117.251
+CA,Fillmore,34.399,-118.918
+CA,Florence-Graham,33.968,-118.244
+CA,Florin,38.496,-121.409
+CA,Folsom,38.678,-121.176
+CA,Fontana,34.092,-117.435
+CA,Foothill Farms,38.679,-121.351
+CA,Foster City,37.559,-122.271
+CA,Fountain Valley,33.709,-117.954
+CA,Fremont,37.548,-121.989
+CA,Fresno,36.748,-119.772
+CA,Fullerton,33.87,-117.925
+CA,Galt,38.255,-121.3
+CA,Garden Grove,33.774,-117.941
+CA,Gardena,33.888,-118.309
+CA,Gilroy,37.006,-121.568
+CA,Glen Avon,34.012,-117.485
+CA,Glendale,34.143,-118.255
+CA,Glendora,34.136,-117.865
+CA,Goleta,34.436,-119.828
+CA,Granite Bay,38.763,-121.164
+CA,Greenfield,36.321,-121.244
+CA,Hacienda Heights,33.993,-117.969
+CA,Hanford,36.327,-119.646
+CA,Hawthorne,33.916,-118.353
+CA,Hayward,37.669,-122.081
+CA,Hemet,33.748,-116.973
+CA,Hercules,38.017,-122.289
+CA,Hermosa Beach,33.862,-118.4
+CA,Hesperia,34.426,-117.301
+CA,Highland,34.128,-117.209
+CA,Hollister,36.852,-121.402
+CA,Hollywood,34.098,-118.327
+CA,Huntington Beach,33.66,-117.999
+CA,Huntington Park,33.982,-118.225
+CA,Imperial,32.848,-115.569
+CA,Imperial Beach,32.584,-117.113
+CA,Indio,33.721,-116.217
+CA,Inglewood,33.962,-118.353
+CA,Irvine,33.669,-117.823
+CA,Isla Vista,34.413,-119.861
+CA,Jurupa Valley,33.993,-117.516
+CA,Koreatown,34.058,-118.301
+CA,La Cañada Flintridge,34.199,-118.188
+CA,La Crescenta-Montrose,34.232,-118.235
+CA,La Habra,33.932,-117.946
+CA,La Jolla,32.847,-117.274
+CA,La Mesa,32.768,-117.023
+CA,La Mirada,33.917,-118.012
+CA,La Palma,33.846,-118.047
+CA,La Presa,32.708,-116.997
+CA,La Puente,34.02,-117.95
+CA,La Quinta,33.663,-116.31
+CA,La Verne,34.101,-117.768
+CA,Ladera Ranch,33.571,-117.636
+CA,Lafayette,37.886,-122.118
+CA,Laguna,38.421,-121.424
+CA,Laguna Beach,33.542,-117.783
+CA,Laguna Hills,33.613,-117.713
+CA,Laguna Niguel,33.523,-117.708
+CA,Laguna Woods,33.61,-117.725
+CA,Lake Elsinore,33.668,-117.327
+CA,Lake Forest,33.647,-117.689
+CA,Lakeside,32.857,-116.922
+CA,Lakewood,33.854,-118.134
+CA,Lamont,35.26,-118.914
+CA,Lancaster,34.698,-118.137
+CA,Lathrop,37.823,-121.277
+CA,Lawndale,33.887,-118.353
+CA,Lemon Grove,32.743,-117.031
+CA,Lemoore,36.301,-119.783
+CA,Lennox,33.938,-118.353
+CA,Lincoln,38.892,-121.293
+CA,Linda,39.128,-121.551
+CA,Live Oak,36.984,-121.981
+CA,Livermore,37.682,-121.768
+CA,Lodi,38.13,-121.272
+CA,Loma Linda,34.048,-117.261
+CA,Lomita,33.792,-118.315
+CA,Lompoc,34.639,-120.458
+CA,Long Beach,33.767,-118.189
+CA,Los Altos,37.385,-122.114
+CA,Los Angeles,34.052,-118.244
+CA,Los Banos,37.058,-120.85
+CA,Los Gatos,37.227,-121.975
+CA,Lynwood,33.93,-118.211
+CA,Madera,36.961,-120.061
+CA,Manhattan Beach,33.885,-118.411
+CA,Manteca,37.797,-121.216
+CA,Marina,36.684,-121.802
+CA,Martinez,38.019,-122.134
+CA,Maywood,33.987,-118.185
+CA,McKinleyville,40.947,-124.101
+CA,Mead Valley,33.833,-117.296
+CA,Menifee,33.728,-117.146
+CA,Menlo Park,37.454,-122.182
+CA,Merced,37.302,-120.483
+CA,Mid-City,34.041,-118.361
+CA,Millbrae,37.599,-122.387
+CA,Milpitas,37.428,-121.907
+CA,Mira Mesa,32.916,-117.144
+CA,Mission District,37.76,-122.419
+CA,Mission Viejo,33.6,-117.672
+CA,Modesto,37.639,-120.997
+CA,Monrovia,34.148,-117.999
+CA,Montclair,34.078,-117.69
+CA,Montebello,34.009,-118.105
+CA,Monterey,36.6,-121.895
+CA,Monterey Park,34.063,-118.123
+CA,Moorpark,34.286,-118.882
+CA,Moraga,37.835,-122.13
+CA,Moreno Valley,33.938,-117.231
+CA,Morgan Hill,37.13,-121.654
+CA,Mountain View,37.386,-122.084
+CA,Murrieta,33.554,-117.214
+CA,Napa,38.297,-122.286
+CA,National City,32.678,-117.099
+CA,Newark,37.53,-122.04
+CA,Newport Beach,33.619,-117.929
+CA,Nipomo,35.043,-120.476
+CA,Noe Valley,37.75,-122.434
+CA,Norco,33.931,-117.549
+CA,North Highlands,38.686,-121.372
+CA,North Hills,34.236,-118.485
+CA,North Hollywood,34.172,-118.379
+CA,North Tustin,33.764,-117.794
+CA,Northridge,34.228,-118.537
+CA,Northwood,33.714,-117.761
+CA,Norwalk,33.902,-118.082
+CA,Novato,38.107,-122.57
+CA,Oakdale,37.767,-120.847
+CA,Oakland,37.804,-122.271
+CA,Oakley,37.997,-121.712
+CA,Oceanside,33.196,-117.379
+CA,Oildale,35.42,-119.02
+CA,Ontario,34.063,-117.651
+CA,Orange,33.788,-117.853
+CA,Orangevale,38.679,-121.226
+CA,Orcutt,34.865,-120.436
+CA,Orinda,37.877,-122.18
+CA,Oroville,39.514,-121.558
+CA,Oxnard,34.197,-119.177
+CA,Pacific Grove,36.618,-121.917
+CA,Pacific Palisades,34.048,-118.526
+CA,Pacifica,37.614,-122.487
+CA,Palm Desert,33.723,-116.377
+CA,Palm Springs,33.83,-116.545
+CA,Palmdale,34.579,-118.116
+CA,Palo Alto,37.442,-122.143
+CA,Paradise,39.76,-121.622
+CA,Paramount,33.889,-118.16
+CA,Parkside,37.742,-122.486
+CA,Parlier,36.612,-119.527
+CA,Pasadena,34.148,-118.145
+CA,Paso Robles,35.627,-120.691
+CA,Patterson,37.472,-121.13
+CA,Perris,33.783,-117.229
+CA,Petaluma,38.232,-122.637
+CA,Pico Rivera,33.983,-118.097
+CA,Pinole,38.004,-122.299
+CA,Pittsburg,38.028,-121.885
+CA,Placentia,33.872,-117.87
+CA,Pleasant Hill,37.948,-122.061
+CA,Pleasanton,37.662,-121.875
+CA,Pomona,34.055,-117.752
+CA,Port Hueneme,34.148,-119.195
+CA,Porterville,36.065,-119.017
+CA,Poway,32.963,-117.036
+CA,Prunedale,36.776,-121.67
+CA,Ramona,33.042,-116.868
+CA,Rancho Cordova,38.589,-121.303
+CA,Rancho Cucamonga,34.106,-117.593
+CA,Rancho Mirage,33.74,-116.413
+CA,Rancho Palos Verdes,33.744,-118.387
+CA,Rancho Penasquitos,32.959,-117.115
+CA,Rancho San Diego,32.747,-116.935
+CA,Rancho Santa Margarita,33.641,-117.603
+CA,Redding,40.587,-122.392
+CA,Redlands,34.056,-117.183
+CA,Redondo Beach,33.849,-118.388
+CA,Redwood City,37.485,-122.236
+CA,Reedley,36.596,-119.45
+CA,Reseda,34.201,-118.536
+CA,Rialto,34.106,-117.37
+CA,Richmond,37.936,-122.348
+CA,Ridgecrest,35.622,-117.671
+CA,Rio Linda,38.691,-121.449
+CA,Ripon,37.742,-121.124
+CA,Riverbank,37.736,-120.935
+CA,Riverside,33.953,-117.396
+CA,Rocklin,38.791,-121.236
+CA,Rohnert Park,38.34,-122.701
+CA,Rosamond,34.864,-118.163
+CA,Rosemead,34.081,-118.073
+CA,Rosemont,38.552,-121.365
+CA,Roseville,38.752,-121.288
+CA,Rowland Heights,33.976,-117.905
+CA,Rubidoux,33.996,-117.406
+CA,Sacramento,38.582,-121.494
+CA,Salinas,36.678,-121.656
+CA,San Bernardino,34.108,-117.29
+CA,San Bruno,37.63,-122.411
+CA,San Carlos,37.507,-122.261
+CA,San Clemente,33.427,-117.612
+CA,San Diego,32.716,-117.165
+CA,San Dimas,34.107,-117.807
+CA,San Fernando,34.282,-118.439
+CA,San Francisco,37.775,-122.419
+CA,San Gabriel,34.096,-118.106
+CA,San Jacinto,33.784,-116.959
+CA,San Jose,37.339,-121.895
+CA,San Juan Capistrano,33.502,-117.663
+CA,San Leandro,37.725,-122.156
+CA,San Lorenzo,37.674,-122.133
+CA,San Luis Obispo,35.283,-120.66
+CA,San Marcos,33.143,-117.166
+CA,San Mateo,37.563,-122.326
+CA,San Pablo,37.962,-122.346
+CA,San Pedro,33.736,-118.292
+CA,San Rafael,37.974,-122.531
+CA,San Ramon,37.78,-121.978
+CA,Sanger,36.708,-119.556
+CA,Santa Ana,33.746,-117.868
+CA,Santa Barbara,34.421,-119.698
+CA,Santa Clara,37.354,-121.955
+CA,Santa Clarita,34.392,-118.543
+CA,Santa Cruz,36.974,-122.031
+CA,Santa Fe Springs,33.947,-118.085
+CA,Santa Maria,34.953,-120.436
+CA,Santa Monica,34.019,-118.491
+CA,Santa Paula,34.354,-119.059
+CA,Santa Rosa,38.44,-122.714
+CA,Santee,32.838,-116.974
+CA,Saratoga,37.264,-122.023
+CA,Sawtelle,34.036,-118.449
+CA,Seal Beach,33.741,-118.105
+CA,Seaside,36.611,-121.852
+CA,Selma,36.571,-119.612
+CA,Shafter,35.501,-119.272
+CA,Sherman Oaks,34.151,-118.449
+CA,Silver Lake,34.087,-118.27
+CA,Simi Valley,34.269,-118.781
+CA,Soledad,36.425,-121.326
+CA,South El Monte,34.052,-118.047
+CA,South Gate,33.955,-118.212
+CA,South Lake Tahoe,38.933,-119.984
+CA,South Pasadena,34.116,-118.15
+CA,South San Francisco,37.655,-122.408
+CA,South San Jose Hills,34.013,-117.905
+CA,South Whittier,33.95,-118.039
+CA,South Yuba City,39.117,-121.639
+CA,Spring Valley,32.745,-116.999
+CA,Stanton,33.803,-117.993
+CA,Stevenson Ranch,34.39,-118.574
+CA,Stockton,37.958,-121.291
+CA,Stonegate,33.705,-117.74
+CA,Studio City,34.149,-118.396
+CA,Suisun,38.238,-122.04
+CA,Sun City,33.709,-117.197
+CA,Sunland,34.267,-118.302
+CA,Sunnyvale,37.369,-122.036
+CA,Susanville,40.416,-120.653
+CA,Sylmar,34.308,-118.449
+CA,Temecula,33.494,-117.148
+CA,Temple City,34.107,-118.058
+CA,Thousand Oaks,34.171,-118.838
+CA,Torrance,33.836,-118.341
+CA,Tracy,37.74,-121.426
+CA,Truckee,39.328,-120.183
+CA,Tujunga,34.252,-118.288
+CA,Tulare,36.208,-119.347
+CA,Turlock,37.495,-120.847
+CA,Tustin,33.746,-117.826
+CA,Tustin Legacy,33.7,-117.826
+CA,Twentynine Palms,34.136,-116.054
+CA,UC Irvine,33.64,-117.842
+CA,Ukiah,39.15,-123.208
+CA,Union City,37.596,-122.019
+CA,Universal City,34.139,-118.353
+CA,Upland,34.098,-117.648
+CA,Vacaville,38.357,-121.988
+CA,Valencia,34.444,-118.61
+CA,Valinda,34.045,-117.944
+CA,Vallejo,38.104,-122.257
+CA,Valley Glen,34.186,-118.42
+CA,Van Nuys,34.187,-118.449
+CA,Venice,33.991,-118.46
+CA,Ventura,34.278,-119.293
+CA,Vermont Square,34.002,-118.299
+CA,Victorville,34.536,-117.291
+CA,Vincent,34.098,-117.924
+CA,Vineyard,38.464,-121.347
+CA,Visalia,36.33,-119.292
+CA,Visitacion Valley,37.717,-122.404
+CA,Vista,33.2,-117.243
+CA,Walnut,34.02,-117.865
+CA,Walnut Creek,37.906,-122.065
+CA,Walnut Park,33.968,-118.225
+CA,Wasco,35.594,-119.341
+CA,Watsonville,36.91,-121.757
+CA,West Carson,33.822,-118.293
+CA,West Covina,34.069,-117.939
+CA,West Hills,34.197,-118.644
+CA,West Hollywood,34.09,-118.362
+CA,West Puente Valley,34.052,-117.968
+CA,West Sacramento,38.58,-121.53
+CA,West Whittier-Los Nietos,33.976,-118.069
+CA,Westminster,33.759,-118.007
+CA,Westmont,33.941,-118.302
+CA,Westpark,33.685,-117.814
+CA,Whittier,33.979,-118.033
+CA,Wildomar,33.599,-117.28
+CA,Willowbrook,33.917,-118.255
+CA,Wilmington,33.78,-118.263
+CA,Windsor,38.547,-122.816
+CA,Winnetka,34.213,-118.572
+CA,Winter Gardens,32.831,-116.933
+CA,Woodbridge,33.677,-117.794
+CA,Woodland,38.679,-121.773
+CA,Woodland Hills,34.168,-118.606
+CA,Yorba Linda,33.889,-117.813
+CA,Yuba City,39.14,-121.617
+CA,Yucaipa,34.034,-117.043
+CA,Yucca Valley,34.114,-116.432
+CO,Arvada,39.803,-105.087
+CO,Aurora,39.729,-104.832
+CO,Boulder,40.015,-105.271
+CO,Brighton,39.985,-104.821
+CO,Broomfield,39.921,-105.087
+CO,Castle Rock,39.372,-104.856
+CO,Castlewood,39.585,-104.901
+CO,Cañon City,38.441,-105.242
+CO,Centennial,39.579,-104.877
+CO,Cimarron Hills,38.859,-104.699
+CO,Clifton,39.092,-108.449
+CO,Colorado Springs,38.834,-104.821
+CO,Columbine,39.588,-105.069
+CO,Commerce City,39.808,-104.934
+CO,Dakota Ridge,39.616,-105.139
+CO,Denver,39.739,-104.985
+CO,Durango,37.275,-107.88
+CO,Englewood,39.648,-104.988
+CO,Erie,40.05,-105.05
+CO,Evans,40.376,-104.692
+CO,Fort Collins,40.585,-105.084
+CO,Fountain,38.682,-104.701
+CO,Golden,39.756,-105.221
+CO,Grand Junction,39.064,-108.551
+CO,Greeley,40.423,-104.709
+CO,Greenwood Village,39.617,-104.951
+CO,Highlands Ranch,39.554,-104.969
+CO,Ken Caryl,39.576,-105.112
+CO,Lafayette,39.994,-105.09
+CO,Lakewood,39.705,-105.081
+CO,Littleton,39.613,-105.017
+CO,Longmont,40.167,-105.102
+CO,Louisville,39.978,-105.132
+CO,Loveland,40.398,-105.075
+CO,Montrose,38.478,-107.876
+CO,Northglenn,39.886,-104.987
+CO,Parker,39.519,-104.761
+CO,Pueblo,38.254,-104.609
+CO,Pueblo West,38.35,-104.723
+CO,Security-Widefield,38.747,-104.714
+CO,Sherrelwood,39.838,-105.001
+CO,Southglenn,39.587,-104.953
+CO,Thornton,39.868,-104.972
+CO,Westminster,39.837,-105.037
+CO,Wheat Ridge,39.766,-105.077
+CO,Windsor,40.477,-104.901
+CT,Ansonia,41.346,-73.079
+CT,Avon,41.81,-72.831
+CT,Bloomfield,41.826,-72.73
+CT,Branford,41.28,-72.815
+CT,Bridgeport,41.179,-73.189
+CT,Bristol,41.672,-72.949
+CT,Cheshire,41.499,-72.901
+CT,City of Milford (balance),41.224,-73.062
+CT,Danbury,41.395,-73.454
+CT,Darien,41.079,-73.469
+CT,East Hartford,41.782,-72.612
+CT,East Haven,41.276,-72.868
+CT,East Norwalk,41.106,-73.398
+CT,Enfield,41.976,-72.592
+CT,Fairfield,41.141,-73.264
+CT,Farmington,41.72,-72.832
+CT,Glastonbury,41.712,-72.608
+CT,Guilford,41.289,-72.682
+CT,Hamden,41.396,-72.897
+CT,Hartford,41.764,-72.685
+CT,Killingly Center,41.839,-71.869
+CT,Ledyard,41.44,-72.014
+CT,Madison,41.28,-72.598
+CT,Manchester,41.776,-72.521
+CT,Mansfield City,41.766,-72.234
+CT,Meriden,41.538,-72.807
+CT,Middletown,41.562,-72.651
+CT,Milford,41.222,-73.056
+CT,Montville Center,41.479,-72.151
+CT,Naugatuck,41.486,-73.051
+CT,New Britain,41.661,-72.78
+CT,New Canaan,41.147,-73.495
+CT,New Haven,41.308,-72.928
+CT,New London,41.356,-72.1
+CT,Newington,41.698,-72.724
+CT,North Haven,41.391,-72.86
+CT,North Stamford,41.138,-73.543
+CT,Norwalk,41.118,-73.408
+CT,Norwich,41.524,-72.076
+CT,Plainfield,41.676,-71.915
+CT,Plainville,41.675,-72.858
+CT,Seymour,41.397,-73.076
+CT,Shelton,41.316,-73.093
+CT,South Windsor,41.824,-72.621
+CT,Southbury,41.481,-73.213
+CT,Southington,41.596,-72.878
+CT,Stamford,41.053,-73.539
+CT,Storrs,41.808,-72.25
+CT,Stratford,41.185,-73.133
+CT,Torrington,41.801,-73.121
+CT,Trumbull,41.243,-73.201
+CT,Wallingford,41.457,-72.823
+CT,Wallingford Center,41.45,-72.819
+CT,Waterbury,41.558,-73.052
+CT,Waterford,41.342,-72.136
+CT,West Hartford,41.762,-72.742
+CT,West Haven,41.271,-72.947
+CT,West Torrington,41.818,-73.144
+CT,Westport,41.141,-73.358
+CT,Wethersfield,41.714,-72.653
+CT,Willimantic,41.711,-72.208
+CT,Wilton,41.195,-73.438
+CT,Windham,41.7,-72.157
+CT,Windsor,41.853,-72.644
+CT,Wolcott,41.602,-72.987
+DC,Adams Morgan,38.922,-77.042
+DC,Brightwood,38.961,-77.027
+DC,Capitol Hill,38.889,-77.0
+DC,Capitol Riverfront,38.878,-77.003
+DC,Central 14th Street / Spring Road,38.937,-77.033
+DC,Columbia Heights,38.926,-77.029
+DC,Downtown DC,38.894,-77.02
+DC,Dupont Circle,38.908,-77.044
+DC,Foggy Bottom,38.901,-77.062
+DC,Golden Triangle,38.905,-77.044
+DC,H Street NE,38.9,-76.996
+DC,Kennedy Street,38.956,-77.018
+DC,Mount Pleasant,38.931,-77.041
+DC,Mount Vernon Triangle,38.902,-77.017
+DC,NoMa,38.904,-77.006
+DC,Northwest One,38.904,-77.012
+DC,Park View,38.932,-77.024
+DC,Petworth,38.946,-77.025
+DC,Pleasant Plains,38.931,-77.03
+DC,Shaw,38.912,-77.021
+DC,Southwest Waterfront,38.879,-77.018
+DC,Washington,38.895,-77.036
+DE,Bear,39.629,-75.658
+DE,Dover,39.158,-75.524
+DE,Middletown,39.45,-75.716
+DE,Newark,39.684,-75.75
+DE,Wilmington,39.746,-75.547
+FL,Alafaya,28.564,-81.211
+FL,Allapattah,25.815,-80.224
+FL,Altamonte Springs,28.661,-81.366
+FL,Apopka,28.676,-81.512
+FL,Auburndale,28.065,-81.789
+FL,Aventura,25.956,-80.139
+FL,Bartow,27.896,-81.843
+FL,Bayonet Point,28.327,-82.683
+FL,Bayshore Gardens,27.425,-82.59
+FL,Belle Glade,26.685,-80.668
+FL,Bellview,30.462,-87.315
+FL,Bloomingdale,27.894,-82.24
+FL,Boca Del Mar,26.345,-80.147
+FL,Boca Raton,26.359,-80.083
+FL,Bonita Springs,26.34,-81.779
+FL,Boynton Beach,26.525,-80.066
+FL,Bradenton,27.499,-82.575
+FL,Brandon,27.938,-82.286
+FL,Brent,30.469,-87.236
+FL,Brownsville,25.822,-80.241
+FL,Buenaventura Lakes,28.336,-81.353
+FL,Cantonment,30.609,-87.34
+FL,Cape Coral,26.563,-81.95
+FL,Carol City,25.941,-80.246
+FL,Carrollwood,28.05,-82.493
+FL,Carrollwood Village,28.068,-82.521
+FL,Casselberry,28.678,-81.328
+FL,Citrus Park,28.078,-82.57
+FL,Clearwater,27.966,-82.8
+FL,Clermont,28.549,-81.773
+FL,Cocoa,28.386,-80.742
+FL,Coconut Creek,26.252,-80.179
+FL,Coconut Grove,25.713,-80.257
+FL,Cooper City,26.057,-80.272
+FL,Coral Gables,25.721,-80.268
+FL,Coral Springs,26.271,-80.271
+FL,Coral Terrace,25.746,-80.305
+FL,Country Club,25.948,-80.317
+FL,Country Walk,25.634,-80.432
+FL,Crestview,30.762,-86.571
+FL,Cutler,25.615,-80.311
+FL,Cutler Bay,25.578,-80.338
+FL,Cutler Ridge,25.581,-80.347
+FL,Dania Beach,26.052,-80.144
+FL,Davie,26.063,-80.233
+FL,Daytona Beach,29.211,-81.023
+FL,DeBary,28.883,-81.309
+FL,DeLand,29.028,-81.303
+FL,Deerfield Beach,26.318,-80.1
+FL,Delray Beach,26.461,-80.073
+FL,Deltona,28.901,-81.264
+FL,Doral,25.82,-80.355
+FL,Dunedin,28.02,-82.773
+FL,East Lake,28.111,-82.695
+FL,East Lake-Orient Park,27.983,-82.379
+FL,East Naples,26.138,-81.766
+FL,East Pensacola Heights,30.429,-87.18
+FL,Edgewater,28.989,-80.902
+FL,Egypt Lake-Leto,28.018,-82.506
+FL,Eloise,27.995,-81.738
+FL,Ensley,30.519,-87.273
+FL,Estero,26.438,-81.807
+FL,Eustis,28.853,-81.685
+FL,Ferry Pass,30.51,-87.212
+FL,Flagami,25.762,-80.316
+FL,Fleming Island,30.093,-81.719
+FL,Florida Ridge,27.58,-80.387
+FL,Fort Lauderdale,26.122,-80.143
+FL,Fort Myers,26.622,-81.841
+FL,Fort Pierce,27.447,-80.326
+FL,Fort Walton Beach,30.421,-86.617
+FL,Fountainebleau,25.773,-80.348
+FL,Four Corners,28.333,-81.647
+FL,Fruit Cove,30.111,-81.642
+FL,Gainesville,29.652,-82.325
+FL,Glenvar Heights,25.708,-80.326
+FL,Golden Gate,26.188,-81.695
+FL,Golden Glades,25.912,-80.2
+FL,Greater Northdale,28.105,-82.526
+FL,Greenacres City,26.624,-80.125
+FL,Haines City,28.114,-81.62
+FL,Hallandale Beach,25.981,-80.148
+FL,Hialeah,25.858,-80.278
+FL,Hialeah Gardens,25.865,-80.325
+FL,Holiday,28.188,-82.74
+FL,Hollywood,26.011,-80.149
+FL,Homestead,25.469,-80.478
+FL,Immokalee,26.419,-81.417
+FL,Iona,26.52,-81.964
+FL,Ives Estates,25.962,-80.177
+FL,Jacksonville,30.332,-81.656
+FL,Jacksonville Beach,30.295,-81.393
+FL,Jasmine Estates,28.293,-82.69
+FL,Jupiter,26.934,-80.094
+FL,Kendale Lakes,25.708,-80.407
+FL,Kendall,25.679,-80.317
+FL,Kendall West,25.706,-80.439
+FL,Key West,24.555,-81.782
+FL,Keystone,28.156,-82.621
+FL,Kissimmee,28.305,-81.417
+FL,Lake Butler,28.502,-81.541
+FL,Lake Magdalene,28.074,-82.472
+FL,Lake Mary,28.759,-81.318
+FL,Lake Wales,27.901,-81.586
+FL,Lake Worth Beach,26.617,-80.072
+FL,Lake Worth Corridor,26.616,-80.101
+FL,Lakeland,28.039,-81.95
+FL,Lakeside,30.13,-81.768
+FL,Land O' Lakes,28.219,-82.458
+FL,Largo,27.91,-82.788
+FL,Lauderdale Lakes,26.166,-80.208
+FL,Lauderhill,26.14,-80.213
+FL,Lealman,27.821,-82.679
+FL,Leesburg,28.811,-81.878
+FL,Lehigh Acres,26.625,-81.625
+FL,Leisure City,25.495,-80.429
+FL,Little Havana,25.768,-80.233
+FL,Lutz,28.151,-82.461
+FL,Lynn Haven,30.245,-85.648
+FL,Maitland,28.628,-81.363
+FL,Marco Island,25.941,-81.718
+FL,Margate,26.245,-80.206
+FL,Marion Oaks,29.009,-82.183
+FL,Meadow Woods,28.386,-81.366
+FL,Melbourne,28.084,-80.608
+FL,Merritt Island,28.359,-80.69
+FL,Miami,25.774,-80.194
+FL,Miami Beach,25.791,-80.13
+FL,Miami Gardens,25.942,-80.246
+FL,Miami Lakes,25.909,-80.309
+FL,Midway,30.406,-87.006
+FL,Miramar,25.987,-80.232
+FL,Myrtle Grove,30.421,-87.307
+FL,Naples,26.142,-81.796
+FL,Navarre,30.402,-86.864
+FL,New Port Richey,28.244,-82.719
+FL,New Smyrna Beach,29.026,-80.927
+FL,Norland,25.949,-80.212
+FL,North Fort Myers,26.667,-81.88
+FL,North Lauderdale,26.217,-80.226
+FL,North Miami,25.89,-80.187
+FL,North Miami Beach,25.933,-80.163
+FL,North Port,27.044,-82.236
+FL,Northdale,28.094,-82.506
+FL,Oak Ridge,28.471,-81.425
+FL,Oakland Park,26.172,-80.132
+FL,Oakleaf Plantation,30.171,-81.835
+FL,Ocala,29.187,-82.14
+FL,Ocoee,28.569,-81.544
+FL,Ojus,25.948,-80.151
+FL,Opa-locka,25.902,-80.25
+FL,Orlando,28.538,-81.379
+FL,Ormond Beach,29.286,-81.056
+FL,Oviedo,28.67,-81.208
+FL,Pace,30.599,-87.161
+FL,Palm Bay,28.034,-80.589
+FL,Palm Beach Gardens,26.823,-80.139
+FL,Palm City,27.168,-80.266
+FL,Palm Coast,29.585,-81.208
+FL,Palm Harbor,28.078,-82.764
+FL,Palm River-Clair Mel,27.924,-82.379
+FL,Palm Springs,26.636,-80.096
+FL,Palm Valley,30.177,-81.388
+FL,Palmetto Bay,25.622,-80.325
+FL,Panama City,30.159,-85.66
+FL,Parkland,26.31,-80.237
+FL,Pembroke Pines,26.003,-80.224
+FL,Pensacola,30.421,-87.217
+FL,Pine Hills,28.558,-81.453
+FL,Pinecrest,25.667,-80.308
+FL,Pinellas Park,27.843,-82.7
+FL,Pinewood,25.869,-80.217
+FL,Plant City,28.019,-82.115
+FL,Plantation,26.134,-80.232
+FL,Poinciana,28.14,-81.458
+FL,Pompano Beach,26.238,-80.125
+FL,Ponte Vedra Beach,30.24,-81.386
+FL,Port Charlotte,26.976,-82.091
+FL,Port Orange,29.138,-80.996
+FL,Port Saint Lucie,27.294,-80.35
+FL,Princeton,25.538,-80.409
+FL,Punta Gorda,26.93,-82.045
+FL,Punta Gorda Isles,26.918,-82.078
+FL,Richmond West,25.61,-80.43
+FL,Riverview,27.866,-82.326
+FL,Riviera Beach,26.775,-80.058
+FL,Rockledge,28.351,-80.725
+FL,Royal Palm Beach,26.708,-80.231
+FL,Ruskin,27.721,-82.433
+FL,Safety Harbor,27.991,-82.693
+FL,Saint Cloud,28.249,-81.281
+FL,San Carlos Park,26.467,-81.801
+FL,Sandalfoot Cove,26.339,-80.187
+FL,Sanford,28.801,-81.273
+FL,Santa Rosa Beach,30.396,-86.229
+FL,Sarasota,27.336,-82.531
+FL,Sebastian,27.816,-80.471
+FL,Seminole,27.84,-82.791
+FL,South Bradenton,27.463,-82.582
+FL,South Miami Heights,25.598,-80.381
+FL,Southchase,28.393,-81.383
+FL,Spring Hill,28.477,-82.525
+FL,St. Johns,30.081,-81.548
+FL,St. Petersburg,27.771,-82.679
+FL,Stuart,27.198,-80.253
+FL,Sun City Center,27.718,-82.352
+FL,Sunny Isles Beach,25.951,-80.123
+FL,Sunrise,26.134,-80.113
+FL,Sunset,25.706,-80.352
+FL,Sweetwater,25.763,-80.373
+FL,Tallahassee,30.438,-84.281
+FL,Tamarac,26.213,-80.25
+FL,Tamiami,25.759,-80.398
+FL,Tampa,27.948,-82.458
+FL,Tarpon Springs,28.146,-82.757
+FL,Tavares,28.804,-81.726
+FL,Temple Terrace,28.035,-82.389
+FL,The Acreage,26.794,-80.267
+FL,The Crossings,25.671,-80.401
+FL,The Hammocks,25.671,-80.445
+FL,The Villages,28.934,-81.96
+FL,Three Lakes,25.642,-80.398
+FL,Titusville,28.612,-80.808
+FL,Town 'n' Country,28.011,-82.577
+FL,University,28.074,-82.439
+FL,University Park,25.746,-80.368
+FL,Valrico,27.938,-82.236
+FL,Venice,27.1,-82.454
+FL,Vero Beach,27.639,-80.397
+FL,Vero Beach South,27.616,-80.413
+FL,Wekiwa Springs,28.699,-81.426
+FL,Wellington,26.659,-80.241
+FL,Wesley Chapel,28.24,-82.328
+FL,West Hollywood,26.021,-80.184
+FL,West Little River,25.857,-80.237
+FL,West Melbourne,28.072,-80.653
+FL,West Palm Beach,26.715,-80.053
+FL,West Park,25.985,-80.199
+FL,West Pensacola,30.427,-87.28
+FL,West and East Lealman,27.82,-82.689
+FL,Westchase,28.055,-82.61
+FL,Westchester,25.755,-80.327
+FL,Weston,26.1,-80.4
+FL,Winter Garden,28.565,-81.586
+FL,Winter Haven,28.022,-81.733
+FL,Winter Park,28.6,-81.339
+FL,Winter Springs,28.699,-81.308
+FL,Wright,30.456,-86.638
+GA,Acworth,34.066,-84.678
+GA,Albany,31.579,-84.156
+GA,Alpharetta,34.075,-84.294
+GA,Americus,32.072,-84.233
+GA,Athens,33.961,-83.378
+GA,Atlanta,33.749,-84.388
+GA,Augusta,33.471,-81.975
+GA,Belvedere Park,33.755,-84.267
+GA,Brookhaven,33.858,-84.34
+GA,Brunswick,31.15,-81.491
+GA,Calhoun,34.503,-84.951
+GA,Candler-McAfee,33.727,-84.272
+GA,Canton,34.237,-84.491
+GA,Carrollton,33.58,-85.077
+GA,Cartersville,34.165,-84.802
+GA,Chamblee,33.892,-84.299
+GA,Columbus,32.461,-84.988
+GA,Conyers,33.668,-84.018
+GA,Dalton,34.77,-84.97
+GA,Decatur,33.775,-84.296
+GA,Douglasville,33.752,-84.748
+GA,Dublin,32.54,-82.904
+GA,Duluth,34.003,-84.145
+GA,Dunwoody,33.946,-84.335
+GA,East Point,33.68,-84.439
+GA,Evans,33.534,-82.131
+GA,Fayetteville,33.449,-84.455
+GA,Forest Park,33.622,-84.369
+GA,Gainesville,34.298,-83.824
+GA,Griffin,33.247,-84.264
+GA,Hinesville,31.847,-81.596
+GA,Johns Creek,34.029,-84.199
+GA,Kennesaw,34.023,-84.615
+GA,Kingsland,30.8,-81.69
+GA,LaGrange,33.039,-85.031
+GA,Lawrenceville,33.956,-83.988
+GA,Lithia Springs,33.794,-84.66
+GA,Mableton,33.819,-84.582
+GA,Macon,32.841,-83.632
+GA,Marietta,33.953,-84.55
+GA,Martinez,33.517,-82.076
+GA,McDonough,33.447,-84.147
+GA,Milledgeville,33.08,-83.232
+GA,Milton,34.132,-84.301
+GA,Newnan,33.381,-84.8
+GA,Norcross,33.941,-84.214
+GA,North Decatur,33.79,-84.306
+GA,North Druid Hills,33.817,-84.313
+GA,Peachtree City,33.397,-84.596
+GA,Peachtree Corners,33.97,-84.222
+GA,Perry,32.458,-83.732
+GA,Pooler,32.115,-81.247
+GA,Redan,33.745,-84.132
+GA,Riverdale,33.573,-84.413
+GA,Rome,34.257,-85.165
+GA,Roswell,34.023,-84.362
+GA,Sandy Springs,33.924,-84.379
+GA,Savannah,32.084,-81.1
+GA,Smyrna,33.884,-84.514
+GA,Snellville,33.857,-84.02
+GA,South Fulton,33.593,-84.673
+GA,St. Marys,30.731,-81.546
+GA,Statesboro,32.449,-81.783
+GA,Stockbridge,33.544,-84.234
+GA,Stonecrest,33.708,-84.135
+GA,Sugar Hill,34.106,-84.034
+GA,Suwanee,34.051,-84.071
+GA,Thomasville,30.837,-83.979
+GA,Tifton,31.45,-83.508
+GA,Tucker,33.855,-84.217
+GA,Union City,33.587,-84.542
+GA,Valdosta,30.833,-83.28
+GA,Warner Robins,32.616,-83.627
+GA,Wilmington Island,32.004,-80.974
+GA,Winder,33.993,-83.72
+GA,Woodstock,34.101,-84.519
+HI,Airport,21.34,-157.928
+HI,Ala Moana - Kakaʻako,21.296,-157.857
+HI,Aliamanu / Salt Lakes / Foster Village,21.36,-157.918
+HI,Diamond Head / Kapahulu / Saint Louis Heights,21.277,-157.811
+HI,East Honolulu,21.289,-157.717
+HI,Hawai‘i Kai,21.296,-157.702
+HI,Hilo,19.73,-155.091
+HI,Honolulu,21.307,-157.858
+HI,Joint Base Pearl Harbor Hickam,21.349,-157.947
+HI,Kahului,20.889,-156.473
+HI,Kailua,21.402,-157.741
+HI,Kaimukī,21.279,-157.801
+HI,Kalihi Valley,21.364,-157.843
+HI,Kalihi-Palama,21.326,-157.876
+HI,Kaneohe,21.4,-157.799
+HI,Kapolei,21.336,-158.058
+HI,Kapolei Villages,21.336,-158.067
+HI,Koolauloa,21.606,-157.927
+HI,Kuliouou - Kalani Iki,21.297,-157.745
+HI,Kīhei,20.765,-156.446
+HI,Liliha - Kapalama,21.337,-157.854
+HI,Makakilo,21.352,-158.087
+HI,Makakilo / Kapolei / Honokai Hale,21.337,-158.097
+HI,Makakilo City,21.347,-158.086
+HI,Makakilo-Makaīwa Hills-Kunia,21.367,-158.073
+HI,Makiki / Lower Punchbowl / Tantalus,21.318,-157.831
+HI,Manoa,21.316,-157.804
+HI,McCully - Moiliili,21.295,-157.831
+HI,Mililani Mauka,21.478,-157.995
+HI,Mililani Mauka / Launani Valley,21.479,-157.988
+HI,Mililani Town,21.45,-158.015
+HI,Mō‘ili‘ili,21.295,-157.83
+HI,Niu Valley,21.284,-157.737
+HI,Nuuanu - Punchbowl,21.342,-157.829
+HI,Pearl City,21.397,-157.975
+HI,Schofield Barracks,21.498,-158.065
+HI,Schofield-Wheeler,21.484,-158.047
+HI,Wahiawā,21.503,-158.025
+HI,Wahiawā-Whitmore,21.506,-158.034
+HI,Waiau-Pacific Palisades,21.4,-157.954
+HI,Waikīkī,21.285,-157.836
+HI,Wailuku,20.891,-156.506
+HI,Waipahu,21.387,-158.009
+HI,ʻEwa Beach-Iroquois Point,21.315,-157.991
+HI,ʻEwa Gentry-West Loch,21.353,-158.028
+HI,‘Ewa Beach,21.316,-158.007
+HI,‘Ewa Gentry,21.34,-158.03
+IA,Altoona,41.644,-93.465
+IA,Ames,42.035,-93.62
+IA,Ankeny,41.73,-93.606
+IA,Bettendorf,41.524,-90.516
+IA,Burlington,40.808,-91.113
+IA,Cedar Falls,42.528,-92.445
+IA,Cedar Rapids,42.008,-91.644
+IA,Clinton,41.844,-90.189
+IA,Clive,41.603,-93.724
+IA,Coralville,41.676,-91.58
+IA,Council Bluffs,41.262,-95.861
+IA,Davenport,41.524,-90.578
+IA,Des Moines,41.601,-93.609
+IA,Dubuque,42.501,-90.665
+IA,Fort Dodge,42.497,-94.168
+IA,Indianola,41.358,-93.557
+IA,Iowa City,41.661,-91.53
+IA,Johnston,41.673,-93.698
+IA,Marion,42.034,-91.598
+IA,Marshalltown,42.049,-92.908
+IA,Mason City,43.154,-93.201
+IA,Muscatine,41.424,-91.043
+IA,Newton,41.7,-93.048
+IA,North Liberty,41.749,-91.598
+IA,Ottumwa,41.02,-92.411
+IA,Sioux City,42.5,-96.4
+IA,Urbandale,41.627,-93.712
+IA,Waterloo,42.493,-92.343
+IA,Waukee,41.612,-93.885
+IA,West Des Moines,41.577,-93.711
+ID,Boise,43.614,-116.203
+ID,Caldwell,43.663,-116.687
+ID,Coeur d'Alene,47.678,-116.78
+ID,Conda,42.728,-111.532
+ID,Eagle,43.695,-116.354
+ID,Idaho Falls,43.467,-112.034
+ID,Kuna,43.492,-116.42
+ID,Lewiston,46.417,-117.018
+ID,Lewiston Orchards,46.38,-116.975
+ID,Meridian,43.612,-116.392
+ID,Moscow,46.732,-117.0
+ID,Nampa,43.541,-116.563
+ID,Pocatello,42.871,-112.446
+ID,Post Falls,47.718,-116.952
+ID,Rexburg,43.826,-111.79
+ID,Twin Falls,42.563,-114.461
+IL,Addison,41.932,-87.989
+IL,Albany Park,41.968,-87.723
+IL,Algonquin,42.166,-88.294
+IL,Alsip,41.669,-87.739
+IL,Alton,38.891,-90.184
+IL,Arlington Heights,42.088,-87.981
+IL,Ashburn,41.748,-87.711
+IL,Auburn Gresham,41.742,-87.653
+IL,Aurora,41.761,-88.32
+IL,Avondale,41.939,-87.711
+IL,Bartlett,41.995,-88.186
+IL,Batavia,41.85,-88.313
+IL,Belleville,38.52,-89.984
+IL,Bellwood,41.881,-87.883
+IL,Belmont Cragin,41.932,-87.769
+IL,Belvidere,42.264,-88.844
+IL,Bensenville,41.955,-87.94
+IL,Berwyn,41.851,-87.794
+IL,Bloomingdale,41.958,-88.081
+IL,Bloomington,40.484,-88.994
+IL,Blue Island,41.657,-87.68
+IL,Bolingbrook,41.699,-88.068
+IL,Bourbonnais,41.154,-87.888
+IL,Bradley,41.142,-87.861
+IL,Bridgeport,41.838,-87.651
+IL,Bridgeview,41.75,-87.804
+IL,Brighton Park,41.819,-87.699
+IL,Brookfield,41.824,-87.852
+IL,Buffalo Grove,42.151,-87.96
+IL,Burbank,41.734,-87.779
+IL,Calumet City,41.616,-87.529
+IL,Carbondale,37.727,-89.217
+IL,Carol Stream,41.913,-88.135
+IL,Carpentersville,42.121,-88.258
+IL,Cary,42.212,-88.238
+IL,Champaign,40.116,-88.243
+IL,Charleston,39.496,-88.176
+IL,Chatham,41.741,-87.613
+IL,Chicago,41.85,-87.65
+IL,Chicago Heights,41.506,-87.636
+IL,Chicago Lawn,41.775,-87.696
+IL,Chicago Loop,41.884,-87.633
+IL,Cicero,41.846,-87.754
+IL,Collinsville,38.67,-89.985
+IL,Country Club Hills,41.568,-87.72
+IL,Crest Hill,41.555,-88.099
+IL,Crystal Lake,42.241,-88.316
+IL,Danville,40.124,-87.63
+IL,Darien,41.752,-87.974
+IL,DeKalb,41.929,-88.75
+IL,Decatur,39.84,-88.955
+IL,Deerfield,42.171,-87.845
+IL,Des Plaines,42.033,-87.883
+IL,Dixon,41.839,-89.48
+IL,Dolton,41.639,-87.607
+IL,Douglas,41.835,-87.618
+IL,Downers Grove,41.809,-88.011
+IL,East Garfield Park,41.881,-87.703
+IL,East Moline,41.501,-90.444
+IL,East Peoria,40.666,-89.58
+IL,East Saint Louis,38.624,-90.151
+IL,Edgewater,41.983,-87.664
+IL,Edwardsville,38.811,-89.953
+IL,Elgin,42.037,-88.281
+IL,Elk Grove Village,42.004,-87.97
+IL,Elmhurst,41.899,-87.94
+IL,Elmwood Park,41.921,-87.809
+IL,Englewood,41.78,-87.646
+IL,Evanston,42.041,-87.69
+IL,Evergreen Park,41.721,-87.702
+IL,Fairview Heights,38.589,-89.99
+IL,Frankfort,41.496,-87.849
+IL,Franklin Park,41.935,-87.866
+IL,Freeport,42.297,-89.621
+IL,Gage Park,41.795,-87.696
+IL,Galesburg,40.948,-90.371
+IL,Geneva,41.888,-88.305
+IL,Glen Ellyn,41.878,-88.067
+IL,Glendale Heights,41.915,-88.065
+IL,Glenview,42.07,-87.788
+IL,Godfrey,38.956,-90.187
+IL,Goodings Grove,41.629,-87.931
+IL,Grand Boulevard,41.814,-87.617
+IL,Granite City,38.701,-90.149
+IL,Grayslake,42.344,-88.042
+IL,Greater Grand Crossing,41.761,-87.615
+IL,Gurnee,42.37,-87.902
+IL,Hanover Park,41.999,-88.145
+IL,Harvey,41.61,-87.647
+IL,Highland Park,42.182,-87.8
+IL,Hinsdale,41.801,-87.937
+IL,Hoffman Estates,42.043,-88.08
+IL,Homer Glen,41.6,-87.938
+IL,Homewood,41.557,-87.666
+IL,Huntley,42.168,-88.428
+IL,Hyde Park,41.794,-87.594
+IL,Irving Park,41.953,-87.736
+IL,Jacksonville,39.734,-90.229
+IL,Joliet,41.525,-88.083
+IL,Kankakee,41.12,-87.861
+IL,Kenwood,41.809,-87.598
+IL,La Grange,41.805,-87.869
+IL,Lake Forest,42.259,-87.841
+IL,Lake Zurich,42.197,-88.093
+IL,Lake in the Hills,42.182,-88.33
+IL,Lansing,41.565,-87.539
+IL,Lemont,41.674,-88.002
+IL,Libertyville,42.283,-87.953
+IL,Lincoln Park,41.922,-87.648
+IL,Lincoln Square,41.976,-87.689
+IL,Lisle,41.801,-88.075
+IL,Lockport,41.589,-88.058
+IL,Logan Square,41.923,-87.699
+IL,Lombard,41.88,-88.008
+IL,Loves Park,42.32,-89.058
+IL,Lower West Side,41.854,-87.666
+IL,Machesney Park,42.347,-89.039
+IL,Macomb,40.459,-90.672
+IL,Marion,37.731,-88.933
+IL,Matteson,41.504,-87.713
+IL,Mattoon,39.483,-88.373
+IL,Maywood,41.879,-87.843
+IL,McHenry,42.333,-88.267
+IL,McKinley Park,41.832,-87.674
+IL,Melrose Park,41.901,-87.857
+IL,Mokena,41.526,-87.889
+IL,Moline,41.507,-90.515
+IL,Montgomery,41.731,-88.346
+IL,Morgan Park,41.69,-87.667
+IL,Morton,40.613,-89.459
+IL,Morton Grove,42.041,-87.783
+IL,Mount Greenwood,41.698,-87.709
+IL,Mount Prospect,42.066,-87.937
+IL,Mount Vernon,38.317,-88.903
+IL,Mundelein,42.263,-88.004
+IL,Naperville,41.786,-88.147
+IL,Near North Side,41.9,-87.635
+IL,Near South Side,41.857,-87.625
+IL,New City,41.808,-87.656
+IL,New Lenox,41.512,-87.966
+IL,Niles,42.019,-87.803
+IL,Normal,40.514,-88.991
+IL,North Aurora,41.806,-88.327
+IL,North Center,41.954,-87.679
+IL,North Chicago,42.326,-87.841
+IL,North Lawndale,41.86,-87.718
+IL,North Peoria,40.718,-89.584
+IL,Northbrook,42.128,-87.829
+IL,O'Fallon,38.592,-89.911
+IL,Oak Forest,41.603,-87.744
+IL,Oak Lawn,41.711,-87.758
+IL,Oak Park,41.885,-87.784
+IL,Orland Park,41.63,-87.854
+IL,Oswego,41.683,-88.351
+IL,Ottawa,41.346,-88.843
+IL,Palatine,42.11,-88.034
+IL,Palos Hills,41.697,-87.817
+IL,Park Forest,41.491,-87.674
+IL,Park Ridge,42.011,-87.841
+IL,Pekin,40.568,-89.641
+IL,Peoria,40.694,-89.589
+IL,Plainfield,41.627,-88.204
+IL,Portage Park,41.958,-87.765
+IL,Prospect Heights,42.095,-87.938
+IL,Quincy,39.936,-91.41
+IL,Rock Island,41.509,-90.579
+IL,Rockford,42.271,-89.094
+IL,Rogers Park,42.009,-87.667
+IL,Rolling Meadows,42.084,-88.013
+IL,Romeoville,41.648,-88.09
+IL,Roselle,41.985,-88.08
+IL,Round Lake,42.353,-88.093
+IL,Round Lake Beach,42.372,-88.09
+IL,Schaumburg,42.033,-88.083
+IL,Shorewood,41.52,-88.202
+IL,Skokie,42.033,-87.733
+IL,South Chicago,41.74,-87.554
+IL,South Elgin,41.994,-88.292
+IL,South Holland,41.601,-87.607
+IL,South Lawndale,41.844,-87.713
+IL,South Shore,41.762,-87.578
+IL,Springfield,39.802,-89.644
+IL,St. Charles,41.914,-88.309
+IL,Sterling,41.789,-89.696
+IL,Streamwood,42.026,-88.178
+IL,Sycamore,41.989,-88.687
+IL,Tinley Park,41.573,-87.784
+IL,Upper Alton,38.911,-90.151
+IL,Uptown,41.966,-87.653
+IL,Urbana,40.111,-88.207
+IL,Vernon Hills,42.219,-87.98
+IL,Villa Park,41.89,-87.989
+IL,Wasco,41.938,-88.405
+IL,Washington,40.704,-89.407
+IL,Waukegan,42.364,-87.845
+IL,West Chicago,41.885,-88.204
+IL,West Elsdon,41.794,-87.725
+IL,West Englewood,41.778,-87.667
+IL,West Garfield Park,41.881,-87.729
+IL,West Lawn,41.773,-87.722
+IL,West Ridge,42.0,-87.693
+IL,West Town,41.894,-87.675
+IL,Westchester,41.851,-87.882
+IL,Westmont,41.796,-87.976
+IL,Wheaton,41.866,-88.107
+IL,Wheeling,42.139,-87.929
+IL,Wilmette,42.072,-87.723
+IL,Woodlawn,41.779,-87.599
+IL,Woodridge,41.747,-88.05
+IL,Woodstock,42.315,-88.449
+IL,Yorkville,41.641,-88.447
+IL,Zion,42.446,-87.833
+IN,Anderson,40.105,-85.68
+IN,Avon,39.763,-86.4
+IN,Bloomington,39.165,-86.526
+IN,Broad Ripple,39.867,-86.142
+IN,Brownsburg,39.843,-86.398
+IN,Carmel,39.978,-86.118
+IN,Clarksville,38.297,-85.76
+IN,Columbus,39.201,-85.921
+IN,Crawfordsville,40.041,-86.874
+IN,Crown Point,41.417,-87.365
+IN,Dyer,41.494,-87.522
+IN,East Chicago,41.639,-87.455
+IN,Elkhart,41.682,-85.977
+IN,Evansville,37.975,-87.556
+IN,Fairfield Heights,39.829,-86.382
+IN,Fishers,39.956,-86.014
+IN,Fort Wayne,41.131,-85.129
+IN,Frankfort,40.279,-86.511
+IN,Franklin,39.481,-86.055
+IN,Gary,41.593,-87.346
+IN,Goshen,41.582,-85.834
+IN,Granger,41.753,-86.111
+IN,Greenfield,39.785,-85.769
+IN,Greenwood,39.614,-86.107
+IN,Griffith,41.528,-87.424
+IN,Hammond,41.583,-87.5
+IN,Highland,41.554,-87.452
+IN,Hobart,41.532,-87.255
+IN,Huntington,40.883,-85.497
+IN,Indianapolis,39.768,-86.158
+IN,Jasper,38.391,-86.931
+IN,Jeffersonville,38.278,-85.737
+IN,Kokomo,40.486,-86.134
+IN,La Porte,41.608,-86.714
+IN,Lafayette,40.417,-86.875
+IN,Lawrence,39.839,-86.025
+IN,Lebanon,40.048,-86.469
+IN,Logansport,40.754,-86.357
+IN,Marion,40.558,-85.659
+IN,Merrillville,41.483,-87.333
+IN,Michigan City,41.708,-86.895
+IN,Mishawaka,41.662,-86.159
+IN,Muncie,40.193,-85.386
+IN,Munster,41.564,-87.513
+IN,New Albany,38.286,-85.824
+IN,New Castle,39.929,-85.37
+IN,New Haven,41.071,-85.014
+IN,Noblesville,40.046,-86.009
+IN,Plainfield,39.704,-86.399
+IN,Portage,41.576,-87.176
+IN,Richmond,39.829,-84.89
+IN,Schererville,41.479,-87.455
+IN,Seymour,38.959,-85.89
+IN,Shelbyville,39.521,-85.777
+IN,South Bend,41.683,-86.25
+IN,Terre Haute,39.467,-87.414
+IN,Valparaiso,41.473,-87.061
+IN,Vincennes,38.677,-87.529
+IN,West Lafayette,40.426,-86.908
+IN,Westfield,40.043,-86.127
+IN,Zionsville,39.951,-86.262
+KS,Derby,37.546,-97.269
+KS,Dodge City,37.753,-100.017
+KS,Emporia,38.404,-96.182
+KS,Garden City,37.972,-100.873
+KS,Gardner,38.811,-94.927
+KS,Great Bend,38.364,-98.765
+KS,Hays,38.879,-99.327
+KS,Hutchinson,38.061,-97.93
+KS,Junction City,39.029,-96.831
+KS,Kansas City,39.114,-94.627
+KS,Lawrence,38.972,-95.235
+KS,Leavenworth,39.311,-94.922
+KS,Leawood,38.967,-94.617
+KS,Lenexa,38.954,-94.734
+KS,Liberal,37.043,-100.921
+KS,Manhattan,39.184,-96.572
+KS,Newton,38.047,-97.345
+KS,Olathe,38.881,-94.819
+KS,Overland Park,38.982,-94.671
+KS,Pittsburg,37.411,-94.705
+KS,Prairie Village,38.992,-94.634
+KS,Salina,38.84,-97.611
+KS,Shawnee,39.042,-94.72
+KS,Topeka,39.048,-95.678
+KS,Wichita,37.692,-97.338
+KY,Ashland,38.478,-82.638
+KY,Bowling Green,36.99,-86.444
+KY,Burlington,39.028,-84.724
+KY,Covington,39.084,-84.509
+KY,Danville,37.646,-84.772
+KY,Elizabethtown,37.694,-85.859
+KY,Erlanger,39.017,-84.601
+KY,Fern Creek,38.16,-85.588
+KY,Florence,38.999,-84.627
+KY,Fort Thomas,39.075,-84.447
+KY,Frankfort,38.201,-84.873
+KY,Georgetown,38.21,-84.559
+KY,Henderson,37.836,-87.59
+KY,Highview,38.143,-85.624
+KY,Hopkinsville,36.866,-87.491
+KY,Independence,38.943,-84.544
+KY,Jeffersontown,38.194,-85.564
+KY,Lexington,37.989,-84.478
+KY,Lexington-Fayette,38.05,-84.459
+KY,Louisville,38.254,-85.759
+KY,Madisonville,37.328,-87.499
+KY,Meads,38.413,-82.709
+KY,Murray,36.61,-88.315
+KY,Newburg,38.16,-85.66
+KY,Newport,39.091,-84.496
+KY,Nicholasville,37.881,-84.573
+KY,Okolona,38.141,-85.688
+KY,Owensboro,37.774,-87.113
+KY,Paducah,37.083,-88.6
+KY,Pleasure Ridge Park,38.145,-85.858
+KY,Radcliff,37.84,-85.949
+KY,Richmond,37.748,-84.295
+KY,Saint Matthews,38.253,-85.656
+KY,Shelbyville,38.212,-85.224
+KY,Shively,38.2,-85.823
+KY,Valley Station,38.111,-85.87
+KY,Winchester,37.99,-84.18
+LA,Alexandria,31.311,-92.445
+LA,Baton Rouge,30.443,-91.187
+LA,Bayou Cane,29.624,-90.751
+LA,Bossier City,32.516,-93.732
+LA,Central,30.554,-91.037
+LA,Chalmette,29.943,-89.965
+LA,Estelle,29.846,-90.107
+LA,Gretna,29.915,-90.054
+LA,Hammond,30.505,-90.463
+LA,Harvey,29.904,-90.077
+LA,Houma,29.596,-90.72
+LA,Kenner,29.994,-90.242
+LA,Lafayette,30.224,-92.02
+LA,Lake Charles,30.213,-93.204
+LA,Laplace,30.067,-90.481
+LA,Marrero,29.899,-90.1
+LA,Metairie,29.984,-90.153
+LA,Metairie Terrace,29.979,-90.164
+LA,Monroe,32.509,-92.119
+LA,Natchitoches,31.761,-93.086
+LA,New Iberia,30.004,-91.819
+LA,New Orleans,29.955,-90.075
+LA,Opelousas,30.534,-92.082
+LA,Prairieville,30.303,-90.972
+LA,Ruston,32.523,-92.638
+LA,Shenandoah,30.401,-91.001
+LA,Shreveport,32.525,-93.75
+LA,Slidell,30.275,-89.781
+LA,Sulphur,30.237,-93.377
+LA,Terrytown,29.91,-90.033
+LA,Zachary,30.649,-91.156
+MA,Abington,42.105,-70.945
+MA,Acton,42.485,-71.433
+MA,Agawam,42.07,-72.615
+MA,Allston,42.358,-71.126
+MA,Amesbury,42.858,-70.93
+MA,Amherst,42.367,-72.519
+MA,Amherst Center,42.375,-72.519
+MA,Arlington,42.415,-71.156
+MA,Ashland,42.261,-71.463
+MA,Ashmont,42.283,-71.069
+MA,Attleboro,41.945,-71.286
+MA,Auburn,42.195,-71.836
+MA,Back Bay,42.35,-71.087
+MA,Barnstable,41.7,-70.299
+MA,Belmont,42.396,-71.179
+MA,Beverly,42.558,-70.88
+MA,Beverly Cove,42.553,-70.854
+MA,Billerica,42.558,-71.269
+MA,Boston,42.358,-71.06
+MA,Braintree,42.204,-71.002
+MA,Brighton,42.35,-71.156
+MA,Brockton,42.083,-71.018
+MA,Brookline,42.332,-71.121
+MA,Burlington,42.505,-71.196
+MA,Cambridge,42.375,-71.106
+MA,Canton,42.158,-71.145
+MA,Charlestown,42.378,-71.062
+MA,Chelmsford,42.6,-71.367
+MA,Chelsea,42.392,-71.033
+MA,Chestnut Hill,42.331,-71.166
+MA,Chicopee,42.149,-72.608
+MA,Concord,42.46,-71.349
+MA,Danvers,42.575,-70.93
+MA,Dedham,42.242,-71.166
+MA,Dorchester,42.297,-71.075
+MA,Dracut,42.67,-71.302
+MA,Duxbury,42.042,-70.672
+MA,East Boston,42.375,-71.039
+MA,East Longmeadow,42.065,-72.513
+MA,Easthampton,42.267,-72.669
+MA,Easton,42.025,-71.129
+MA,Everett,42.408,-71.054
+MA,Fairhaven,41.638,-70.904
+MA,Fall River,41.701,-71.155
+MA,Fenway/Kenmore,42.345,-71.1
+MA,Fitchburg,42.583,-71.802
+MA,Framingham,42.279,-71.416
+MA,Framingham Center,42.297,-71.437
+MA,Franklin,42.083,-71.397
+MA,Gardner,42.575,-71.998
+MA,Gloucester,42.614,-70.663
+MA,Grafton,42.207,-71.686
+MA,Greenfield,42.588,-72.6
+MA,Hanover,42.113,-70.812
+MA,Haverhill,42.776,-71.077
+MA,Holden,42.352,-71.863
+MA,Holyoke,42.204,-72.616
+MA,Hyde Park,42.256,-71.124
+MA,Jamaica Plain,42.31,-71.12
+MA,Lawrence,42.707,-71.163
+MA,Leominster,42.525,-71.76
+MA,Lexington,42.447,-71.225
+MA,Longmeadow,42.05,-72.583
+MA,Lowell,42.633,-71.316
+MA,Ludlow,42.16,-72.476
+MA,Lynn,42.467,-70.949
+MA,Malden,42.425,-71.066
+MA,Mansfield,42.033,-71.219
+MA,Marblehead,42.5,-70.858
+MA,Marlborough,42.346,-71.552
+MA,Mattapan,42.272,-71.087
+MA,Medford,42.418,-71.106
+MA,Melrose,42.458,-71.066
+MA,Methuen,42.726,-71.191
+MA,Middleborough,41.893,-70.911
+MA,Milford,42.14,-71.516
+MA,Milton,42.25,-71.066
+MA,Mission Hill,42.334,-71.108
+MA,Natick,42.283,-71.35
+MA,Needham,42.283,-71.233
+MA,New Bedford,41.635,-70.927
+MA,Newburyport,42.813,-70.877
+MA,Newton,42.337,-71.209
+MA,North Andover,42.699,-71.135
+MA,North Attleborough Center,41.973,-71.325
+MA,North Chicopee,42.183,-72.6
+MA,Northampton,42.325,-72.641
+MA,Norton,41.967,-71.187
+MA,Norwood,42.195,-71.2
+MA,Orient Heights,42.388,-71.004
+MA,Palmer,42.158,-72.329
+MA,Peabody,42.528,-70.929
+MA,Pittsfield,42.45,-73.245
+MA,Quincy,42.253,-71.002
+MA,Randolph,42.163,-71.041
+MA,Reading,42.526,-71.095
+MA,Revere,42.408,-71.012
+MA,Rockland,42.131,-70.916
+MA,Roslindale,42.291,-71.124
+MA,Roxbury Crossing,42.331,-71.091
+MA,Salem,42.52,-70.896
+MA,Saugus,42.465,-71.01
+MA,Shrewsbury,42.296,-71.713
+MA,Somerset,41.77,-71.129
+MA,Somerville,42.388,-71.1
+MA,South Boston,42.333,-71.049
+MA,South Hadley,42.258,-72.575
+MA,South Peabody,42.51,-70.949
+MA,Southbridge,42.075,-72.033
+MA,Springfield,42.101,-72.59
+MA,Stoneham,42.48,-71.1
+MA,Stoughton,42.125,-71.102
+MA,Sudbury,42.383,-71.416
+MA,Swansea,41.748,-71.19
+MA,Taunton,41.9,-71.09
+MA,Tewksbury,42.611,-71.234
+MA,Wakefield,42.506,-71.073
+MA,Waltham,42.376,-71.236
+MA,Watertown,42.371,-71.183
+MA,Wellesley,42.296,-71.293
+MA,West Roxbury,42.279,-71.15
+MA,West Springfield,42.107,-72.62
+MA,Westfield,42.125,-72.75
+MA,Westford,42.579,-71.438
+MA,Weymouth,42.221,-70.94
+MA,Wilmington,42.546,-71.174
+MA,Winchester,42.452,-71.137
+MA,Winthrop,42.375,-70.983
+MA,Woburn,42.479,-71.152
+MA,Worcester,42.263,-71.802
+MA,Yarmouth,41.706,-70.229
+MD,Aberdeen,39.51,-76.164
+MD,Adelphi,39.003,-76.972
+MD,Annapolis,38.979,-76.492
+MD,Arbutus,39.255,-76.7
+MD,Arnold,39.032,-76.503
+MD,Aspen Hill,39.08,-77.073
+MD,Ballenger Creek,39.373,-77.435
+MD,Baltimore,39.29,-76.612
+MD,Bel Air North,39.554,-76.373
+MD,Bel Air South,39.505,-76.32
+MD,Beltsville,39.035,-76.907
+MD,Bethesda,38.981,-77.1
+MD,Bowie,38.943,-76.73
+MD,Calverton,39.058,-76.936
+MD,Camp Springs,38.804,-76.907
+MD,Carney,39.394,-76.524
+MD,Catonsville,39.272,-76.732
+MD,Chillum,38.964,-76.991
+MD,Clinton,38.765,-76.898
+MD,Cloverly,39.108,-76.998
+MD,Cockeysville,39.481,-76.644
+MD,College Park,38.981,-76.937
+MD,Columbia,39.24,-76.839
+MD,Crofton,39.002,-76.687
+MD,Cumberland,39.653,-78.763
+MD,Damascus,39.288,-77.204
+MD,Dundalk,39.251,-76.521
+MD,East Riverdale,38.958,-76.911
+MD,Easton,38.774,-76.076
+MD,Edgewood,39.419,-76.294
+MD,Eldersburg,39.404,-76.95
+MD,Elkridge,39.213,-76.714
+MD,Elkton,39.607,-75.833
+MD,Ellicott City,39.267,-76.798
+MD,Essex,39.309,-76.475
+MD,Fairland,39.076,-76.958
+MD,Ferndale,39.183,-76.64
+MD,Fort Washington,38.707,-77.023
+MD,Frankford,39.329,-76.545
+MD,Frederick,39.414,-77.411
+MD,Gaithersburg,39.143,-77.201
+MD,Germantown,39.173,-77.272
+MD,Glassmanor,38.819,-76.999
+MD,Glen Burnie,39.163,-76.625
+MD,Greater Upper Marlboro,38.831,-76.748
+MD,Green Haven,39.14,-76.548
+MD,Greenbelt,39.005,-76.876
+MD,Gwynn Oak,39.333,-76.693
+MD,Hagerstown,39.642,-77.72
+MD,Hanover,39.193,-76.724
+MD,Hillcrest Heights,38.833,-76.959
+MD,Hunt Valley,39.5,-76.641
+MD,Hyattsville,38.956,-76.946
+MD,Ilchester,39.251,-76.765
+MD,Lake Shore,39.107,-76.485
+MD,Landover,38.934,-76.897
+MD,Langley Park,38.989,-76.981
+MD,Lanham-Seabrook,38.968,-76.851
+MD,Laurel,39.099,-76.848
+MD,Lochearn,39.341,-76.722
+MD,Lutherville-Timonium,39.44,-76.611
+MD,Maryland City,39.092,-76.818
+MD,Middle River,39.334,-76.439
+MD,Milford Mill,39.348,-76.77
+MD,Montgomery Village,39.177,-77.195
+MD,North Bel Air,39.54,-76.355
+MD,North Bethesda,39.045,-77.119
+MD,North Potomac,39.083,-77.265
+MD,Odenton,39.084,-76.7
+MD,Olney,39.153,-77.067
+MD,Owings Mills,39.42,-76.78
+MD,Oxon Hill,38.803,-76.99
+MD,Oxon Hill-Glassmanor,38.796,-76.975
+MD,Parkville,39.377,-76.54
+MD,Parole,38.981,-76.545
+MD,Pasadena,39.119,-76.571
+MD,Perry Hall,39.413,-76.464
+MD,Pikesville,39.374,-76.722
+MD,Potomac,39.018,-77.209
+MD,Randallstown,39.367,-76.795
+MD,Redland,39.145,-77.144
+MD,Reisterstown,39.47,-76.832
+MD,Rockville,39.084,-77.153
+MD,Rosedale,39.32,-76.516
+MD,Rossville,39.338,-76.48
+MD,Saint Charles,38.603,-76.939
+MD,Salisbury,38.361,-75.599
+MD,Scaggsville,39.145,-76.9
+MD,Seabrook,38.974,-76.849
+MD,Severn,39.137,-76.698
+MD,Severna Park,39.07,-76.545
+MD,Silver Spring,38.991,-77.026
+MD,South Bel Air,39.533,-76.337
+MD,South Gate,39.129,-76.626
+MD,South Laurel,39.07,-76.85
+MD,St. Charles,38.607,-76.925
+MD,Suitland,38.849,-76.924
+MD,Suitland-Silver Hill,38.847,-76.926
+MD,Takoma Park,38.978,-77.007
+MD,Towson,39.401,-76.602
+MD,Waldorf,38.625,-76.939
+MD,West Elkridge,39.207,-76.727
+MD,Westminster,39.575,-76.996
+MD,Wheaton,39.04,-77.055
+MD,White Oak,39.04,-76.993
+MD,Woodlawn,39.323,-76.728
+ME,Auburn,44.098,-70.231
+ME,Augusta,44.311,-69.779
+ME,Bangor,44.799,-68.773
+ME,Biddeford,43.493,-70.453
+ME,Brunswick,43.915,-69.965
+ME,Lewiston,44.1,-70.215
+ME,Portland,43.657,-70.259
+ME,Saco,43.501,-70.443
+ME,Sanford,43.439,-70.774
+ME,South Portland,43.641,-70.241
+ME,South Portland Gardens,43.639,-70.315
+ME,Waterville,44.552,-69.632
+ME,West Scarborough,43.57,-70.388
+ME,Westbrook,43.677,-70.371
+MI,Adrian,41.898,-84.037
+MI,Allen Park,42.258,-83.211
+MI,Allendale,42.972,-85.954
+MI,Ann Arbor,42.278,-83.741
+MI,Auburn Hills,42.688,-83.234
+MI,Battle Creek,42.317,-85.178
+MI,Bay City,43.594,-83.889
+MI,Berkley,42.503,-83.184
+MI,Birmingham,42.547,-83.211
+MI,Burton,42.999,-83.616
+MI,Canton,42.309,-83.482
+MI,Clinton Township,42.587,-82.92
+MI,Dearborn,42.322,-83.176
+MI,Dearborn Heights,42.337,-83.273
+MI,Detroit,42.331,-83.046
+MI,East Lansing,42.737,-84.484
+MI,Eastpointe,42.468,-82.955
+MI,Farmington Hills,42.485,-83.377
+MI,Ferndale,42.461,-83.135
+MI,Flint,43.013,-83.687
+MI,Forest Hills,42.959,-85.49
+MI,Garden City,42.326,-83.331
+MI,Grand Rapids,42.963,-85.668
+MI,Grandville,42.91,-85.763
+MI,Grosse Pointe Woods,42.444,-82.907
+MI,Hamtramck,42.393,-83.05
+MI,Haslett,42.747,-84.401
+MI,Hazel Park,42.463,-83.104
+MI,Holland,42.788,-86.109
+MI,Holt,42.641,-84.515
+MI,Inkster,42.294,-83.31
+MI,Jackson,42.246,-84.401
+MI,Jenison,42.907,-85.792
+MI,Kalamazoo,42.292,-85.587
+MI,Kentwood,42.869,-85.645
+MI,Lansing,42.733,-84.556
+MI,Lincoln Park,42.251,-83.179
+MI,Livonia,42.368,-83.353
+MI,Madison Heights,42.486,-83.105
+MI,Marquette,46.544,-87.395
+MI,Midland,43.616,-84.247
+MI,Monroe,41.916,-83.398
+MI,Mount Clemens,42.597,-82.878
+MI,Mount Pleasant,43.598,-84.768
+MI,Muskegon,43.234,-86.248
+MI,Norton Shores,43.169,-86.264
+MI,Novi,42.481,-83.475
+MI,Oak Park,42.459,-83.183
+MI,Okemos,42.722,-84.427
+MI,Pontiac,42.639,-83.291
+MI,Port Huron,42.971,-82.425
+MI,Portage,42.201,-85.58
+MI,Redford,42.383,-83.297
+MI,Rochester Hills,42.658,-83.15
+MI,Romulus,42.222,-83.397
+MI,Roseville,42.497,-82.937
+MI,Royal Oak,42.489,-83.145
+MI,Saginaw,43.419,-83.951
+MI,Saginaw Township North,43.46,-84.007
+MI,Saint Clair Shores,42.497,-82.889
+MI,Shelby,42.671,-83.033
+MI,Southfield,42.473,-83.222
+MI,Southgate,42.214,-83.194
+MI,Sterling Heights,42.58,-83.03
+MI,Taylor,42.241,-83.27
+MI,Traverse City,44.763,-85.621
+MI,Trenton,42.139,-83.178
+MI,Troy,42.606,-83.15
+MI,Walker,43.001,-85.768
+MI,Warren,42.49,-83.013
+MI,Waterford,42.693,-83.412
+MI,Waverly,42.739,-84.621
+MI,Wayne,42.281,-83.386
+MI,West Bloomfield Township,42.569,-83.384
+MI,Westland,42.324,-83.4
+MI,Wyandotte,42.214,-83.15
+MI,Wyoming,42.913,-85.705
+MI,Ypsilanti,42.241,-83.613
+MN,Albert Lea,43.648,-93.368
+MN,Andover,45.233,-93.291
+MN,Anoka,45.198,-93.387
+MN,Apple Valley,44.732,-93.218
+MN,Austin,43.667,-92.975
+MN,Blaine,45.161,-93.235
+MN,Bloomington,44.841,-93.298
+MN,Brooklyn Center,45.076,-93.333
+MN,Brooklyn Park,45.094,-93.356
+MN,Buffalo,45.172,-93.875
+MN,Burnsville,44.768,-93.278
+MN,Champlin,45.189,-93.397
+MN,Chanhassen,44.862,-93.531
+MN,Chaska,44.789,-93.602
+MN,Columbia Heights,45.041,-93.263
+MN,Coon Rapids,45.12,-93.288
+MN,Cottage Grove,44.828,-92.944
+MN,Crystal,45.033,-93.36
+MN,Duluth,46.783,-92.107
+MN,Eagan,44.804,-93.167
+MN,Eden Prairie,44.855,-93.471
+MN,Edina,44.89,-93.35
+MN,Elk River,45.304,-93.567
+MN,Faribault,44.295,-93.269
+MN,Farmington,44.64,-93.144
+MN,Forest Lake,45.279,-92.985
+MN,Fridley,45.086,-93.263
+MN,Golden Valley,45.01,-93.349
+MN,Ham Lake,45.25,-93.25
+MN,Hastings,44.743,-92.852
+MN,Hibbing,47.427,-92.938
+MN,Hopkins,44.925,-93.463
+MN,Inver Grove Heights,44.848,-93.043
+MN,Lakeville,44.65,-93.243
+MN,Lino Lakes,45.16,-93.089
+MN,Longfellow Community,44.943,-93.226
+MN,Mankato,44.159,-94.009
+MN,Maple Grove,45.072,-93.456
+MN,Maplewood,44.953,-92.995
+MN,Minneapolis,44.98,-93.264
+MN,Minnetonka,44.913,-93.503
+MN,Minnetonka Mills,44.941,-93.442
+MN,Moorhead,46.874,-96.77
+MN,New Brighton,45.066,-93.202
+MN,New Hope,45.038,-93.387
+MN,Northfield,44.458,-93.162
+MN,Oakdale,44.963,-92.965
+MN,Otsego,45.274,-93.591
+MN,Owatonna,44.084,-93.226
+MN,Plymouth,45.011,-93.456
+MN,Prior Lake,44.713,-93.423
+MN,Ramsey,45.261,-93.45
+MN,Red Wing,44.562,-92.534
+MN,Richfield,44.883,-93.283
+MN,Rochester,44.022,-92.47
+MN,Rosemount,44.739,-93.126
+MN,Roseville,45.006,-93.157
+MN,Saint Cloud,45.561,-94.162
+MN,Saint Louis Park,44.948,-93.348
+MN,Saint Michael,45.21,-93.665
+MN,Saint Paul,44.944,-93.093
+MN,Sartell,45.622,-94.207
+MN,Savage,44.779,-93.336
+MN,Shakopee,44.798,-93.527
+MN,Shoreview,45.079,-93.147
+MN,South Saint Paul,44.893,-93.035
+MN,Stillwater,45.056,-92.806
+MN,West Coon Rapids,45.16,-93.35
+MN,West Saint Paul,44.916,-93.102
+MN,White Bear Lake,45.085,-93.01
+MN,Willmar,45.122,-95.043
+MN,Winona,44.05,-91.639
+MN,Woodbury,44.924,-92.959
+MO,Affton,38.551,-90.333
+MO,Arnold,38.433,-90.378
+MO,Ballwin,38.595,-90.546
+MO,Belton,38.812,-94.532
+MO,Blue Springs,39.017,-94.282
+MO,Cape Girardeau,37.306,-89.518
+MO,Chesterfield,38.663,-90.577
+MO,Clayton,38.643,-90.324
+MO,Columbia,38.952,-92.334
+MO,Concord,38.525,-90.357
+MO,Creve Coeur,38.661,-90.423
+MO,East Independence,39.096,-94.355
+MO,Farmington,37.781,-90.422
+MO,Ferguson,38.744,-90.305
+MO,Florissant,38.789,-90.323
+MO,Fort Leonard Wood,37.706,-92.157
+MO,Gladstone,39.204,-94.555
+MO,Grandview,38.886,-94.533
+MO,Hannibal,39.708,-91.358
+MO,Hazelwood,38.771,-90.371
+MO,Independence,39.091,-94.416
+MO,Jefferson City,38.577,-92.174
+MO,Joplin,37.084,-94.513
+MO,Kansas City,39.1,-94.579
+MO,Kirksville,40.195,-92.583
+MO,Kirkwood,38.583,-90.407
+MO,Lee's Summit,38.911,-94.382
+MO,Lemay,38.533,-90.279
+MO,Liberty,39.246,-94.419
+MO,Manchester,38.597,-90.509
+MO,Maryland Heights,38.713,-90.43
+MO,Mehlville,38.508,-90.323
+MO,Nixa,37.043,-93.294
+MO,O'Fallon,38.811,-90.7
+MO,Oakville,38.47,-90.305
+MO,Old Jamestown,38.835,-90.285
+MO,Overland,38.701,-90.362
+MO,Ozark,37.021,-93.206
+MO,Poplar Bluff,36.757,-90.393
+MO,Raymore,38.802,-94.453
+MO,Raytown,39.009,-94.464
+MO,Republic,37.12,-93.48
+MO,Rolla,37.951,-91.771
+MO,Saint Charles,38.784,-90.481
+MO,Saint Joseph,39.769,-94.847
+MO,Saint Peters,38.8,-90.627
+MO,Sedalia,38.704,-93.228
+MO,Sikeston,36.877,-89.588
+MO,Spanish Lake,38.788,-90.216
+MO,Springfield,37.215,-93.298
+MO,St. Louis,38.627,-90.198
+MO,University City,38.656,-90.309
+MO,Warrensburg,38.763,-93.736
+MO,Webster Groves,38.593,-90.357
+MO,Wentzville,38.811,-90.853
+MO,Wildwood,38.583,-90.663
+MS,Biloxi,30.396,-88.885
+MS,Brandon,32.273,-89.986
+MS,Clarksdale,34.2,-90.571
+MS,Clinton,32.342,-90.322
+MS,Columbus,33.496,-88.427
+MS,Gautier,30.386,-88.612
+MS,Greenville,33.409,-91.06
+MS,Greenwood,33.516,-90.18
+MS,Gulfport,30.367,-89.093
+MS,Hattiesburg,31.327,-89.29
+MS,Hernando,34.824,-89.994
+MS,Horn Lake,34.955,-90.035
+MS,Jackson,32.299,-90.185
+MS,Laurel,31.694,-89.131
+MS,Long Beach,30.35,-89.153
+MS,Madison,32.462,-90.115
+MS,Meridian,32.364,-88.704
+MS,Natchez,31.56,-91.403
+MS,Ocean Springs,30.411,-88.828
+MS,Olive Branch,34.962,-89.83
+MS,Oxford,34.367,-89.519
+MS,Pascagoula,30.366,-88.556
+MS,Pearl,32.275,-90.132
+MS,Ridgeland,32.428,-90.132
+MS,Southaven,34.989,-90.013
+MS,Starkville,33.45,-88.82
+MS,Tupelo,34.258,-88.705
+MS,Vicksburg,32.353,-90.878
+MS,West Gulfport,30.404,-89.094
+MT,Billings,45.783,-108.501
+MT,Bozeman,45.68,-111.039
+MT,Butte,46.004,-112.535
+MT,Great Falls,47.5,-111.301
+MT,Helena,46.593,-112.036
+MT,Kalispell,48.196,-114.313
+MT,Missoula,46.872,-113.994
+NC,Albemarle,35.35,-80.2
+NC,Apex,35.733,-78.85
+NC,Asheboro,35.708,-79.814
+NC,Asheville,35.601,-82.554
+NC,Boone,36.217,-81.675
+NC,Burlington,36.096,-79.438
+NC,Carrboro,35.91,-79.075
+NC,Cary,35.792,-78.781
+NC,Chapel Hill,35.913,-79.056
+NC,Charlotte,35.227,-80.843
+NC,Clayton,35.651,-78.456
+NC,Clemmons,36.022,-80.382
+NC,Concord,35.409,-80.582
+NC,Cornelius,35.487,-80.86
+NC,Durham,35.994,-78.899
+NC,Eden,36.488,-79.767
+NC,Elizabeth City,36.295,-76.251
+NC,Fayetteville,35.053,-78.878
+NC,Fort Bragg,35.139,-79.006
+NC,Fuquay-Varina,35.584,-78.8
+NC,Garner,35.711,-78.614
+NC,Gastonia,35.262,-81.187
+NC,Goldsboro,35.385,-77.993
+NC,Greensboro,36.073,-79.792
+NC,Greenville,35.613,-77.366
+NC,Havelock,34.879,-76.901
+NC,Henderson,36.33,-78.399
+NC,Hickory,35.733,-81.341
+NC,High Point,35.956,-80.005
+NC,Holly Springs,35.651,-78.834
+NC,Hope Mills,34.97,-78.945
+NC,Huntersville,35.411,-80.843
+NC,Indian Trail,35.077,-80.669
+NC,Jacksonville,34.754,-77.43
+NC,Kannapolis,35.487,-80.622
+NC,Kernersville,36.12,-80.074
+NC,Kinston,35.263,-77.582
+NC,Laurinburg,34.774,-79.463
+NC,Leland,34.256,-78.045
+NC,Lenoir,35.914,-81.539
+NC,Lexington,35.824,-80.253
+NC,Lumberton,34.618,-79.01
+NC,Matthews,35.117,-80.724
+NC,Mint Hill,35.18,-80.647
+NC,Monroe,34.985,-80.55
+NC,Mooresville,35.585,-80.81
+NC,Morganton,35.745,-81.685
+NC,Morrisville,35.823,-78.826
+NC,New Bern,35.108,-77.044
+NC,Pinehurst,35.195,-79.469
+NC,Raleigh,35.772,-78.639
+NC,Roanoke Rapids,36.462,-77.654
+NC,Rocky Mount,35.938,-77.791
+NC,Salisbury,35.671,-80.474
+NC,Sanford,35.48,-79.18
+NC,Shelby,35.292,-81.536
+NC,Stallings,35.091,-80.686
+NC,Statesville,35.783,-80.887
+NC,Thomasville,35.883,-80.082
+NC,Wake Forest,35.98,-78.51
+NC,West Raleigh,35.787,-78.664
+NC,Wilmington,34.236,-77.946
+NC,Wilson,35.721,-77.916
+NC,Winston-Salem,36.1,-80.244
+ND,Bismarck,46.808,-100.784
+ND,Dickinson,46.879,-102.79
+ND,Fargo,46.877,-96.79
+ND,Grand Forks,47.925,-97.033
+ND,Jamestown,46.911,-98.708
+ND,Mandan,46.827,-100.89
+ND,Minot,48.233,-101.296
+ND,West Fargo,46.875,-96.9
+ND,Williston,48.147,-103.618
+NE,Bellevue,41.137,-95.891
+NE,Columbus,41.43,-97.368
+NE,Fremont,41.433,-96.498
+NE,Grand Island,40.925,-98.342
+NE,Hastings,40.586,-98.388
+NE,Kearney,40.699,-99.081
+NE,La Vista,41.184,-96.031
+NE,Lincoln,40.8,-96.667
+NE,Norfolk,42.028,-97.417
+NE,North Platte,41.124,-100.765
+NE,Omaha,41.256,-95.94
+NE,Papillion,41.154,-96.042
+NH,Bedford,42.946,-71.516
+NH,Concord,43.208,-71.538
+NH,Derry,42.881,-71.327
+NH,Derry Village,42.892,-71.312
+NH,Dover,43.198,-70.874
+NH,East Concord,43.242,-71.538
+NH,Keene,42.934,-72.278
+NH,Laconia,43.528,-71.47
+NH,Manchester,42.996,-71.455
+NH,Merrimack,42.865,-71.493
+NH,Nashua,42.765,-71.468
+NH,Portsmouth,43.077,-70.758
+NH,Rochester,43.305,-70.976
+NH,Salem,42.788,-71.201
+NJ,Asbury Park,40.22,-74.012
+NJ,Atlantic City,39.364,-74.423
+NJ,Avenel,40.58,-74.285
+NJ,Basking Ridge,40.706,-74.549
+NJ,Bayonne,40.669,-74.114
+NJ,Bayville,39.909,-74.155
+NJ,Belleville,40.794,-74.15
+NJ,Bergenfield,40.928,-73.997
+NJ,Bloomfield,40.807,-74.185
+NJ,Brick,40.059,-74.137
+NJ,Bridgeton,39.427,-75.234
+NJ,Bridgewater,40.601,-74.648
+NJ,Camden,39.926,-75.12
+NJ,Carteret,40.577,-74.228
+NJ,Cherry Hill,39.935,-75.031
+NJ,Cliffside Park,40.821,-73.988
+NJ,Clifton,40.858,-74.164
+NJ,Colonia,40.575,-74.302
+NJ,Cranford,40.658,-74.3
+NJ,Denville,40.892,-74.477
+NJ,Dover,40.884,-74.562
+NJ,Dumont,40.941,-73.997
+NJ,East Brunswick,40.428,-74.416
+NJ,East Orange,40.767,-74.205
+NJ,Edison,40.519,-74.412
+NJ,Elizabeth,40.664,-74.211
+NJ,Elmwood Park,40.904,-74.118
+NJ,Englewood,40.893,-73.973
+NJ,Ewing,40.27,-74.8
+NJ,Fair Lawn,40.94,-74.132
+NJ,Fords,40.529,-74.316
+NJ,Fort Lee,40.851,-73.97
+NJ,Garfield,40.881,-74.113
+NJ,Glassboro,39.703,-75.112
+NJ,Hackensack,40.886,-74.043
+NJ,Harrison,40.746,-74.156
+NJ,Hawthorne,40.949,-74.154
+NJ,Hillsborough,40.478,-74.627
+NJ,Hillside,40.701,-74.23
+NJ,Hoboken,40.744,-74.032
+NJ,Hopatcong Hills,40.944,-74.671
+NJ,Irvington,40.732,-74.235
+NJ,Iselin,40.575,-74.322
+NJ,Jackson,39.776,-74.862
+NJ,Jersey City,40.728,-74.078
+NJ,Kearny,40.768,-74.145
+NJ,Lakewood,40.098,-74.218
+NJ,Linden,40.622,-74.245
+NJ,Lindenwold,39.824,-74.998
+NJ,Livingston,40.796,-74.315
+NJ,Lodi,40.882,-74.083
+NJ,Long Branch,40.304,-73.992
+NJ,Lyndhurst,40.812,-74.124
+NJ,Madison,40.76,-74.417
+NJ,Mahwah,41.089,-74.144
+NJ,Maple Shade,39.953,-74.992
+NJ,Maplewood,40.731,-74.273
+NJ,Marlboro,40.315,-74.246
+NJ,Mercerville-Hamilton Square,40.231,-74.672
+NJ,Middletown,40.394,-74.117
+NJ,Millburn,40.725,-74.304
+NJ,Millville,39.402,-75.039
+NJ,Montclair,40.826,-74.209
+NJ,Morristown,40.797,-74.482
+NJ,Mount Laurel,39.934,-74.891
+NJ,New Brunswick,40.486,-74.452
+NJ,New Milford,40.935,-74.019
+NJ,Newark,40.736,-74.172
+NJ,North Arlington,40.788,-74.133
+NJ,North Bergen,40.804,-74.012
+NJ,North Brunswick,40.454,-74.482
+NJ,North Plainfield,40.63,-74.427
+NJ,Nutley,40.822,-74.16
+NJ,Ocean Acres,39.743,-74.281
+NJ,Old Bridge,40.415,-74.365
+NJ,Orange,40.771,-74.233
+NJ,Palisades Park,40.848,-73.998
+NJ,Paramus,40.945,-74.075
+NJ,Parsippany,40.858,-74.426
+NJ,Passaic,40.857,-74.128
+NJ,Paterson,40.917,-74.172
+NJ,Pennsauken,39.956,-75.058
+NJ,Perth Amboy,40.507,-74.265
+NJ,Piscataway,40.499,-74.399
+NJ,Plainfield,40.634,-74.407
+NJ,Pleasantville,39.39,-74.524
+NJ,Point Pleasant,40.083,-74.068
+NJ,Princeton,40.349,-74.659
+NJ,Rahway,40.608,-74.278
+NJ,Ramsey,41.057,-74.141
+NJ,Randolph,40.848,-74.581
+NJ,Ridgewood,40.979,-74.117
+NJ,Roselle,40.652,-74.259
+NJ,Rutherford,40.826,-74.107
+NJ,Sayreville,40.459,-74.361
+NJ,Sayreville Junction,40.465,-74.33
+NJ,Scotch Plains,40.655,-74.39
+NJ,Secaucus,40.79,-74.057
+NJ,Sewell,39.767,-75.144
+NJ,Sicklerville,39.717,-74.969
+NJ,Somerset,40.498,-74.488
+NJ,South Old Bridge,40.408,-74.354
+NJ,South Orange,40.749,-74.261
+NJ,South Plainfield,40.579,-74.412
+NJ,South River,40.446,-74.386
+NJ,South Vineland,39.446,-75.029
+NJ,Sparta,41.033,-74.638
+NJ,Summit,40.716,-74.365
+NJ,Teaneck,40.898,-74.016
+NJ,Tinton Falls,40.304,-74.1
+NJ,Toms River,39.954,-74.198
+NJ,Trenton,40.217,-74.743
+NJ,Union,40.698,-74.263
+NJ,Union City,40.78,-74.024
+NJ,Vincentown,39.934,-74.748
+NJ,Vineland,39.486,-75.026
+NJ,Warren Township,40.608,-74.518
+NJ,Wayne,40.925,-74.277
+NJ,West Milford,41.131,-74.367
+NJ,West New York,40.788,-74.014
+NJ,West Orange,40.799,-74.239
+NJ,Westfield,40.659,-74.347
+NJ,Williamstown,39.686,-74.995
+NJ,Willingboro,40.028,-74.869
+NJ,Woodbridge,40.558,-74.285
+NJ,Wyckoff,41.01,-74.173
+NM,Alamogordo,32.9,-105.96
+NM,Albuquerque,35.084,-106.651
+NM,Carlsbad,32.421,-104.229
+NM,Clovis,34.405,-103.205
+NM,Enchanted Hills,35.337,-106.593
+NM,Farmington,36.728,-108.219
+NM,Gallup,35.528,-108.743
+NM,Hobbs,32.703,-103.136
+NM,Las Cruces,32.312,-106.778
+NM,Los Lunas,34.806,-106.733
+NM,Rio Rancho,35.233,-106.664
+NM,Roswell,33.394,-104.525
+NM,Santa Fe,35.687,-105.938
+NM,South Valley,35.01,-106.678
+NM,Sunland Park,31.797,-106.58
+NV,Boulder City,35.979,-114.832
+NV,Carson City,39.164,-119.767
+NV,Elko,40.832,-115.763
+NV,Enterprise,36.025,-115.242
+NV,Fernley,39.608,-119.252
+NV,Henderson,36.04,-114.982
+NV,Las Vegas,36.175,-115.137
+NV,Mesquite,36.806,-114.067
+NV,North Las Vegas,36.199,-115.118
+NV,Pahrump,36.208,-115.984
+NV,Paradise,36.097,-115.147
+NV,Reno,39.53,-119.814
+NV,Spanish Springs,39.649,-119.707
+NV,Sparks,39.535,-119.753
+NV,Spring Valley,36.108,-115.245
+NV,Summerlin South,36.117,-115.33
+NV,Sun Valley,39.596,-119.776
+NV,Sunrise Manor,36.211,-115.073
+NV,Whitney,36.098,-115.036
+NV,Winchester,36.13,-115.119
+NY,Albany,42.653,-73.756
+NY,Amherst,42.978,-78.8
+NY,Amsterdam,42.939,-74.188
+NY,Astoria,40.772,-73.93
+NY,Auburn,42.932,-76.566
+NY,Baldwin,40.656,-73.609
+NY,Batavia,42.998,-78.188
+NY,Bath Beach,40.605,-74.004
+NY,Bay Shore,40.725,-73.245
+NY,Baychester,40.869,-73.836
+NY,Bayside,40.768,-73.777
+NY,Bellmore,40.669,-73.527
+NY,Bensonhurst,40.602,-73.994
+NY,Bethpage,40.744,-73.482
+NY,Binghamton,42.099,-75.918
+NY,Borough Park,40.634,-73.997
+NY,Brentwood,40.781,-73.246
+NY,Briarwood,40.709,-73.815
+NY,Brighton,43.148,-77.551
+NY,Brighton Beach,40.578,-73.96
+NY,Brooklyn,40.65,-73.95
+NY,Brooklyn Heights,40.695,-73.994
+NY,Brownsville,40.661,-73.92
+NY,Buffalo,42.886,-78.878
+NY,Bushwick,40.694,-73.919
+NY,Cambria Heights,40.695,-73.738
+NY,Canarsie,40.644,-73.901
+NY,Centereach,40.858,-73.1
+NY,Central Islip,40.791,-73.202
+NY,Cheektowaga,42.903,-78.755
+NY,Chinatown,40.716,-73.996
+NY,Cicero,43.176,-76.119
+NY,Clay,43.186,-76.172
+NY,Clifton Park,42.866,-73.771
+NY,Cohoes,42.774,-73.7
+NY,College Point,40.788,-73.846
+NY,Commack,40.843,-73.293
+NY,Coney Island,40.578,-73.994
+NY,Copiague,40.681,-73.4
+NY,Coram,40.869,-73.001
+NY,Corona,40.747,-73.86
+NY,Cortland,42.601,-76.18
+NY,Cortlandt Manor,41.28,-73.872
+NY,Cypress Hills,40.677,-73.891
+NY,Deer Park,40.762,-73.329
+NY,Depew,42.904,-78.692
+NY,Dix Hills,40.805,-73.336
+NY,Dyker Heights,40.621,-74.01
+NY,East Amherst,43.018,-78.697
+NY,East Elmhurst,40.761,-73.865
+NY,East Flatbush,40.654,-73.93
+NY,East Harlem,40.795,-73.942
+NY,East Massapequa,40.673,-73.437
+NY,East Meadow,40.714,-73.559
+NY,East New York,40.667,-73.882
+NY,East Northport,40.877,-73.325
+NY,East Patchogue,40.767,-72.996
+NY,East Setauket,40.941,-73.106
+NY,East Tremont,40.845,-73.891
+NY,East Village,40.729,-73.987
+NY,Eastchester,40.958,-73.809
+NY,Eggertsville,42.963,-78.804
+NY,Elmhurst,40.736,-73.878
+NY,Elmira,42.09,-76.808
+NY,Elmont,40.701,-73.713
+NY,Emerson Hill,40.609,-74.096
+NY,Far Rockaway,40.605,-73.755
+NY,Farmingville,40.831,-73.03
+NY,Financial District,40.708,-74.009
+NY,Flatbush,40.652,-73.959
+NY,Flatlands,40.621,-73.935
+NY,Floral Park,40.724,-73.705
+NY,Fordham,40.859,-73.898
+NY,Forest Hills,40.716,-73.85
+NY,Fort Hamilton,40.619,-74.033
+NY,Franklin Square,40.707,-73.676
+NY,Freeport,40.658,-73.583
+NY,Fresh Meadows,40.735,-73.793
+NY,Garden City,40.727,-73.634
+NY,Gates-North Gates,43.165,-77.701
+NY,Glen Cove,40.862,-73.634
+NY,Glendale,40.701,-73.887
+NY,Glenville,42.929,-74.052
+NY,Gloversville,43.053,-74.344
+NY,Gramercy Park,40.737,-73.986
+NY,Grand Island,43.033,-78.963
+NY,Graniteville,40.625,-74.148
+NY,Gravesend,40.598,-73.965
+NY,Great Kills,40.554,-74.152
+NY,Greenburgh,41.033,-73.843
+NY,Greenpoint,40.724,-73.951
+NY,Harlem,40.808,-73.945
+NY,Harrison,40.969,-73.713
+NY,Hauppauge,40.826,-73.203
+NY,Hell's Kitchen,40.765,-73.991
+NY,Hempstead,40.706,-73.619
+NY,Henrietta,43.059,-77.612
+NY,Hicksville,40.768,-73.525
+NY,Hillside,40.708,-73.787
+NY,Holbrook,40.812,-73.078
+NY,Hollis,40.713,-73.767
+NY,Holtsville,40.815,-73.045
+NY,Howard Beach,40.658,-73.836
+NY,Huntington,40.868,-73.426
+NY,Huntington Station,40.853,-73.412
+NY,Hunts Point,40.813,-73.884
+NY,Irondequoit,43.213,-77.58
+NY,Islip,40.73,-73.21
+NY,Ithaca,42.441,-76.497
+NY,Jackson Heights,40.756,-73.885
+NY,Jamaica,40.691,-73.806
+NY,Jamestown,42.097,-79.235
+NY,Kenmore,42.966,-78.87
+NY,Kensington,40.646,-73.971
+NY,Kew Gardens,40.714,-73.831
+NY,Kew Gardens Hills,40.73,-73.823
+NY,Kings Bridge,40.879,-73.905
+NY,Kings Park,40.886,-73.257
+NY,Kingston,41.927,-73.997
+NY,Kiryas Joel,41.342,-74.168
+NY,Lackawanna,42.826,-78.823
+NY,Lake Ronkonkoma,40.835,-73.131
+NY,Latham,42.747,-73.759
+NY,Laurelton,40.67,-73.747
+NY,Levittown,40.726,-73.514
+NY,Lindenhurst,40.687,-73.373
+NY,Lockport,43.171,-78.69
+NY,Long Beach,40.588,-73.658
+NY,Long Island City,40.745,-73.949
+NY,Lynbrook,40.655,-73.672
+NY,Mamaroneck,40.949,-73.733
+NY,Manhattan,40.783,-73.966
+NY,Manhattan Valley,40.794,-73.965
+NY,Mariners Harbor,40.637,-74.159
+NY,Maspeth,40.723,-73.913
+NY,Massapequa,40.681,-73.474
+NY,Massapequa Park,40.68,-73.455
+NY,Mastic,40.802,-72.841
+NY,Medford,40.818,-73.0
+NY,Melrose,40.825,-73.91
+NY,Melville,40.793,-73.415
+NY,Merrick,40.663,-73.552
+NY,Middle Village,40.716,-73.881
+NY,Middletown,41.446,-74.423
+NY,Mineola,40.749,-73.641
+NY,Monsey,41.111,-74.068
+NY,Morningside Heights,40.81,-73.963
+NY,Morris Heights,40.85,-73.92
+NY,Morrisania,40.829,-73.907
+NY,Mott Haven,40.809,-73.923
+NY,Mount Vernon,40.913,-73.837
+NY,Nanuet,41.089,-74.013
+NY,New City,41.148,-73.989
+NY,New Rochelle,40.911,-73.782
+NY,New Springville,40.593,-74.163
+NY,New York City,40.714,-74.006
+NY,Newburgh,41.503,-74.01
+NY,Niagara Falls,43.094,-79.057
+NY,North Amityville,40.698,-73.425
+NY,North Babylon,40.716,-73.322
+NY,North Bay Shore,40.753,-73.26
+NY,North Bellmore,40.691,-73.533
+NY,North Massapequa,40.701,-73.462
+NY,North Tonawanda,43.039,-78.864
+NY,North Valley Stream,40.685,-73.702
+NY,Oceanside,40.639,-73.64
+NY,Ossining,41.163,-73.862
+NY,Oswego,43.455,-76.51
+NY,Ozone Park,40.677,-73.844
+NY,Park Slope,40.67,-73.986
+NY,Parkchester,40.839,-73.86
+NY,Pearl River,41.059,-74.022
+NY,Peekskill,41.29,-73.92
+NY,Plainview,40.776,-73.467
+NY,Plattsburgh,44.699,-73.453
+NY,Port Chester,41.002,-73.666
+NY,Port Richmond,40.633,-74.137
+NY,Port Washington,40.826,-73.698
+NY,Poughkeepsie,41.7,-73.921
+NY,Queens,40.681,-73.837
+NY,Queens Village,40.727,-73.742
+NY,Queensbury,43.377,-73.613
+NY,Rego Park,40.726,-73.853
+NY,Richmond Hill,40.7,-73.831
+NY,Ridgewood,40.7,-73.906
+NY,Rochester,43.155,-77.616
+NY,Rockville Centre,40.659,-73.641
+NY,Rome,43.213,-75.456
+NY,Ronkonkoma,40.821,-73.143
+NY,Roosevelt,40.679,-73.589
+NY,Rosedale,40.662,-73.735
+NY,Rossville,40.549,-74.21
+NY,Rotterdam,42.787,-73.971
+NY,Rye,40.981,-73.684
+NY,Saratoga Springs,43.083,-73.785
+NY,Sayville,40.736,-73.082
+NY,Scarsdale,41.005,-73.785
+NY,Schenectady,42.814,-73.94
+NY,Seaford,40.666,-73.488
+NY,Selden,40.866,-73.036
+NY,Setauket-East Setauket,40.931,-73.102
+NY,Sheepshead Bay,40.591,-73.945
+NY,Shirley,40.801,-72.868
+NY,Smithtown,40.856,-73.201
+NY,South Ozone Park,40.67,-73.819
+NY,Spring Valley,41.113,-74.044
+NY,Springfield Gardens,40.663,-73.762
+NY,Staten Island,40.562,-74.14
+NY,Sunnyside,40.74,-73.935
+NY,Sunset Park,40.645,-74.012
+NY,Syosset,40.826,-73.502
+NY,Syracuse,43.048,-76.147
+NY,Terrace Heights,40.721,-73.769
+NY,The Bronx,40.85,-73.866
+NY,Throgs Neck,40.823,-73.82
+NY,Times Square,40.756,-73.986
+NY,Tremont,40.85,-73.906
+NY,Troy,42.728,-73.692
+NY,Uniondale,40.7,-73.593
+NY,Unionport,40.827,-73.85
+NY,University Heights,40.86,-73.909
+NY,Upper West Side,40.787,-73.975
+NY,Utica,43.101,-75.233
+NY,Valley Stream,40.664,-73.708
+NY,Van Nest,40.848,-73.864
+NY,Vestal,42.085,-76.054
+NY,Wakefield,40.898,-73.852
+NY,Wantagh,40.684,-73.51
+NY,Washington Heights,40.85,-73.935
+NY,Watertown,43.975,-75.911
+NY,West Albany,42.683,-73.778
+NY,West Babylon,40.718,-73.354
+NY,West Hempstead,40.705,-73.65
+NY,West Islip,40.706,-73.306
+NY,West Seneca,42.85,-78.8
+NY,West Village,40.734,-74.009
+NY,Westbury,40.756,-73.588
+NY,White Plains,41.034,-73.763
+NY,Whitestone,40.795,-73.818
+NY,Williamsburg,40.714,-73.953
+NY,Wilton,43.18,-73.744
+NY,Woodhaven,40.689,-73.858
+NY,Woodmere,40.632,-73.713
+NY,Woodrow,40.541,-74.191
+NY,Woodside,40.745,-73.905
+NY,Yonkers,40.93,-73.898
+OH,Akron,41.081,-81.519
+OH,Alliance,40.915,-81.106
+OH,Ashland,40.869,-82.318
+OH,Ashtabula,41.865,-80.79
+OH,Athens,39.329,-82.101
+OH,Aurora,41.318,-81.345
+OH,Austintown,41.102,-80.765
+OH,Avon,41.452,-82.035
+OH,Avon Center,41.46,-82.02
+OH,Avon Lake,41.505,-82.028
+OH,Barberton,41.013,-81.605
+OH,Bay Village,41.485,-81.922
+OH,Beavercreek,39.709,-84.063
+OH,Berea,41.366,-81.854
+OH,Boardman,41.024,-80.663
+OH,Bowling Green,41.375,-83.651
+OH,Broadview Heights,41.314,-81.685
+OH,Brook Park,41.398,-81.805
+OH,Brunswick,41.238,-81.842
+OH,Canton,40.799,-81.378
+OH,Centerville,39.628,-84.159
+OH,Chillicothe,39.333,-82.982
+OH,Cincinnati,39.127,-84.514
+OH,Clark-Fulton,41.464,-81.71
+OH,Cleveland,41.499,-81.695
+OH,Cleveland Heights,41.52,-81.556
+OH,Collinwood,41.558,-81.569
+OH,Columbus,39.961,-82.999
+OH,Cuyahoga Falls,41.134,-81.485
+OH,Dayton,39.759,-84.192
+OH,Defiance,41.284,-84.356
+OH,Delaware,40.299,-83.068
+OH,Detroit-Shoreway,41.478,-81.73
+OH,Dublin,40.099,-83.114
+OH,East Cleveland,41.533,-81.579
+OH,Eastlake,41.654,-81.45
+OH,Elyria,41.368,-82.108
+OH,Euclid,41.593,-81.527
+OH,Fairborn,39.821,-84.019
+OH,Fairfield,39.346,-84.561
+OH,Fairview Park,41.441,-81.864
+OH,Findlay,41.044,-83.65
+OH,Forest Park,39.29,-84.504
+OH,Fremont,41.35,-83.122
+OH,Gahanna,40.019,-82.879
+OH,Garfield Heights,41.417,-81.606
+OH,Glenville,41.533,-81.617
+OH,Green,40.946,-81.483
+OH,Grove City,39.881,-83.093
+OH,Hamilton,39.4,-84.561
+OH,Hilliard,40.033,-83.158
+OH,Hough,41.512,-81.637
+OH,Huber Heights,39.844,-84.125
+OH,Hudson,41.24,-81.441
+OH,Kent,41.154,-81.358
+OH,Kettering,39.69,-84.169
+OH,Lakewood,41.482,-81.798
+OH,Lancaster,39.714,-82.599
+OH,Lebanon,39.435,-84.203
+OH,Lima,40.743,-84.105
+OH,Lorain,41.453,-82.182
+OH,Mansfield,40.758,-82.515
+OH,Maple Heights,41.415,-81.566
+OH,Marion,40.589,-83.129
+OH,Marysville,40.236,-83.367
+OH,Mason,39.36,-84.31
+OH,Massillon,40.797,-81.522
+OH,Mayfield Heights,41.519,-81.458
+OH,Medina,41.138,-81.864
+OH,Mentor,41.666,-81.34
+OH,Miamisburg,39.643,-84.287
+OH,Middleburg Heights,41.361,-81.813
+OH,Middletown,39.515,-84.398
+OH,Mount Vernon,40.393,-82.486
+OH,New Philadelphia,40.49,-81.446
+OH,Newark,40.058,-82.401
+OH,Niles,41.183,-80.765
+OH,North Canton,40.876,-81.402
+OH,North Olmsted,41.416,-81.923
+OH,North Ridgeville,41.389,-82.019
+OH,North Royalton,41.314,-81.725
+OH,Norwalk,41.243,-82.616
+OH,Norwood,39.156,-84.46
+OH,Oregon,41.644,-83.487
+OH,Oxford,39.507,-84.745
+OH,Painesville,41.724,-81.246
+OH,Parma,41.405,-81.723
+OH,Parma Heights,41.39,-81.76
+OH,Pataskala,39.996,-82.674
+OH,Perrysburg,41.557,-83.627
+OH,Pickerington,39.884,-82.754
+OH,Piqua,40.145,-84.242
+OH,Portsmouth,38.732,-82.998
+OH,Reynoldsburg,39.955,-82.812
+OH,Riverside,39.78,-84.124
+OH,Rocky River,41.476,-81.839
+OH,Sandusky,41.449,-82.708
+OH,Shaker Heights,41.474,-81.537
+OH,Sidney,40.284,-84.156
+OH,Solon,41.39,-81.441
+OH,South Euclid,41.523,-81.518
+OH,Springboro,39.552,-84.233
+OH,Springfield,39.924,-83.809
+OH,Steubenville,40.37,-80.634
+OH,Stow,41.16,-81.44
+OH,Streetsboro,41.239,-81.346
+OH,Strongsville,41.315,-81.836
+OH,Sylvania,41.719,-83.713
+OH,Tallmadge,41.101,-81.442
+OH,Tiffin,41.114,-83.178
+OH,Toledo,41.664,-83.555
+OH,Trotwood,39.797,-84.311
+OH,Troy,40.039,-84.203
+OH,Twinsburg,41.313,-81.44
+OH,Upper Arlington,39.995,-83.062
+OH,Vandalia,39.891,-84.199
+OH,Wadsworth,41.026,-81.73
+OH,Warren,41.238,-80.818
+OH,Westerville,40.126,-82.929
+OH,Westlake,41.455,-81.918
+OH,White Oak,39.213,-84.599
+OH,Whitehall,39.967,-82.885
+OH,Willoughby,41.64,-81.406
+OH,Wooster,40.805,-81.936
+OH,Xenia,39.685,-83.93
+OH,Youngstown,41.1,-80.65
+OH,Zanesville,39.94,-82.013
+OK,Ada,34.775,-96.678
+OK,Altus,34.638,-99.334
+OK,Ardmore,34.174,-97.144
+OK,Bartlesville,36.747,-95.981
+OK,Bethany,35.519,-97.632
+OK,Bixby,35.942,-95.883
+OK,Broken Arrow,36.053,-95.791
+OK,Chickasha,35.053,-97.936
+OK,Claremore,36.313,-95.616
+OK,Del City,35.442,-97.441
+OK,Duncan,34.502,-97.958
+OK,Durant,33.994,-96.371
+OK,Edmond,35.653,-97.478
+OK,El Reno,35.532,-97.955
+OK,Enid,36.396,-97.878
+OK,Jenks,36.023,-95.968
+OK,Lawton,34.609,-98.39
+OK,McAlester,34.933,-95.77
+OK,Midwest City,35.45,-97.397
+OK,Moore,35.34,-97.487
+OK,Muskogee,35.748,-95.37
+OK,Mustang,35.384,-97.724
+OK,Norman,35.223,-97.439
+OK,Oklahoma City,35.468,-97.516
+OK,Owasso,36.27,-95.855
+OK,Ponca City,36.707,-97.086
+OK,Sand Springs,36.14,-96.109
+OK,Sapulpa,35.999,-96.114
+OK,Shawnee,35.327,-96.925
+OK,Stillwater,36.116,-97.058
+OK,Tahlequah,35.915,-94.97
+OK,Tulsa,36.154,-95.993
+OK,Yukon,35.507,-97.763
+OR,Albany,44.637,-123.106
+OR,Aloha,45.494,-122.867
+OR,Altamont,42.207,-121.737
+OR,Ashland,42.195,-122.709
+OR,Beaverton,45.487,-122.804
+OR,Bend,44.058,-121.315
+OR,Bethany,45.558,-122.868
+OR,Canby,45.263,-122.693
+OR,Central Point,42.376,-122.916
+OR,Coos Bay,43.367,-124.218
+OR,Corvallis,44.565,-123.262
+OR,Dallas,44.919,-123.317
+OR,Eugene,44.052,-123.087
+OR,Forest Grove,45.52,-123.111
+OR,Four Corners,44.928,-122.984
+OR,Grants Pass,42.439,-123.331
+OR,Gresham,45.498,-122.431
+OR,Happy Valley,45.447,-122.53
+OR,Hayesville,44.986,-122.983
+OR,Hermiston,45.84,-119.289
+OR,Hillsboro,45.523,-122.99
+OR,Keizer,44.99,-123.026
+OR,Klamath Falls,42.225,-121.782
+OR,Lake Oswego,45.421,-122.671
+OR,Lebanon,44.537,-122.907
+OR,Lents,45.48,-122.567
+OR,McMinnville,45.21,-123.199
+OR,Medford,42.327,-122.876
+OR,Milwaukie,45.446,-122.639
+OR,Newberg,45.3,-122.973
+OR,Oak Grove,45.417,-122.64
+OR,Oregon City,45.357,-122.607
+OR,Pendleton,45.672,-118.789
+OR,Portland,45.523,-122.676
+OR,Redmond,44.273,-121.174
+OR,Roseburg,43.217,-123.342
+OR,Salem,44.943,-123.035
+OR,Sherwood,45.357,-122.84
+OR,Springfield,44.046,-123.022
+OR,The Dalles,45.595,-121.179
+OR,Tigard,45.431,-122.771
+OR,Troutdale,45.539,-122.387
+OR,Tualatin,45.384,-122.764
+OR,West Linn,45.366,-122.612
+OR,Wilsonville,45.3,-122.774
+OR,Woodburn,45.144,-122.855
+PA,Abington,40.121,-75.118
+PA,Allentown,40.608,-75.49
+PA,Allison Park,40.56,-79.959
+PA,Altoona,40.519,-78.395
+PA,Back Mountain,41.336,-75.996
+PA,Baldwin,40.338,-79.979
+PA,Bensalem,40.105,-74.951
+PA,Bethel Park,40.328,-80.04
+PA,Bethlehem,40.626,-75.37
+PA,Bustleton,40.083,-75.032
+PA,Carlisle,40.201,-77.189
+PA,Center City,39.951,-75.159
+PA,Chambersburg,39.938,-77.661
+PA,Chester,39.848,-75.358
+PA,Cobbs Creek,39.948,-75.24
+PA,Cranberry Township,40.685,-80.107
+PA,Drexel Hill,39.947,-75.292
+PA,East Mount Airy,40.065,-75.188
+PA,Easton,40.688,-75.221
+PA,Elmwood,39.918,-75.228
+PA,Erie,42.129,-80.085
+PA,Fishtown,39.965,-75.135
+PA,Fox Chase,40.081,-75.08
+PA,Frankford,40.014,-75.079
+PA,Haddington,39.966,-75.238
+PA,Hanover,39.801,-76.983
+PA,Harrisburg,40.274,-76.884
+PA,Hartranft,39.985,-75.147
+PA,Havertown,39.981,-75.309
+PA,Hazleton,40.958,-75.975
+PA,Hermitage,41.233,-80.449
+PA,Holmesburg,40.041,-75.028
+PA,Hunting Park,40.017,-75.144
+PA,Johnstown,40.327,-78.922
+PA,Juniata Park,40.008,-75.109
+PA,King of Prussia,40.089,-75.396
+PA,Kingsessing,39.937,-75.23
+PA,Lancaster,40.038,-76.306
+PA,Lansdale,40.242,-75.284
+PA,Lawndale,40.05,-75.092
+PA,Lebanon,40.341,-76.411
+PA,Levittown,40.155,-74.829
+PA,Limerick,40.231,-75.522
+PA,Logan,40.028,-75.152
+PA,Lower Moyamensing,39.92,-75.165
+PA,McKeesport,40.348,-79.864
+PA,Monroeville,40.421,-79.788
+PA,Mount Lebanon,40.355,-80.049
+PA,Murrysville,40.428,-79.698
+PA,New Castle,41.004,-80.347
+PA,Nicetown-Tioga,40.01,-75.164
+PA,Norristown,40.121,-75.34
+PA,Olney,40.041,-75.124
+PA,Overbrook,39.989,-75.243
+PA,Oxford Circle,40.05,-75.072
+PA,Parkwood Manor,40.093,-74.968
+PA,Penn Hills,40.501,-79.839
+PA,Pennsport,39.928,-75.15
+PA,Philadelphia,39.952,-75.164
+PA,Phoenixville,40.13,-75.515
+PA,Pittsburgh,40.441,-79.996
+PA,Plum,40.5,-79.749
+PA,Point Breeze,39.933,-75.178
+PA,Port Richmond,39.993,-75.1
+PA,Pottstown,40.245,-75.65
+PA,Radnor,40.046,-75.36
+PA,Reading,40.336,-75.927
+PA,Rhawnhurst,40.062,-75.056
+PA,Rittenhouse,39.948,-75.172
+PA,Scranton,41.409,-75.665
+PA,Somerton,40.123,-75.015
+PA,Springfield,39.931,-75.32
+PA,State College,40.793,-77.86
+PA,Strawberry Mansion,39.983,-75.183
+PA,Tacony,40.031,-75.044
+PA,University City,39.951,-75.195
+PA,Upper Saint Clair,40.336,-80.083
+PA,Wayne,40.044,-75.388
+PA,West Chester,39.961,-75.608
+PA,West Mifflin,40.363,-79.866
+PA,West Oak Lane,40.069,-75.166
+PA,Wharton,39.927,-75.157
+PA,Whitehall Township,40.667,-75.5
+PA,Whitman,39.917,-75.155
+PA,Wilkes-Barre,41.246,-75.881
+PA,Wilkinsburg,40.442,-79.882
+PA,Williamsport,41.241,-77.001
+PA,Willow Grove,40.144,-75.116
+PA,Wissinoming,40.022,-75.063
+PA,York,39.963,-76.728
+RI,Barrington,41.741,-71.309
+RI,Bristol,41.677,-71.266
+RI,Central Falls,41.891,-71.392
+RI,Coventry,41.7,-71.683
+RI,Cranston,41.78,-71.437
+RI,Cumberland,41.967,-71.433
+RI,East Providence,41.814,-71.37
+RI,Johnston,41.822,-71.507
+RI,Lincoln,41.921,-71.435
+RI,Middletown,41.546,-71.291
+RI,Narragansett,41.45,-71.45
+RI,Newport,41.49,-71.313
+RI,North Kingstown,41.55,-71.466
+RI,North Providence,41.85,-71.466
+RI,Pawtucket,41.879,-71.383
+RI,Portsmouth,41.602,-71.25
+RI,Providence,41.824,-71.413
+RI,Smithfield,41.922,-71.55
+RI,South Kingstown,41.447,-71.525
+RI,Warwick,41.7,-71.416
+RI,West Warwick,41.697,-71.522
+RI,Westerly,41.378,-71.827
+RI,Woonsocket,42.003,-71.515
+SC,Aiken,33.56,-81.72
+SC,Anderson,34.503,-82.65
+SC,Bluffton,32.237,-80.86
+SC,Charleston,32.776,-79.933
+SC,Clemson,34.683,-82.837
+SC,Columbia,34.001,-81.035
+SC,Conway,33.836,-79.048
+SC,Easley,34.83,-82.602
+SC,Florence,34.195,-79.763
+SC,Goose Creek,32.981,-80.033
+SC,Greenville,34.853,-82.394
+SC,Greenwood,34.195,-82.162
+SC,Greer,34.939,-82.227
+SC,Hanahan,32.919,-80.022
+SC,Hilton Head,32.216,-80.753
+SC,Hilton Head Island,32.194,-80.738
+SC,Lexington,33.982,-81.236
+SC,Mauldin,34.779,-82.31
+SC,Mount Pleasant,32.794,-79.863
+SC,Myrtle Beach,33.689,-78.887
+SC,North Augusta,33.502,-81.965
+SC,North Charleston,32.855,-79.975
+SC,North Myrtle Beach,33.816,-78.68
+SC,Rock Hill,34.925,-81.025
+SC,Saint Andrews,34.043,-81.101
+SC,Seven Oaks,34.049,-81.146
+SC,Simpsonville,34.737,-82.254
+SC,Socastee,33.684,-78.998
+SC,Spartanburg,34.95,-81.932
+SC,Summerville,33.019,-80.176
+SC,Sumter,33.92,-80.341
+SC,Taylors,34.92,-82.296
+SC,Wade Hampton,34.904,-82.333
+SC,West Columbia,33.993,-81.074
+SD,Aberdeen,45.465,-98.486
+SD,Brookings,44.311,-96.798
+SD,Mitchell,43.709,-98.03
+SD,Rapid City,44.081,-103.231
+SD,Sioux Falls,43.544,-96.728
+SD,Watertown,44.899,-97.115
+TN,Bartlett,35.205,-89.874
+TN,Brentwood,36.033,-86.783
+TN,Brentwood Estates,36.025,-86.779
+TN,Bristol,36.595,-82.189
+TN,Chattanooga,35.046,-85.31
+TN,Clarksville,36.53,-87.359
+TN,Cleveland,35.16,-84.877
+TN,Collierville,35.042,-89.665
+TN,Columbia,35.615,-87.035
+TN,Cookeville,36.163,-85.502
+TN,Cordova,35.156,-89.776
+TN,Dickson,36.077,-87.388
+TN,Dyersburg,36.035,-89.386
+TN,East Brainerd,34.996,-85.15
+TN,East Chattanooga,35.065,-85.249
+TN,East Ridge,35.014,-85.252
+TN,Ellendale,35.231,-89.826
+TN,Farragut,35.885,-84.154
+TN,Franklin,35.925,-86.869
+TN,Gallatin,36.388,-86.447
+TN,Germantown,35.087,-89.81
+TN,Goodlettsville,36.323,-86.713
+TN,Greeneville,36.163,-82.831
+TN,Hendersonville,36.305,-86.62
+TN,Hermitage,36.196,-86.623
+TN,Jackson,35.615,-88.814
+TN,Johnson City,36.313,-82.353
+TN,Kingsport,36.548,-82.562
+TN,Knoxville,35.961,-83.921
+TN,La Vergne,36.016,-86.582
+TN,Lebanon,36.208,-86.291
+TN,Maryville,35.756,-83.97
+TN,Memphis,35.15,-90.049
+TN,Morristown,36.214,-83.295
+TN,Mount Juliet,36.2,-86.519
+TN,Murfreesboro,35.846,-86.39
+TN,Nashville,36.166,-86.784
+TN,New South Memphis,35.087,-90.057
+TN,Oak Ridge,36.01,-84.27
+TN,Sevierville,35.868,-83.562
+TN,Shelbyville,35.483,-86.46
+TN,Smyrna,35.983,-86.519
+TN,Spring Hill,35.751,-86.93
+TN,Springfield,36.509,-86.885
+TN,Tullahoma,35.362,-86.209
+TX,Abilene,32.449,-99.733
+TX,Addison,32.962,-96.829
+TX,Alamo,26.184,-98.123
+TX,Aldine,29.932,-95.38
+TX,Alice,27.752,-98.07
+TX,Alief,29.711,-95.596
+TX,Allen,33.103,-96.671
+TX,Alton,26.287,-98.313
+TX,Alvin,29.424,-95.244
+TX,Amarillo,35.222,-101.831
+TX,Angleton,29.169,-95.432
+TX,Arlington,32.736,-97.108
+TX,Atascocita,29.999,-95.177
+TX,Austin,30.267,-97.743
+TX,Balch Springs,32.729,-96.623
+TX,Bay City,28.983,-95.969
+TX,Baytown,29.735,-94.977
+TX,Beaumont,30.086,-94.102
+TX,Bedford,32.844,-97.143
+TX,Bellaire,29.706,-95.459
+TX,Belton,31.056,-97.464
+TX,Benbrook,32.673,-97.461
+TX,Big Spring,32.25,-101.479
+TX,Brenham,30.167,-96.398
+TX,Brownsville,25.902,-97.497
+TX,Brownwood,31.709,-98.991
+TX,Brushy Creek,30.514,-97.74
+TX,Bryan,30.674,-96.37
+TX,Burleson,32.542,-97.321
+TX,Canyon Lake,29.875,-98.263
+TX,Carrollton,32.954,-96.89
+TX,Cedar Hill,32.588,-96.956
+TX,Cedar Park,30.505,-97.82
+TX,Celina,33.325,-96.784
+TX,Channelview,29.776,-95.115
+TX,Cibolo,29.562,-98.227
+TX,Cinco Ranch,29.739,-95.758
+TX,Cleburne,32.348,-97.387
+TX,Cloverleaf,29.778,-95.172
+TX,College Station,30.628,-96.334
+TX,Colleyville,32.881,-97.155
+TX,Conroe,30.312,-95.456
+TX,Converse,29.518,-98.316
+TX,Coppell,32.955,-97.015
+TX,Copperas Cove,31.124,-97.903
+TX,Corinth,33.154,-97.065
+TX,Corpus Christi,27.801,-97.396
+TX,Corsicana,32.095,-96.469
+TX,Cypress,29.969,-95.697
+TX,Dallas,32.783,-96.807
+TX,DeSoto,32.59,-96.857
+TX,Deer Park,29.705,-95.124
+TX,Del Rio,29.363,-100.897
+TX,Denison,33.756,-96.537
+TX,Denton,33.215,-97.133
+TX,Dickinson,29.461,-95.051
+TX,Donna,26.17,-98.052
+TX,Dumas,35.866,-101.973
+TX,Duncanville,32.652,-96.908
+TX,Eagle Pass,28.709,-100.5
+TX,Edinburg,26.302,-98.163
+TX,El Paso,31.759,-106.487
+TX,Ennis,32.329,-96.625
+TX,Euless,32.837,-97.082
+TX,Farmers Branch,32.927,-96.896
+TX,Flower Mound,33.015,-97.097
+TX,Forney,32.748,-96.472
+TX,Fort Cavazos,31.135,-97.776
+TX,Fort Worth,32.725,-97.321
+TX,Fresno,29.539,-95.447
+TX,Friendswood,29.529,-95.201
+TX,Frisco,33.151,-96.824
+TX,Gainesville,33.626,-97.133
+TX,Galveston,29.301,-94.798
+TX,Garland,32.913,-96.639
+TX,Gatesville,31.435,-97.744
+TX,Georgetown,30.633,-97.677
+TX,Grand Prairie,32.746,-96.998
+TX,Grapevine,32.934,-97.078
+TX,Greenville,33.138,-96.111
+TX,Groves,29.948,-93.917
+TX,Haltom City,32.8,-97.269
+TX,Harker Heights,31.084,-97.66
+TX,Harlingen,26.191,-97.696
+TX,Hereford,34.815,-102.399
+TX,Highland Village,33.092,-97.047
+TX,Horizon City,31.693,-106.207
+TX,Houston,29.763,-95.363
+TX,Humble,29.999,-95.262
+TX,Huntsville,30.724,-95.551
+TX,Hurst,32.823,-97.171
+TX,Hutto,30.543,-97.547
+TX,Irving,32.814,-96.949
+TX,Jollyville,30.443,-97.775
+TX,Katy,29.786,-95.824
+TX,Keller,32.935,-97.252
+TX,Kerrville,30.047,-99.14
+TX,Killeen,31.117,-97.728
+TX,Kingsville,27.516,-97.856
+TX,Kyle,29.989,-97.877
+TX,La Marque,29.369,-94.971
+TX,La Porte,29.666,-95.019
+TX,Lake Jackson,29.034,-95.434
+TX,Lancaster,32.592,-96.756
+TX,Laredo,27.506,-99.508
+TX,League City,29.507,-95.095
+TX,Leander,30.579,-97.853
+TX,Lewisville,33.046,-96.994
+TX,Little Elm,33.163,-96.938
+TX,Live Oak,29.565,-98.336
+TX,Longview,32.501,-94.74
+TX,Lubbock,33.578,-101.855
+TX,Lufkin,31.338,-94.729
+TX,Mansfield,32.563,-97.142
+TX,Marshall,32.545,-94.367
+TX,McAllen,26.203,-98.23
+TX,McKinney,33.198,-96.615
+TX,Mercedes,26.15,-97.914
+TX,Mesquite,32.767,-96.599
+TX,Midland,31.997,-102.078
+TX,Midlothian,32.482,-96.994
+TX,Mission,26.216,-98.325
+TX,Mission Bend,29.694,-95.665
+TX,Missouri City,29.619,-95.538
+TX,Mount Pleasant,33.157,-94.968
+TX,Murphy,33.015,-96.613
+TX,Nacogdoches,31.604,-94.655
+TX,Nederland,29.974,-93.992
+TX,New Braunfels,29.703,-98.124
+TX,New Caney,30.155,-95.211
+TX,New Territory,29.594,-95.681
+TX,North Richland Hills,32.834,-97.229
+TX,Odessa,31.846,-102.368
+TX,Orange,30.093,-93.737
+TX,Palestine,31.762,-95.631
+TX,Pampa,35.536,-100.96
+TX,Paris,33.661,-95.556
+TX,Pasadena,29.691,-95.209
+TX,Pearland,29.564,-95.286
+TX,Pecan Grove,29.626,-95.732
+TX,Pflugerville,30.439,-97.62
+TX,Pharr,26.195,-98.184
+TX,Plainview,34.185,-101.707
+TX,Plano,33.02,-96.699
+TX,Port Arthur,29.885,-93.942
+TX,Portland,27.877,-97.324
+TX,Prosper,33.236,-96.801
+TX,Richardson,32.948,-96.73
+TX,Rockwall,32.931,-96.46
+TX,Rosenberg,29.557,-95.809
+TX,Round Rock,30.508,-97.679
+TX,Rowlett,32.903,-96.564
+TX,Sachse,32.976,-96.595
+TX,Saginaw,32.86,-97.364
+TX,San Angelo,31.464,-100.437
+TX,San Antonio,29.424,-98.494
+TX,San Benito,26.133,-97.631
+TX,San Juan,26.189,-98.155
+TX,San Marcos,29.883,-97.941
+TX,Schertz,29.552,-98.27
+TX,Seagoville,32.64,-96.538
+TX,Seguin,29.569,-97.965
+TX,Sherman,33.636,-96.609
+TX,Socorro,31.655,-106.303
+TX,Socorro Mission Number 1 Colonia,31.636,-106.291
+TX,South Houston,29.663,-95.235
+TX,Southlake,32.941,-97.134
+TX,Spring,30.08,-95.417
+TX,Stafford,29.616,-95.558
+TX,Stephenville,32.221,-98.202
+TX,Sugar Land,29.62,-95.635
+TX,Sulphur Springs,33.138,-95.601
+TX,Taylor,30.571,-97.409
+TX,Temple,31.098,-97.343
+TX,Terrell,32.736,-96.275
+TX,Texarkana,33.425,-94.048
+TX,Texas City,29.384,-94.903
+TX,The Colony,33.089,-96.886
+TX,The Trails of Frisco,33.161,-96.872
+TX,The Woodlands,30.158,-95.489
+TX,Tyler,32.351,-95.301
+TX,Universal City,29.548,-98.291
+TX,University Park,32.85,-96.8
+TX,University of Texas,30.286,-97.739
+TX,Uvalde,29.21,-99.786
+TX,Victoria,28.805,-97.004
+TX,Waco,31.549,-97.147
+TX,Watauga,32.858,-97.255
+TX,Waxahachie,32.387,-96.848
+TX,Weatherford,32.759,-97.797
+TX,Weslaco,26.16,-97.991
+TX,West Odessa,31.842,-102.499
+TX,West University Place,29.718,-95.434
+TX,White Settlement,32.76,-97.458
+TX,Wichita Falls,33.914,-98.493
+TX,Wylie,33.015,-96.539
+UT,American Fork,40.377,-111.796
+UT,Bountiful,40.889,-111.881
+UT,Brigham City,41.51,-112.016
+UT,Cedar City,37.677,-113.062
+UT,Centerville,40.918,-111.872
+UT,Clearfield,41.111,-112.026
+UT,Clinton,41.14,-112.05
+UT,Cottonwood Heights,40.62,-111.81
+UT,Draper,40.525,-111.864
+UT,Eagle Mountain,40.314,-112.007
+UT,East Millcreek,40.7,-111.81
+UT,Farmington,40.98,-111.887
+UT,Herriman,40.514,-112.033
+UT,Highland,40.425,-111.794
+UT,Holladay,40.669,-111.825
+UT,Hurricane,37.175,-113.29
+UT,Kaysville,41.035,-111.939
+UT,Kearns,40.66,-111.996
+UT,Layton,41.06,-111.971
+UT,Lehi,40.392,-111.851
+UT,Logan,41.735,-111.834
+UT,Magna,40.709,-112.102
+UT,Midvale,40.611,-111.9
+UT,Millcreek,40.687,-111.875
+UT,Murray,40.667,-111.888
+UT,North Ogden,41.307,-111.96
+UT,North Salt Lake,40.849,-111.907
+UT,Ogden,41.223,-111.974
+UT,Orem,40.297,-111.695
+UT,Payson,40.044,-111.732
+UT,Pleasant Grove,40.364,-111.739
+UT,Provo,40.234,-111.659
+UT,Riverton,40.522,-111.939
+UT,Roy,41.162,-112.026
+UT,Saint George,37.104,-113.584
+UT,Salt Lake City,40.761,-111.891
+UT,Sandy,40.592,-111.884
+UT,Sandy Hills,40.581,-111.851
+UT,Saratoga Springs,40.349,-111.905
+UT,South Jordan,40.562,-111.93
+UT,South Jordan Heights,40.564,-111.949
+UT,South Ogden,41.192,-111.971
+UT,South Salt Lake,40.719,-111.888
+UT,Spanish Fork,40.115,-111.655
+UT,Springville,40.165,-111.611
+UT,Syracuse,41.089,-112.065
+UT,Taylorsville,40.668,-111.939
+UT,Tooele,40.531,-112.298
+UT,Washington,37.131,-113.508
+UT,West Jordan,40.61,-111.939
+UT,West Valley City,40.692,-112.001
+VA,Alexandria,38.805,-77.047
+VA,Annandale,38.83,-77.196
+VA,Arlington,38.881,-77.104
+VA,Ashburn,39.044,-77.487
+VA,Baileys Crossroads,38.85,-77.13
+VA,Blacksburg,37.23,-80.414
+VA,Bon Air,37.525,-77.558
+VA,Bristol,36.596,-82.188
+VA,Buckhall,38.732,-77.431
+VA,Burke,38.793,-77.272
+VA,Cave Spring,37.228,-80.013
+VA,Centreville,38.84,-77.429
+VA,Chantilly,38.894,-77.431
+VA,Charlottesville,38.029,-78.477
+VA,Cherry Hill,38.57,-77.267
+VA,Chesapeake,36.819,-76.275
+VA,Chester,37.357,-77.442
+VA,Christiansburg,37.13,-80.409
+VA,Colonial Heights,37.268,-77.407
+VA,Culpeper,38.473,-77.997
+VA,Dale City,38.637,-77.311
+VA,Danville,36.586,-79.395
+VA,East Hampton,37.037,-76.332
+VA,Fairfax,38.846,-77.306
+VA,Fort Hunt,38.733,-77.058
+VA,Franconia,38.782,-77.146
+VA,Fredericksburg,38.303,-77.461
+VA,Front Royal,38.918,-78.194
+VA,Great Falls,38.998,-77.288
+VA,Hampton,37.03,-76.345
+VA,Harrisonburg,38.45,-78.869
+VA,Herndon,38.97,-77.386
+VA,Highland Springs,37.546,-77.328
+VA,Hopewell,37.304,-77.287
+VA,Hybla Valley,38.748,-77.083
+VA,Idylwood,38.895,-77.212
+VA,Lake Ridge,38.688,-77.298
+VA,Laurel,37.643,-77.509
+VA,Leesburg,39.116,-77.564
+VA,Lincolnia,38.818,-77.143
+VA,Linton Hall,38.76,-77.575
+VA,Lorton,38.704,-77.228
+VA,Lynchburg,37.414,-79.142
+VA,Manassas,38.751,-77.475
+VA,Manassas Park,38.784,-77.47
+VA,McLean,38.934,-77.177
+VA,Meadowbrook,37.449,-77.474
+VA,Mechanicsville,37.609,-77.373
+VA,Merrifield,38.874,-77.227
+VA,Midlothian,37.506,-77.649
+VA,Montclair,38.611,-77.34
+VA,Newport News,36.98,-76.43
+VA,Norfolk,36.847,-76.285
+VA,Oak Hill,38.926,-77.402
+VA,Oakton,38.881,-77.301
+VA,Petersburg,37.228,-77.402
+VA,Portsmouth,36.835,-76.298
+VA,Portsmouth Heights,36.821,-76.369
+VA,Radford,37.132,-80.576
+VA,Reston,38.969,-77.341
+VA,Richmond,37.554,-77.46
+VA,Roanoke,37.271,-79.941
+VA,Rose Hill,38.789,-77.113
+VA,Salem,37.293,-80.055
+VA,Short Pump,37.65,-77.612
+VA,South Riding,38.921,-77.504
+VA,South Suffolk,36.717,-76.59
+VA,Springfield,38.789,-77.187
+VA,Staunton,38.15,-79.073
+VA,Sterling,39.006,-77.429
+VA,Sudley,38.793,-77.497
+VA,Suffolk,36.728,-76.585
+VA,Tuckahoe,37.59,-77.556
+VA,Tysons,38.919,-77.231
+VA,Vienna,38.901,-77.265
+VA,Virginia Beach,36.853,-75.978
+VA,Waynesboro,38.068,-78.889
+VA,West Falls Church,38.865,-77.188
+VA,West Lynchburg,37.403,-79.178
+VA,West Springfield,38.773,-77.221
+VA,Williamsburg,37.271,-76.707
+VA,Winchester,39.186,-78.163
+VA,Wolf Trap,38.94,-77.286
+VA,Woodlawn,38.717,-77.133
+VT,Burlington,44.476,-73.212
+VT,Colchester,44.544,-73.148
+VT,Rutland,43.611,-72.973
+VT,South Burlington,44.467,-73.171
+WA,Aberdeen,46.975,-123.816
+WA,Anacortes,48.513,-122.613
+WA,Arlington,48.199,-122.125
+WA,Auburn,47.307,-122.228
+WA,Bainbridge Island,47.626,-122.521
+WA,Battle Ground,45.781,-122.533
+WA,Bellevue,47.61,-122.201
+WA,Bellingham,48.76,-122.488
+WA,Bonney Lake,47.177,-122.187
+WA,Bothell,47.762,-122.205
+WA,Bothell West,47.805,-122.241
+WA,Bremerton,47.567,-122.633
+WA,Bryn Mawr-Skyway,47.494,-122.241
+WA,Burien,47.47,-122.347
+WA,Camas,45.587,-122.4
+WA,Centralia,46.716,-122.954
+WA,City of Sammamish,47.604,-122.038
+WA,Columbia City,47.564,-122.275
+WA,Cottage Lake,47.744,-122.077
+WA,Covington,47.358,-122.122
+WA,Des Moines,47.402,-122.324
+WA,East Hill-Meridian,47.411,-122.174
+WA,Eastmont,47.897,-122.182
+WA,Edmonds,47.811,-122.377
+WA,Ellensburg,46.997,-120.548
+WA,Everett,47.979,-122.202
+WA,Fairwood,47.448,-122.157
+WA,Federal Way,47.322,-122.313
+WA,Five Corners,45.685,-122.575
+WA,Frederickson,47.096,-122.359
+WA,Graham,47.053,-122.294
+WA,Hazel Dell,45.672,-122.663
+WA,Inglewood-Finn Hill,47.72,-122.232
+WA,Issaquah,47.53,-122.033
+WA,Kenmore,47.757,-122.244
+WA,Kennewick,46.211,-119.137
+WA,Kent,47.381,-122.235
+WA,Kirkland,47.681,-122.209
+WA,Lacey,47.034,-122.823
+WA,Lake Stevens,48.015,-122.064
+WA,Lakewood,47.172,-122.518
+WA,Longview,46.138,-122.938
+WA,Lynnwood,47.821,-122.315
+WA,Maple Valley,47.393,-122.046
+WA,Martha Lake,47.851,-122.239
+WA,Marysville,48.052,-122.177
+WA,Mercer Island,47.571,-122.222
+WA,Mill Creek,47.86,-122.204
+WA,Mill Creek East,47.836,-122.188
+WA,Monroe,47.855,-121.971
+WA,Moses Lake,47.13,-119.278
+WA,Mount Vernon,48.421,-122.334
+WA,Mountlake Terrace,47.788,-122.309
+WA,Mukilteo,47.945,-122.305
+WA,North Creek,47.82,-122.176
+WA,Oak Harbor,48.293,-122.643
+WA,Olympia,47.045,-122.902
+WA,Opportunity,47.65,-117.24
+WA,Orchards,45.667,-122.561
+WA,Parkland,47.155,-122.434
+WA,Pasco,46.24,-119.101
+WA,Picnic Point-North Lynnwood,47.863,-122.295
+WA,Port Angeles,48.118,-123.431
+WA,Pullman,46.731,-117.18
+WA,Puyallup,47.185,-122.293
+WA,Redmond,47.674,-122.122
+WA,Renton,47.483,-122.217
+WA,Richland,46.286,-119.284
+WA,Salmon Creek,45.711,-122.649
+WA,Sammamish,47.642,-122.08
+WA,SeaTac,47.448,-122.292
+WA,Seattle,47.606,-122.332
+WA,Shoreline,47.756,-122.342
+WA,Silver Firs,47.866,-122.155
+WA,Silverdale,47.645,-122.695
+WA,South Hill,47.141,-122.27
+WA,Spanaway,47.104,-122.435
+WA,Spokane,47.66,-117.429
+WA,Spokane Valley,47.673,-117.239
+WA,Sunnyside,46.324,-120.009
+WA,Tacoma,47.253,-122.444
+WA,Tri-Cities,46.245,-119.196
+WA,Tukwila,47.474,-122.261
+WA,Tumwater,47.007,-122.909
+WA,Union Hill-Novelty Hill,47.679,-122.028
+WA,University Place,47.236,-122.55
+WA,Vancouver,45.639,-122.661
+WA,Walla Walla,46.065,-118.343
+WA,Washougal,45.583,-122.353
+WA,Wenatchee,47.423,-120.31
+WA,West Lake Sammamish,47.578,-122.101
+WA,West Lake Stevens,47.993,-122.102
+WA,Yakima,46.602,-120.506
+WI,Appleton,44.262,-88.415
+WI,Ashwaubenon,44.482,-88.07
+WI,Beaver Dam,43.458,-88.837
+WI,Bellevue,44.444,-87.92
+WI,Beloit,42.508,-89.032
+WI,Brookfield,43.061,-88.106
+WI,Caledonia,42.808,-87.924
+WI,Cudahy,42.96,-87.861
+WI,De Pere,44.449,-88.06
+WI,Eau Claire,44.811,-91.498
+WI,Fitchburg,42.961,-89.47
+WI,Fond du Lac,43.775,-88.439
+WI,Franklin,42.889,-88.038
+WI,Germantown,43.229,-88.11
+WI,Green Bay,44.519,-88.02
+WI,Greenfield,42.961,-88.013
+WI,Howard,44.544,-88.088
+WI,Janesville,42.683,-89.019
+WI,Kaukauna,44.278,-88.272
+WI,Kenosha,42.585,-87.821
+WI,La Crosse,43.801,-91.24
+WI,Madison,43.073,-89.401
+WI,Manitowoc,44.089,-87.658
+WI,Marshfield,44.669,-90.172
+WI,Menasha,44.202,-88.447
+WI,Menomonee Falls,43.179,-88.117
+WI,Menomonie,44.876,-91.919
+WI,Mequon,43.216,-88.03
+WI,Middleton,43.097,-89.504
+WI,Milwaukee,43.039,-87.906
+WI,Mount Pleasant,42.697,-87.856
+WI,Muskego,42.906,-88.139
+WI,Neenah,44.186,-88.463
+WI,New Berlin,42.976,-88.108
+WI,North La Crosse,43.846,-91.248
+WI,Oak Creek,42.886,-87.863
+WI,Oconomowoc,43.112,-88.499
+WI,Onalaska,43.884,-91.235
+WI,Oshkosh,44.025,-88.543
+WI,Pleasant Prairie,42.553,-87.933
+WI,Racine,42.726,-87.783
+WI,River Falls,44.861,-92.624
+WI,Sheboygan,43.751,-87.715
+WI,South Milwaukee,42.911,-87.861
+WI,Stevens Point,44.524,-89.575
+WI,Sun Prairie,43.184,-89.214
+WI,Superior,46.721,-92.104
+WI,Watertown,43.195,-88.729
+WI,Waukesha,43.012,-88.231
+WI,Wausau,44.959,-89.63
+WI,Wauwatosa,43.049,-88.008
+WI,West Allis,43.017,-88.007
+WI,West Bend,43.425,-88.183
+WI,Weston,44.891,-89.548
+WI,Wisconsin Rapids,44.384,-89.817
+WV,Beckley,37.778,-81.188
+WV,Charleston,38.35,-81.633
+WV,Clarksburg,39.281,-80.345
+WV,Fairmont,39.485,-80.143
+WV,Huntington,38.419,-82.445
+WV,Martinsburg,39.456,-77.964
+WV,Morgantown,39.63,-79.956
+WV,Parkersburg,39.267,-81.562
+WV,Weirton,40.419,-80.59
+WV,Weirton Heights,40.408,-80.539
+WV,Wheeling,40.064,-80.721
+WY,Casper,42.867,-106.313
+WY,Cheyenne,41.14,-104.82
+WY,Gillette,44.291,-105.502
+WY,Laramie,41.311,-105.591
+WY,Rock Springs,41.587,-109.203
+WY,Sheridan,44.797,-106.956

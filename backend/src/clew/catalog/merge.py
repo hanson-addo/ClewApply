@@ -10,6 +10,7 @@ from sqlalchemy import exists, select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from clew.catalog.geocode import geocode
 from clew.catalog.normalize import dedup_key, normalize_company, normalize_title, parse_location
 from clew.models import Company, Job, JobSource, JobStatus
 
@@ -134,6 +135,7 @@ async def _company(session: AsyncSession, name: str) -> Company:
 
 async def _job(session: AsyncSession, posting: Posting, company: Company, key: str) -> Job:
     location = parse_location(posting.location)
+    point = geocode(location.city, location.region, location.remote_type)
     await session.execute(
         insert(Job)
         .values(
@@ -144,6 +146,9 @@ async def _job(session: AsyncSession, posting: Posting, company: Company, key: s
             city=location.city,
             region=location.region,
             remote_type=location.remote_type,
+            lat=point.lat,
+            lng=point.lng,
+            geocode_status=point.status,
             salary_min=posting.salary_min,
             salary_max=posting.salary_max,
             description=posting.description,

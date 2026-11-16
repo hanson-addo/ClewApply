@@ -12,6 +12,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -118,6 +119,8 @@ class Job(Base):
     __tablename__ = "jobs"
     __table_args__ = (
         Index("ix_jobs_posted_at", "posted_at"),
+        # Jobs still waiting for a map point (clew.catalog.geocode.geocode_missing).
+        Index("ix_jobs_geocode_pending", "id", postgresql_where=text("geocode_status IS NULL")),
         CheckConstraint("status IN ('open', 'closed')", name="status"),
         CheckConstraint(
             "remote_type IS NULL OR remote_type IN ('onsite', 'hybrid', 'remote')",
@@ -138,6 +141,11 @@ class Job(Base):
     city: Mapped[str | None] = mapped_column(String(100))
     region: Mapped[str | None] = mapped_column(String(100))
     remote_type: Mapped[str | None] = mapped_column(String(16))
+    # The city's map point (clew.catalog.geocode), and why there is none when it's null.
+    # A null status means not looked up yet.
+    lat: Mapped[float | None] = mapped_column(Float)
+    lng: Mapped[float | None] = mapped_column(Float)
+    geocode_status: Mapped[str | None] = mapped_column(String(16))
     # Yearly US dollars.
     salary_min: Mapped[int | None] = mapped_column(Integer)
     salary_max: Mapped[int | None] = mapped_column(Integer)

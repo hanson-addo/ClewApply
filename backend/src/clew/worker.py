@@ -14,6 +14,7 @@ from arq.connections import RedisSettings
 from arq.cron import cron
 
 from clew.catalog.companies import ensure_starter_boards
+from clew.catalog.geocode import geocode_missing
 from clew.catalog.ingest import POLL_RUN_TIMEOUT, poll_due_boards
 from clew.catalog.merge import close_vanished_jobs
 from clew.catalog.usajobs import USAJOBS_RUN_TIMEOUT_SECONDS, client_headers, poll_usajobs
@@ -62,6 +63,10 @@ async def poll_boards(ctx: dict[str, Any]) -> None:
         await session.commit()
     async with httpx.AsyncClient(headers={"User-Agent": "Clew job feed"}) as client:
         await poll_due_boards(sessions, client)
+    async with sessions() as session:
+        placed = await geocode_missing(session)
+        await session.commit()
+    logger.info("jobs_geocoded", extra={"jobs": placed})
 
 
 async def read_usajobs(ctx: dict[str, Any]) -> None:
