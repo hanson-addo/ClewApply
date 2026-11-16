@@ -48,10 +48,18 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
       <div className="home-hero-copy">
         <p className="home-eyebrow">{greetingFor(hour)}</p>
         <h1 id="home-title" className="home-title">
-          {name ? `Welcome back, ${name}.` : data.hasProfile ? "Welcome back." : "Let's get you hired."}
+          {name
+            ? `Welcome back, ${name}.`
+            : data.hasProfile === false
+              ? "Let's get you hired."
+              : "Welcome back."}
         </h1>
-        <p className="home-hero-lede">{statusLine(data.hasProfile, counts, data.jobs?.total ?? 0)}</p>
-        {data.hasProfile ? (
+        <p className="home-hero-lede">
+          {data.hasProfile === null
+            ? "We couldn't load your profile just now. Reload the page to try again."
+            : statusLine(data.hasProfile, counts, data.jobs?.total ?? 0)}
+        </p>
+        {data.hasProfile !== false ? (
           <div className="home-hero-actions">
             <Link to="/jobs" className="button button-primary button-lg">
               See your matches
@@ -75,7 +83,7 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
           </Link>
         )}
       </div>
-      {!progress.complete && (
+      {data.hasProfile !== null && !progress.complete && (
         <div className="home-hero-progress">
           <ProgressRing done={progress.doneCount} total={progress.steps.length} />
           <p>
@@ -235,7 +243,7 @@ function MapTeaser() {
 
 /** The signed-in home: a hero, your numbers, top matches, setup and pipeline. */
 export function HomeDashboard({ data, hour = new Date().getHours() }: { data: Dashboard; hour?: number }) {
-  const progress = setupProgress(data.hasProfile, data.prefs);
+  const progress = setupProgress(data.hasProfile === true, data.prefs);
   return (
     <div className="home-grid">
       <Hero data={data} progress={progress} hour={hour} />
@@ -248,7 +256,8 @@ export function HomeDashboard({ data, hour = new Date().getHours() }: { data: Da
               We couldn&apos;t load your matches just now. Open Jobs to try again.
             </p>
           )}
-          {!progress.complete && <Checklist progress={progress} />}
+          {/* Unknown profile state: no checklist, so it never says "Add your resume" by mistake. */}
+          {data.hasProfile !== null && !progress.complete && <Checklist progress={progress} />}
         </div>
         <div className="home-col">
           {data.hasProfile && data.apps && <Pipeline apps={data.apps} />}

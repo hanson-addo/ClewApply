@@ -1640,8 +1640,8 @@ input:focus-visible + .upload-choose,
 .home .home-title {
   margin: 0;
   font-size: var(--clew-font-size-hero);
-  line-height: var(--clew-line-height-tight);
-  letter-spacing: var(--clew-letter-spacing-display);
+  line-height: var(--clew-font-line-height-tight);
+  letter-spacing: var(--clew-font-letter-spacing-display);
   color: var(--clew-text-on-inverse);
 }
 
@@ -1664,7 +1664,8 @@ input:focus-visible + .upload-choose,
   gap: var(--clew-space-5);
   margin-top: var(--clew-space-4);
   padding: var(--clew-space-6);
-  border: 2px dashed var(--clew-border-inverse);
+  /* Solid, not dashed: this is a link to the upload step, not a place to drop a file. */
+  border: 2px solid var(--clew-border-inverse);
   border-radius: var(--clew-radius-xl);
   background: var(--clew-gradient-glass);
   color: var(--clew-text-on-inverse);
@@ -1798,7 +1799,7 @@ input:focus-visible + .upload-choose,
   font-family: var(--clew-font-family-display);
   font-size: var(--clew-font-size-4xl);
   font-weight: var(--clew-font-weight-heavy);
-  line-height: var(--clew-line-height-tight);
+  line-height: var(--clew-font-line-height-tight);
 }
 
 .stat-label {
