@@ -43,7 +43,8 @@ _ALIASES = {
 
 
 def _key(city: str) -> str:
-    """Lowercase, no dots, "St"/"Saint" made the same, and no trailing "city"."""
+    """Lowercase, no dots, and "St"/"Saint" made the same. A trailing "city" is handled by
+    geocode(), which tries the name with and without it."""
     text = city.lower().replace(".", " ")
     text = re.sub(r"\b(saint|st|ste)\b", "st", text)
     text = re.sub(r"\s+", " ", text).strip()
