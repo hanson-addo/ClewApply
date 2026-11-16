@@ -43,11 +43,13 @@ Status: built, not yet looked at in a browser. Needs a visual pass with real Cle
 
 ## Phase 3: Polish
 
-- [ ] Micro-interactions: card hover lift, progress ring animation, count-up on stat tiles (all off under reduced motion).
-- [ ] Illustrations/empty-state art in brand style (needles, yarn, maze motif from `MazeArt`).
-- [ ] Dark-hero and light-section contrast check; keyboard focus order; screen-reader landmarks and headings.
-- [ ] Phone layout pass at 360px and 390px widths.
-- [ ] Compare against 3 or 4 best-in-class dashboards (Linear, Notion, Teal, Huntr) and note what we match or beat.
+Status: done. Notes are in `docs/design/home-benchmarks.md`.
+
+- [x] Micro-interactions: card hover lift, progress ring animation, count-up on stat tiles (all off under reduced motion).
+- [x] Illustrations/empty-state art in brand style (needles, yarn, maze motif from `MazeArt`).
+- [x] Dark-hero and light-section contrast check; keyboard focus order; screen-reader landmarks and headings.
+- [x] Phone layout pass at 360px and 390px widths.
+- [x] Compare against 3 or 4 best-in-class dashboards (Linear, Notion, Teal, Huntr) and note what we match or beat.
 
 ## Phase 4: Jobs map (the big feature)
 

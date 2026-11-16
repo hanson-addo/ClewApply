@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "react-router";
 
 import { COLUMNS } from "../applications/model";
@@ -13,6 +14,8 @@ import {
   type FeedJob,
   type Progress,
 } from "./model";
+import { MapArt, YarnArt } from "./BrandArt";
+import { useCountUp } from "./useCountUp";
 import type { Dashboard } from "./useDashboard";
 
 /** A ring that shows how many setup steps are done. The text carries the meaning. */
@@ -20,7 +23,8 @@ function ProgressRing({ done, total }: { done: number; total: number }) {
   const radius = 26;
   const circumference = 2 * Math.PI * radius;
   return (
-    <div className="ring">
+    // --ring-full lets the fill animate in from empty (CSS; off under reduced motion).
+    <div className="ring" style={{ "--ring-full": `${circumference}` } as CSSProperties}>
       <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true">
         <circle cx="32" cy="32" r={radius} className="ring-track" />
         <circle
@@ -97,10 +101,16 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
 }
 
 function Tile({ value, label, to }: { value: number; label: string; to: string }) {
+  const shown = useCountUp(value);
   return (
-    <Link to={to} className="stat-tile">
-      <span className="stat-value">{value}</span>
-      <span className="stat-label">{label}</span>
+    // The counting number is for the eye; screen readers get the final value from the label.
+    <Link to={to} className="stat-tile" aria-label={`${value} ${label}`}>
+      <span className="stat-value" aria-hidden="true">
+        {shown}
+      </span>
+      <span className="stat-label" aria-hidden="true">
+        {label}
+      </span>
     </Link>
   );
 }
@@ -147,12 +157,17 @@ function TopMatches({ jobs }: { jobs: NonNullable<Dashboard["jobs"]> }) {
     <section className="home-card" aria-labelledby="matches-title">
       <div className="home-card-head">
         <h2 id="matches-title">Top matches</h2>
-        <Link to="/jobs" className="home-card-link">
-          See all {jobs.total}
-        </Link>
+        {jobs.total > 0 && (
+          <Link to="/jobs" className="home-card-link">
+            See all {jobs.total}
+          </Link>
+        )}
       </div>
       {jobs.items.length === 0 ? (
-        <p className="home-empty">No matches yet. Jobs are fetched regularly, so check back soon.</p>
+        <div className="home-empty-art">
+          <YarnArt />
+          <p className="home-empty">No matches yet. New jobs come in every hour, so check back soon.</p>
+        </div>
       ) : (
         <ul className="match-list">
           {jobs.items.map((job) => (
@@ -208,7 +223,10 @@ function Pipeline({ apps }: { apps: NonNullable<Dashboard["apps"]> }) {
         </Link>
       </div>
       {total === 0 ? (
-        <p className="home-empty">Save a job from your feed and it shows up here.</p>
+        <div className="home-empty-art">
+          <YarnArt />
+          <p className="home-empty">Save a job from your feed and it shows up here.</p>
+        </div>
       ) : (
         <ul className="pipe-list">
           {COLUMNS.map((col) => (
@@ -234,6 +252,7 @@ function MapTeaser() {
         <h2 id="map-title">Jobs near you</h2>
         <span className="pill-soon">Coming soon</span>
       </div>
+      <MapArt />
       <p className="home-empty">
         A map of roles hiring around you, matched to what you're looking for.
       </p>

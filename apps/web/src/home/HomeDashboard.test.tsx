@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it } from "vitest";
 
@@ -77,8 +77,8 @@ describe("HomeDashboard", () => {
   it("shows the stat tiles from the matches and the tracker", () => {
     renderHome(base);
     const stats = screen.getByRole("region", { name: "Your numbers" });
-    expect(within(stats).getByText("Jobs matching you").previousSibling).toHaveTextContent("12");
-    expect(within(stats).getByText("Interviews").previousSibling).toHaveTextContent("1");
+    expect(within(stats).getByRole("link", { name: "12 Jobs matching you" })).toBeInTheDocument();
+    expect(within(stats).getByRole("link", { name: "1 Interviews" })).toBeInTheDocument();
   });
 
   it("says so when matches could not load, and still shows the rest", () => {
@@ -105,5 +105,18 @@ describe("HomeDashboard", () => {
   it("is honest that the map is not built yet", () => {
     renderHome(base);
     expect(screen.getByRole("region", { name: "Jobs near you" })).toHaveTextContent("Coming soon");
+  });
+});
+
+describe("polish", () => {
+  it("counts the numbers up, and lands on the real value", async () => {
+    renderHome(base);
+    const tile = screen.getByRole("link", { name: "12 Jobs matching you" });
+    await waitFor(() => expect(tile).toHaveTextContent("12Jobs matching you"));
+  });
+
+  it("shows the yarn art and a hint when there are no matches yet", () => {
+    renderHome({ ...base, jobs: { items: [], total: 0 } });
+    expect(screen.getByText(/no matches yet/i)).toBeInTheDocument();
   });
 });
