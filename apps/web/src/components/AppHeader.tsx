@@ -1,3 +1,4 @@
+import { useEffect, useId, useRef, useState } from "react";
 import { Link, NavLink } from "react-router";
 
 import { Logo } from "./Logo";
@@ -9,7 +10,84 @@ const LINKS = [
   { to: "/profile", label: "Profile", end: false },
 ];
 
-/** Indigo bar on every signed-in page: skip link, logo, main nav and sign-out. */
+/**
+ * The avatar button and its menu. It's a disclosure (a button that shows a panel), not an ARIA
+ * menu, so Tab moves through it like any links. Escape or a click outside closes it.
+ */
+function AccountMenu({ email, onSignOut }: { email: string | null; onSignOut: () => void }) {
+  const [open, setOpen] = useState(false);
+  const panelId = useId();
+  const root = useRef<HTMLDivElement>(null);
+  const button = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!root.current?.contains(event.target as Node)) setOpen(false);
+    };
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      button.current?.focus();
+    };
+    document.addEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open]);
+
+  return (
+    <div className="account-menu" ref={root}>
+      <button
+        ref={button}
+        type="button"
+        className="account-menu-button"
+        aria-expanded={open}
+        aria-controls={panelId}
+        onClick={() => setOpen((was) => !was)}
+      >
+        <span className="app-header-avatar" aria-hidden="true">
+          {email ? email.charAt(0).toUpperCase() : "•"}
+        </span>
+        <span className="clew-sr-only">Account</span>
+        <span className="account-menu-caret" aria-hidden="true" />
+      </button>
+      <div id={panelId} className="account-menu-panel" hidden={!open}>
+        {email && (
+          <p className="account-menu-email">
+            <span className="clew-sr-only">Signed in as </span>
+            {email}
+          </p>
+        )}
+        <ul>
+          <li>
+            <Link to="/profile" className="account-menu-item" onClick={() => setOpen(false)}>
+              Your profile
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/onboarding/preferences"
+              className="account-menu-item"
+              onClick={() => setOpen(false)}
+            >
+              Job preferences
+            </Link>
+          </li>
+          <li>
+            <button type="button" className="account-menu-item" onClick={onSignOut}>
+              Sign out
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/** Indigo bar on every signed-in page: skip link, logo, main nav and the account menu. */
 export function AppHeader({ email, onSignOut }: { email: string | null; onSignOut: () => void }) {
   return (
     <>
@@ -32,17 +110,7 @@ export function AppHeader({ email, onSignOut }: { email: string | null; onSignOu
           </ul>
         </nav>
         <div className="app-header-account">
-          {email && (
-            <>
-              <span className="app-header-avatar" aria-hidden="true">
-                {email.charAt(0).toUpperCase()}
-              </span>
-              <span className="app-header-email">{email}</span>
-            </>
-          )}
-          <button type="button" className="button button-inverse-outline" onClick={onSignOut}>
-            Sign out
-          </button>
+          <AccountMenu email={email} onSignOut={onSignOut} />
         </div>
       </header>
     </>

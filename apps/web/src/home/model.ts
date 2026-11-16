@@ -34,7 +34,12 @@ export function hasPreferences(prefs: Preferences | null): boolean {
 }
 
 /** The setup checklist. A step is done only when we know it is; unknown counts as not done. */
-export function setupProgress(hasProfile: boolean, prefs: Preferences | null): Progress {
+export function setupProgress(
+  hasProfile: boolean,
+  prefs: Preferences | null,
+  /** Saved jobs and applications, or null when they couldn't be loaded. */
+  tracked: number | null = null,
+): Progress {
   const prefsDone = hasPreferences(prefs);
   const steps: Step[] = [
     {
@@ -53,10 +58,11 @@ export function setupProgress(hasProfile: boolean, prefs: Preferences | null): P
     },
     {
       id: "jobs",
-      title: "Browse your ranked jobs",
-      hint: "One deduplicated feed, best fit first.",
+      title: "Save a job you like",
+      hint: "Your feed ranks every job by fit. Saved jobs show up in Applications.",
       to: "/jobs",
-      done: hasProfile && prefsDone,
+      // Done once something is saved or tracked, not just because setup is finished.
+      done: (tracked ?? 0) > 0,
     },
   ];
   const doneCount = steps.filter((s) => s.done).length;

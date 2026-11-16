@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { useMediaQuery } from "../components/useMediaQuery";
 import { AddApplicationDialog } from "./AddApplicationDialog";
 import { ApplicationDetail } from "./ApplicationDetail";
 import {
@@ -39,6 +40,8 @@ export function ApplicationsPage() {
     [loaded, attempt],
   );
   const [tab, setTab] = useState<Column>("saved");
+  // Matches the CSS breakpoint where the board turns into one column with tabs.
+  const tabMode = useMediaQuery("(max-width: 47.99rem)");
   const [adding, setAdding] = useState(false);
   const [announcement, setAnnouncement] = useState("");
   const selects = useRef(new Map<string, HTMLSelectElement>());
@@ -228,9 +231,12 @@ export function ApplicationsPage() {
                   <section
                     key={column.id}
                     id={`apps-col-${column.id}`}
-                    role="tabpanel"
+                    // Columns are tab panels only while the tabs show; side by side they're sections.
+                    role={tabMode ? "tabpanel" : undefined}
                     className={`apps-column${tab === column.id ? " apps-column-current" : ""}`}
-                    aria-labelledby={`apps-col-${column.id}-heading`}
+                    aria-labelledby={
+                      tabMode ? `apps-tab-${column.id}` : `apps-col-${column.id}-heading`
+                    }
                   >
                     <h2 id={`apps-col-${column.id}-heading`} className="apps-column-title">
                       {column.label} <span className="apps-column-count">({cards.length})</span>

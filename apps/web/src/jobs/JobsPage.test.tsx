@@ -302,6 +302,29 @@ describe("job detail", () => {
     expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
   });
 
+  it("keeps the Undo note while the pointer is over it", async () => {
+    serve({
+      [detailUrl]: () => Response.json(detail(one)),
+      [`GET /jobs/${job(2).id}`]: () => Response.json(detail(job(2))),
+      [`POST /jobs/${one.id}/dismiss`]: () => new Response(null, { status: 204 }),
+    });
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    renderAt(`/jobs/${one.id}`);
+    const typing = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    await typing.click(await screen.findByRole("button", { name: "Not for me" }));
+    const undo = await screen.findByRole("button", { name: "Undo" });
+    await typing.hover(undo);
+    await act(async () => {
+      vi.advanceTimersByTime(30_000);
+    });
+    expect(screen.getByRole("button", { name: "Undo" })).toBeInTheDocument();
+    await typing.unhover(undo);
+    await act(async () => {
+      vi.advanceTimersByTime(10_000);
+    });
+    expect(screen.queryByRole("button", { name: "Undo" })).not.toBeInTheDocument();
+  });
+
   it("says when a job is gone", async () => {
     serve({ [detailUrl]: () => new Response(null, { status: 404 }) });
     renderAt(`/jobs/${one.id}`);

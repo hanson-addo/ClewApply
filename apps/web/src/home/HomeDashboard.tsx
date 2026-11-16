@@ -243,7 +243,7 @@ function MapTeaser() {
 
 /** The signed-in home: a hero, your numbers, top matches, setup and pipeline. */
 export function HomeDashboard({ data, hour = new Date().getHours() }: { data: Dashboard; hour?: number }) {
-  const progress = setupProgress(data.hasProfile === true, data.prefs);
+  const progress = setupProgress(data.hasProfile === true, data.prefs, data.apps?.length ?? null);
   return (
     <div className="home-grid">
       <Hero data={data} progress={progress} hour={hour} />

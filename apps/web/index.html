@@ -10,7 +10,13 @@
     <title>Clew</title>
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Replaced as soon as the app starts. If it stays, the app's code didn't load. -->
+    <div id="root">
+      <p style="font-family: sans-serif; padding: 2rem; color: #101935; background: #f4f2ff">
+        Loading Clew… If this stays, reload. Still stuck? Run <code>docker compose logs web</code>
+        to see why.
+      </p>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

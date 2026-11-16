@@ -144,6 +144,27 @@ describe("board", () => {
     expect(screen.getByRole("tab", { name: "Closed 2" })).toHaveAttribute("aria-selected", "true");
   });
 
+  it("makes the columns tab panels only on narrow screens, where the tabs show", async () => {
+    const narrow = (matches: boolean) =>
+      vi.stubGlobal("matchMedia", (query: string) => ({
+        matches,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+      }));
+    narrow(false);
+    const wide = renderAt("/applications");
+    await screen.findByRole("tab", { name: "Saved 1" });
+    expect(screen.queryAllByRole("tabpanel")).toHaveLength(0);
+    wide.unmount();
+
+    narrow(true);
+    renderAt("/applications");
+    await screen.findByRole("tab", { name: "Saved 1" });
+    expect(screen.getAllByRole("tabpanel", { hidden: true })).toHaveLength(5);
+    expect(screen.getByRole("tabpanel", { name: "Saved 1" })).toBeInTheDocument();
+  });
+
   it("welcomes a brand-new account with one message", async () => {
     serve({ "GET /applications": () => Response.json({ applications: [] }) });
     renderAt("/applications");

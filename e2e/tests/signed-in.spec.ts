@@ -71,6 +71,7 @@ test.describe("sign up and sign in", () => {
 
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
     expect(await (await me).json()).toMatchObject({ email, plan: "free" });
+    await page.getByRole("button", { name: "Account" }).click();
     await expect(page.getByText(email)).toBeVisible();
   });
 
@@ -82,6 +83,7 @@ test.describe("sign up and sign in", () => {
     await enterEmailCode(page);
 
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
+    await page.getByRole("button", { name: "Account" }).click();
     await expect(page.getByText(email)).toBeVisible();
   });
 
@@ -99,6 +101,7 @@ test.describe("signed in", () => {
     await page.goto("/");
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
+    await page.getByRole("button", { name: "Account" }).click();
     await page.getByRole("button", { name: "Sign out" }).click();
     await expectSignInPage(page);
 

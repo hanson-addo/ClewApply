@@ -20,10 +20,10 @@ Rules that still apply (CLAUDE.md): tokens only (no raw hex in components), WCAG
 
 ## Phase 1: Visual foundation (tokens and shell)
 
-Status: done except the type scale and the header avatar menu (header got a sticky blur bar and an avatar initial; the dropdown menu is still to do).
+Status: done. Screenshots are in `docs/design/screenshots/home/`.
 
 - [x] Add tokens: elevation scale (soft layered shadows), larger radii, a gradient (indigo to ink-700 with a coral glow), glass/blur surface for the hero card.
-- [ ] Type scale: bigger Syne display size for the greeting (clamp-based, fluid), tighter tracking.
+- [x] Type scale: bigger Syne display size for the greeting (clamp-based, fluid), tighter tracking.
 - [x] Rebuild the app header: sticky, slim, blur on scroll, avatar menu instead of an email plus a Sign out button.
 - [x] Wider page container (about 72rem) with a 12-column grid on desktop, one column on phone.
 - [x] Run `npm run build` in `packages/design-tokens`; keep contrast tests passing.
