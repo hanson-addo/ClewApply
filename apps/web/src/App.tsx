@@ -1,4 +1,4 @@
-import { ClerkProvider } from "@clerk/react";
+import { ClerkFailed, ClerkProvider } from "@clerk/react";
 import { Navigate, Route, Routes, useNavigate } from "react-router";
 
 import { ApplicationsPage } from "./applications/ApplicationsPage";
@@ -12,6 +12,7 @@ import { UploadStep } from "./onboarding/UploadStep";
 import { HomePage } from "./pages/HomePage";
 import { ProfilePage } from "./profile/ProfilePage";
 import { SetupNeededPage } from "./pages/SetupNeededPage";
+import { SignInUnavailablePage } from "./pages/StartupProblemPage";
 import { SignInPage } from "./pages/SignInPage";
 
 export function AppRoutes() {
@@ -96,6 +97,9 @@ export function App({ publishableKey = config.clerkPublishableKey }: { publishab
       afterSignOutUrl="/sign-in"
       appearance={clerkAppearance}
     >
+      <ClerkFailed>
+        <SignInUnavailablePage />
+      </ClerkFailed>
       <AppRoutes />
     </ClerkProvider>
   );

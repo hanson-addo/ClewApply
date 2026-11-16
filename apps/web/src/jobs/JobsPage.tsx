@@ -86,11 +86,13 @@ export function JobsPage() {
     };
   }, [api, filters, loadKey]);
 
+  // The toast waits while it has keyboard focus or the pointer is over it, so Undo stays reachable.
+  const [toastHeld, setToastHeld] = useState(false);
   useEffect(() => {
-    if (!toast) return;
+    if (!toast || toastHeld) return;
     const timer = setTimeout(() => setToast(null), TOAST_MS);
     return () => clearTimeout(timer);
-  }, [toast]);
+  }, [toast, toastHeld]);
 
   useEffect(() => {
     // After "Show 25 more", focus moves to the first new card (FEED-15).
@@ -281,7 +283,17 @@ export function JobsPage() {
           )}
         </section>
 
-        <div className="jobs-toast" role="status" aria-live="polite">
+        <div
+          className="jobs-toast"
+          role="status"
+          aria-live="polite"
+          onFocus={() => setToastHeld(true)}
+          onBlur={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setToastHeld(false);
+          }}
+          onMouseEnter={() => setToastHeld(true)}
+          onMouseLeave={() => setToastHeld(false)}
+        >
           {toast && (
             <p>
               {toast.message}{" "}
@@ -292,6 +304,7 @@ export function JobsPage() {
                   onClick={() => {
                     const undo = toast.undo;
                     setToast(null);
+                    setToastHeld(false);
                     undo?.();
                   }}
                 >

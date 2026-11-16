@@ -53,6 +53,22 @@ describe("without a Clerk key", () => {
   });
 });
 
+describe("when Clerk can't load", () => {
+  it("says sign-in couldn't load instead of loading forever", () => {
+    clerkState.isLoaded = false;
+    clerkState.failed = true;
+    renderAt("/");
+    expect(screen.getByRole("heading", { name: /sign-in couldn't load/i })).toBeInTheDocument();
+    expect(screen.queryByText("Loading…")).not.toBeInTheDocument();
+  });
+
+  it("shows Loading while Clerk is still loading", () => {
+    clerkState.isLoaded = false;
+    renderAt("/");
+    expect(screen.getByText("Loading…")).toBeInTheDocument();
+  });
+});
+
 describe("sign-in page", () => {
   it("shows Clerk's sign-in widget, the brand and the password promise", () => {
     renderAt("/sign-in");
