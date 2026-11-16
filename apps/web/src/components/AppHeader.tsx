@@ -32,7 +32,14 @@ export function AppHeader({ email, onSignOut }: { email: string | null; onSignOu
           </ul>
         </nav>
         <div className="app-header-account">
-          {email && <span className="app-header-email">{email}</span>}
+          {email && (
+            <>
+              <span className="app-header-avatar" aria-hidden="true">
+                {email.charAt(0).toUpperCase()}
+              </span>
+              <span className="app-header-email">{email}</span>
+            </>
+          )}
           <button type="button" className="button button-inverse-outline" onClick={onSignOut}>
             Sign out
           </button>

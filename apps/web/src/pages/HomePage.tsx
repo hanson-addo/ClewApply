@@ -1,9 +1,10 @@
 import { useClerk } from "@clerk/react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { HomeDashboard } from "../home/HomeDashboard";
+import { useDashboard } from "../home/useDashboard";
 
 type Me = { id: string; email: string; plan: string };
 type State =
@@ -27,6 +28,11 @@ export function HomePage() {
   const api = useApi();
   const { signOut } = useClerk();
   const [state, setState] = useState<State>({ status: "loading" });
+  const dashboard = useDashboard(state.status === "ready");
+
+  useEffect(() => {
+    document.title = "Home · Clew";
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -54,7 +60,7 @@ export function HomePage() {
         email={state.status === "ready" ? state.me.email : null}
         onSignOut={() => void signOut({ redirectUrl: "/sign-in" })}
       />
-      <main id="main" className="home">
+      <main id="main" className={state.status === "ready" ? "home home-wide" : "home"}>
         {state.status === "loading" && <p role="status">Loading your account…</p>}
         {state.status === "error" && (
           <p role="alert" className="home-error">
@@ -72,17 +78,12 @@ export function HomePage() {
             or LinkedIn.
           </p>
         )}
-        {state.status === "ready" && (
-          <>
-            <h1>You&apos;re in.</h1>
-            <p className="home-lede">
-              Next, add your resume and Clew will build your profile from it.
-            </p>
-            <Link to="/onboarding/upload" className="button button-primary">
-              Add your resume
-            </Link>
-          </>
+        {state.status === "ready" && dashboard.status === "loading" && (
+          <p role="status" className="home-loading">
+            Loading your home…
+          </p>
         )}
+        {state.status === "ready" && dashboard.status === "ready" && <HomeDashboard data={dashboard} />}
       </main>
     </>
   );

@@ -20,6 +20,22 @@ function renderAt(path: string, publishableKey = "pk_test_placeholder") {
 
 const fetchMock = vi.fn<(request: Request) => Promise<Response>>();
 
+/** Answers each endpoint by its path. A new user: an account, but no profile or jobs yet. */
+function mockApi(overrides: Record<string, () => Response> = {}) {
+  const routes: Record<string, () => Response> = {
+    "/me": () => Response.json({ id: "0b0e7c9e-1111-4222-8333-444455556666", email: "riley@example.test", plan: "free" }),
+    "/profile": () => Response.json({ detail: "No profile yet." }, { status: 404 }),
+    "/preferences": () => Response.json({ detail: "none" }, { status: 404 }),
+    "/feed": () => Response.json({ jobs: [], total: 0, page: 1, per_page: 4, has_more: false }),
+    "/applications": () => Response.json({ applications: [] }),
+    ...overrides,
+  };
+  fetchMock.mockImplementation((request) => {
+    const handler = routes[new URL(request.url).pathname];
+    return Promise.resolve(handler ? handler() : Response.json({ detail: "not found" }, { status: 404 }));
+  });
+}
+
 beforeEach(() => {
   resetClerk();
   fetchMock.mockReset();
@@ -74,13 +90,12 @@ describe("signed-in pages", () => {
 
   it("load the account with the session token and show the email", async () => {
     clerkState.isSignedIn = true;
-    fetchMock.mockResolvedValue(
-      Response.json({ id: "0b0e7c9e-1111-4222-8333-444455556666", email: "riley@example.test", plan: "free" }),
-    );
+    mockApi();
     renderAt("/");
 
     expect(await screen.findByText("riley@example.test")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /you're in/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /let's get you hired/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /add your resume/i })[0]).toHaveAttribute("href", "/onboarding/upload");
     const request = fetchMock.mock.calls[0]?.[0];
     expect(request?.url).toMatch(/\/me$/);
     expect(request?.headers.get("Authorization")).toBe("Bearer test-session-token");
@@ -118,9 +133,7 @@ describe("signed-in pages", () => {
 
   it("sign out from the header", async () => {
     clerkState.isSignedIn = true;
-    fetchMock.mockResolvedValue(
-      Response.json({ id: "0b0e7c9e-1111-4222-8333-444455556666", email: "riley@example.test", plan: "free" }),
-    );
+    mockApi();
     renderAt("/");
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" });
