@@ -34,7 +34,8 @@ const parsingServers: WebServer[] = !hasParsing
           ]),
       {
         name: "worker",
-        command: "uv run arq clew.worker.WorkerSettings",
+        // No cron jobs: an hourly board poll mid-run would add real jobs to the seeded feed.
+        command: "uv run arq clew.worker.EndToEndWorkerSettings",
         cwd: "../backend",
         wait: { stderr: /Starting worker/ },
         timeout: 120_000,

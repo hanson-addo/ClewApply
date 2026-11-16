@@ -30,7 +30,7 @@ Status: done. Screenshots are in `docs/design/screenshots/home/`.
 
 ## Phase 2: Home v1 (no backend changes)
 
-Status: built, not yet looked at in a browser. Needs a visual pass with real Clerk keys. The map card is a "Coming soon" teaser only.
+Status: built, not yet looked at in a browser. Needs a visual pass with real Clerk keys. The map card was a "Coming soon" teaser until Phase 4.
 
 - [x] **Hero**: personal greeting ("Good morning, Sam"), one-line status, and a large primary action sized for the page (not a small button). Includes the Clew yarn art as a decorative background (`aria-hidden`).
 - [x] **Setup checklist card** for new users: Add resume, Review profile, Set preferences, Install add-on (disabled until it exists). Progress ring plus a big "Add your resume" drop-zone card that links to `/onboarding/upload`.
@@ -55,13 +55,16 @@ Status: done. Notes are in `docs/design/home-benchmarks.md`.
 
 User opens Home and sees a map centered on their location, with pins for jobs near them in their preferred roles.
 
-- [ ] **Decisions needed:** map library and tiles. Options: MapLibre GL with a hosted tile provider (MapTiler or Stadia; flexible, styleable to our brand) or Mapbox (polished, paid, key required). Recommend MapLibre with a brand-styled indigo/lavender map.
-- [ ] **Backend geocoding**: add `lat`/`lng` (and a `geocode_status`) to catalog jobs; geocode city/region text at ingest via a permitted geocoder (US Census geocoder is free; cache results by city). Alembic migration plus tests. Remote jobs get no pin.
-- [ ] **Backend endpoint**: `GET /feed/map?lat&lng&radius` returning compact pins (id, title, company, lat, lng, fit score), filtered by the user's preferences, capped in count.
-- [ ] **User location**: ask the browser for location only on a button press, with a plain explanation. Fall back to the city in their preferences. Never log or store precise coordinates; round before sending to the API.
-- [ ] **Frontend**: map card on Home with clustered pins, coral pins for top matches, click a pin for a mini job card, "Open in Jobs" link. A list view toggle for accessibility (the map is never the only way to reach a job).
+Status: built in #122 (geocoding) and the step 5 PR (endpoint and map card). Tiles could not be fetched from the build sandbox, so the screenshots show pins on the plain indigo background; check the full map locally.
+
+- [x] **Map library and tiles:** MapLibre GL (BSD-3) with OpenFreeMap vector tiles (free, no key or account), styled indigo with coral pins.
+- [x] **Backend geocoding**: `lat`/`lng`/`geocode_status` on catalog jobs, from a committed GeoNames table of US places (no runtime geocoder, so R19 holds). Remote jobs with no city get no pin.
+- [x] **Backend endpoint**: `GET /feed/map` returns up to 300 compact pins, best fit first, with the same filters as the feed (dealbreakers, dismissed jobs, R28 unverified boards). It takes no location; the map centers on the first saved place.
+- [x] **User location**: "Near me" asks the browser only on a press, rounds to about 1 km at once, and uses it only in the browser (center the map, sort the list). It is never sent to the API, stored or logged.
+- [x] **Frontend**: map card on Home with clustered pins, a React card for the picked pin linking to the job, and a Map/List toggle. Without WebGL, the list is shown.
 - [ ] Privacy review (Security wakes for this one: personal data, plus a new runtime dependency).
-- [ ] Performance: lazy-load the map so Home paints first.
+- [x] Performance: the map library loads in its own chunk, only when the map is shown.
+- [ ] Before launch: GeoNames and OpenStreetMap credit on the about or privacy page; re-geocode `not_found` jobs after the place table is rebuilt.
 
 ## Phase 5: Idea parking lot (not scheduled)
 

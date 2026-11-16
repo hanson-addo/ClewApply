@@ -14,9 +14,11 @@ import {
   type FeedJob,
   type Progress,
 } from "./model";
-import { MapArt, YarnArt } from "./BrandArt";
+import { YarnArt } from "./BrandArt";
+import { MapCard } from "./MapCard";
 import { useCountUp } from "./useCountUp";
 import type { Dashboard } from "./useDashboard";
+import type { JobMapState } from "./useJobMap";
 
 /** A ring that shows how many setup steps are done. The text carries the meaning. */
 function ProgressRing({ done, total }: { done: number; total: number }) {
@@ -245,23 +247,16 @@ function Pipeline({ apps }: { apps: NonNullable<Dashboard["apps"]> }) {
 }
 
 /** A teaser for the jobs map. Honest about not being built yet. */
-function MapTeaser() {
-  return (
-    <section className="home-card home-map-teaser" aria-labelledby="map-title">
-      <div className="home-card-head">
-        <h2 id="map-title">Jobs near you</h2>
-        <span className="pill-soon">Coming soon</span>
-      </div>
-      <MapArt />
-      <p className="home-empty">
-        A map of roles hiring around you, matched to what you're looking for.
-      </p>
-    </section>
-  );
-}
-
-/** The signed-in home: a hero, your numbers, top matches, setup and pipeline. */
-export function HomeDashboard({ data, hour = new Date().getHours() }: { data: Dashboard; hour?: number }) {
+/** The signed-in home: a hero, your numbers, top matches, setup, pipeline and the jobs map. */
+export function HomeDashboard({
+  data,
+  map,
+  hour = new Date().getHours(),
+}: {
+  data: Dashboard;
+  map: JobMapState;
+  hour?: number;
+}) {
   const progress = setupProgress(data.hasProfile === true, data.prefs, data.apps?.length ?? null);
   return (
     <div className="home-grid">
@@ -280,7 +275,7 @@ export function HomeDashboard({ data, hour = new Date().getHours() }: { data: Da
         </div>
         <div className="home-col">
           {data.hasProfile && data.apps && <Pipeline apps={data.apps} />}
-          <MapTeaser />
+          <MapCard state={map} />
         </div>
       </div>
     </div>

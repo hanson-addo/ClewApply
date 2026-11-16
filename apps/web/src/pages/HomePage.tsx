@@ -5,6 +5,7 @@ import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
 import { HomeDashboard } from "../home/HomeDashboard";
 import { useDashboard } from "../home/useDashboard";
+import { useJobMap } from "../home/useJobMap";
 
 type Me = { id: string; email: string; plan: string };
 type State =
@@ -29,6 +30,7 @@ export function HomePage() {
   const { signOut } = useClerk();
   const [state, setState] = useState<State>({ status: "loading" });
   const dashboard = useDashboard(state.status === "ready");
+  const jobMap = useJobMap(state.status === "ready");
 
   useEffect(() => {
     document.title = "Home · Clew";
@@ -83,7 +85,9 @@ export function HomePage() {
             Loading your home…
           </p>
         )}
-        {state.status === "ready" && dashboard.status === "ready" && <HomeDashboard data={dashboard} />}
+        {state.status === "ready" && dashboard.status === "ready" && (
+          <HomeDashboard data={dashboard} map={jobMap} />
+        )}
       </main>
     </>
   );

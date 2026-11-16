@@ -2146,8 +2146,126 @@ input:focus-visible + .upload-choose,
   font-weight: var(--clew-font-weight-bold);
 }
 
-.home-map-teaser {
+/* --- Jobs map (Home) --- */
+
+.map-views {
+  display: inline-flex;
+  padding: 3px;
+  border-radius: var(--clew-radius-pill);
+  background: var(--clew-bg-sunken);
+}
+
+.map-view {
+  min-height: 36px;
+  padding: 0 var(--clew-space-4);
+  border: none;
+  border-radius: var(--clew-radius-pill);
+  background: transparent;
+  color: var(--clew-text-secondary);
+  font: inherit;
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-bold);
+  cursor: pointer;
+}
+
+.map-view[aria-pressed="true"] {
+  background: var(--clew-bg-inverse);
+  color: var(--clew-text-on-inverse);
+}
+
+.map-frame {
+  position: relative;
+  height: clamp(18rem, 42vw, 26rem);
+  overflow: hidden;
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-bg-inverse);
+}
+
+/* MapLibre makes its container position: relative, so size it rather than pin it. */
+.map-frame .jobs-map-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.map-loading {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--clew-text-on-inverse-muted);
+}
+
+.map-popup {
+  position: absolute;
+  left: var(--clew-space-3);
+  right: var(--clew-space-3);
+  bottom: var(--clew-space-3);
+  display: flex;
+  align-items: flex-start;
+  border-radius: var(--clew-radius-lg);
   background: var(--clew-bg-surface);
+  box-shadow: var(--clew-shadow-raised);
+}
+
+.map-popup .match-row {
+  flex: 1;
+  min-width: 0;
+}
+
+.map-popup-close {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background: transparent;
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-xl);
+  cursor: pointer;
+}
+
+.map-pill {
+  justify-self: start;
+  margin: var(--clew-space-1) 0 0;
+}
+
+.map-list {
+  display: grid;
+  gap: var(--clew-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.map-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--clew-space-3);
+  margin-top: var(--clew-space-4);
+}
+
+.map-note,
+.map-unplaced {
+  margin: 0;
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-sm);
+}
+
+.map-unplaced {
+  margin-top: var(--clew-space-2);
+}
+
+.map-unplaced a {
+  color: var(--clew-text-link);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+/* MapLibre's own controls, in brand colors. */
+.jobs-map-canvas .maplibregl-ctrl-group {
+  border-radius: var(--clew-radius-md);
+  box-shadow: var(--clew-shadow-raised);
+}
+
+.jobs-map-canvas .maplibregl-ctrl-attrib {
+  font-size: var(--clew-font-size-xs);
 }
 
 .map-art {
@@ -2167,12 +2285,3 @@ input:focus-visible + .upload-choose,
   flex: none;
 }
 
-.pill-soon {
-  padding: 2px var(--clew-space-3);
-  border-radius: var(--clew-radius-pill);
-  background: var(--clew-status-info-bg);
-  color: var(--clew-status-info-fg);
-  font-size: var(--clew-font-size-xs);
-  font-weight: var(--clew-font-weight-bold);
-  white-space: nowrap;
-}

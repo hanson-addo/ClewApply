@@ -27,6 +27,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.auth.deps import CurrentUser
+from clew.catalog.geocode import geocode
 from clew.catalog.merge import source_rank
 from clew.catalog.normalize import normalize_company, state_code
 from clew.db.session import get_session
@@ -352,3 +353,83 @@ async def job_links(
         url, source = primary.get(job_id) or best[job_id]
         links[job_id] = (url, source, sorted(listed, key=lambda s: (source_rank(s), s)))
     return links
+
+
+# The most pins one map shows: the best fits among placed jobs.
+MAP_PINS = 300
+
+
+class MapPin(BaseModel):
+    id: uuid.UUID
+    title: str
+    company: str
+    unverified_board: bool
+    location: str | None
+    lat: float
+    lng: float
+    fit_score: int
+
+
+class MapPoint(BaseModel):
+    lat: float
+    lng: float
+
+
+class JobMap(BaseModel):
+    # Where to center the map: the first city in the user's preferences, when we know it.
+    # The browser's own location is never sent here; the app centers on it locally.
+    center: MapPoint | None
+    pins: list[MapPin]
+    # Jobs that passed the filters but have no map point (remote, or a place we don't know).
+    unplaced: int
+
+
+@router.get("/feed/map", responses={401: {"description": "Not signed in"}})
+async def feed_map(user: CurrentUser, session: Session) -> JobMap:
+    """The feed's jobs that have a map point, best fit first, with the same visibility (R28),
+    dealbreakers and dismissals as the feed. Takes no location from the client."""
+    now = datetime.now(UTC)
+    wants, prefs = await wants_for(session, user.id)
+    rules = [
+        Job.status == JobStatus.OPEN,
+        *_dealbreakers(prefs),
+        feedback_action(user.id).is_distinct_from(FeedbackAction.DISMISSED),
+    ]
+    rows = (
+        await session.execute(
+            job_rows(user.id)
+            .add_columns(Job.lat, Job.lng)
+            .where(and_(true(), *rules))
+            .order_by(NEWEST.desc(), Job.id)
+            .limit(CANDIDATES)
+        )
+    ).all()
+    placed = [row for row in rows if row.lat is not None and row.lng is not None]
+    terms = skill_terms(wants.skills)
+    scored = [(fit(wants, job_facts(row), now, terms), row) for row in placed]
+    scored.sort(key=lambda item: (-item[0].score, -item[1].newest.timestamp(), item[1].id))
+    return JobMap(
+        center=_preferred_center(prefs),
+        pins=[
+            MapPin(
+                id=row.id,
+                title=row.title,
+                company=row.name,
+                unverified_board=not row.verified,
+                location=row.location,
+                lat=row.lat,
+                lng=row.lng,
+                fit_score=job_fit.score,
+            )
+            for job_fit, row in scored[:MAP_PINS]
+        ],
+        unplaced=len(rows) - len(placed),
+    )
+
+
+def _preferred_center(prefs: JobPreferences | None) -> MapPoint | None:
+    for loc in prefs.locations if prefs else []:
+        point = geocode(loc.get("city"), loc.get("region"), "onsite")
+        if point.lat is not None and point.lng is not None:
+            return MapPoint(lat=point.lat, lng=point.lng)
+    return None

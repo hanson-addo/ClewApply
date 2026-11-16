@@ -1,11 +1,13 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import type { Application } from "../applications/model";
 import { HomeDashboard } from "./HomeDashboard";
 import type { FeedJob } from "./model";
 import type { Dashboard } from "./useDashboard";
+
+vi.mock("./webgl", () => ({ canDrawMap: () => false }));
 
 const job = (over: Partial<FeedJob> = {}): FeedJob =>
   ({
@@ -33,7 +35,7 @@ const base: Dashboard = {
 function renderHome(data: Dashboard, hour = 9) {
   return render(
     <MemoryRouter>
-      <HomeDashboard data={data} hour={hour} />
+      <HomeDashboard data={data} map={{ status: "ready", center: null, pins: [], unplaced: 0 }} hour={hour} />
     </MemoryRouter>,
   );
 }
@@ -102,9 +104,9 @@ describe("HomeDashboard", () => {
     );
   });
 
-  it("is honest that the map is not built yet", () => {
+  it("has the jobs map card", () => {
     renderHome(base);
-    expect(screen.getByRole("region", { name: "Jobs near you" })).toHaveTextContent("Coming soon");
+    expect(screen.getByRole("region", { name: "Jobs near you" })).toHaveTextContent(/no matching jobs with a city/i);
   });
 });
 
@@ -112,7 +114,8 @@ describe("polish", () => {
   it("counts the numbers up, and lands on the real value", async () => {
     renderHome(base);
     const tile = screen.getByRole("link", { name: "12 Jobs matching you" });
-    await waitFor(() => expect(tile).toHaveTextContent("12Jobs matching you"));
+    // The count-up runs about a second; leave room for a busy test machine.
+    await waitFor(() => expect(tile).toHaveTextContent("12Jobs matching you"), { timeout: 4000 });
   });
 
   it("shows the yarn art and a hint when there are no matches yet", () => {
