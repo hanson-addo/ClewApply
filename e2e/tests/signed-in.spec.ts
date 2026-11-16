@@ -99,6 +99,7 @@ test.describe("signed in", () => {
     await page.goto("/");
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
+    await page.getByRole("button", { name: "Account" }).click();
     await page.getByRole("button", { name: "Sign out" }).click();
     await expectSignInPage(page);
 

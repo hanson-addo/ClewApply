@@ -386,6 +386,7 @@ describe("profile page", () => {
     const u = user();
     await renderLoaded();
     await u.type(screen.getByLabelText("Full name"), " Jr.");
+    await u.click(screen.getByRole("button", { name: "Account" }));
     await u.click(screen.getByRole("button", { name: "Sign out" }));
     let dialog = screen.getByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Discard" }));
@@ -401,6 +402,7 @@ describe("profile page", () => {
     const u = user();
     await renderLoaded();
     await u.type(screen.getByLabelText("Full name"), " Jr.");
+    await u.click(screen.getByRole("button", { name: "Account" }));
     await u.click(screen.getByRole("button", { name: "Sign out" }));
     const dialog = screen.getByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Save" }));

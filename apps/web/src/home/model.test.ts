@@ -53,13 +53,14 @@ describe("setupProgress", () => {
   it("counts the resume once there is a profile", () => {
     expect(setupProgress(true, prefs()).steps.find((s) => s.id === "resume")?.done).toBe(true);
   });
-  it("is complete with a profile and preferences", () => {
-    const p = setupProgress(true, prefs({ titles: ["Designer"] }));
+  it("is complete with a profile, preferences and one saved job", () => {
+    const p = setupProgress(true, prefs({ titles: ["Designer"] }), 1);
     expect(p.complete).toBe(true);
     expect(p.doneCount).toBe(3);
   });
-  it("does not unlock the jobs step from preferences alone", () => {
-    expect(setupProgress(false, prefs({ titles: ["Designer"] })).steps[2]?.done).toBe(false);
+  it("doesn't tick the jobs step until a job is saved", () => {
+    expect(setupProgress(true, prefs({ titles: ["Designer"] }), 0).steps[2]?.done).toBe(false);
+    expect(setupProgress(true, prefs({ titles: ["Designer"] }), null).steps[2]?.done).toBe(false);
   });
 });
 

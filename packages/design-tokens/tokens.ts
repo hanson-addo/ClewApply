@@ -108,17 +108,20 @@ export const tokens = {
       "2xl": "1.5rem",
       "3xl": "clamp(1.75rem, 1.3rem + 1.8vw, 2.25rem)",
       "4xl": "clamp(2rem, 1.4rem + 2.6vw, 2.75rem)",
-      "hero": "clamp(2.5rem, 1.5rem + 4.4vw, 3.75rem)"
+      "hero": "clamp(2.5rem, 1.5rem + 4.4vw, 3.75rem)",
+      "display": "clamp(2.25rem, 0.9rem + 5.6vw, 4.75rem)"
     },
     "line-height": {
       "tight": "1.05",
       "snug": "1.2",
-      "normal": "1.5"
+      "normal": "1.5",
+      "display": "0.98"
     },
     "letter-spacing": {
       "display": "-0.02em",
       "normal": "0",
-      "caps": "0.02em"
+      "caps": "0.02em",
+      "tight": "-0.035em"
     }
   },
   "space": {
@@ -156,7 +159,8 @@ export const tokens = {
     "raised": "0 1px 2px rgba(16, 25, 53, 0.08), 0 4px 12px rgba(16, 25, 53, 0.06)",
     "overlay": "0 12px 40px rgba(16, 25, 53, 0.24)",
     "lift": "0 2px 4px rgba(16, 25, 53, 0.06), 0 12px 32px rgba(16, 25, 53, 0.12)",
-    "hero": "0 24px 60px rgba(16, 25, 53, 0.32)"
+    "hero": "0 24px 60px rgba(16, 25, 53, 0.32)",
+    "glow-coral": "0 10px 28px rgba(255, 107, 74, 0.4)"
   },
   "gradient": {
     "hero": "radial-gradient(60% 90% at 88% 0%, rgba(255, 107, 74, 0.34) 0%, rgba(255, 107, 74, 0) 62%), linear-gradient(135deg, #101935 0%, #1C2750 100%)",

@@ -151,6 +151,7 @@ describe("signed-in pages", () => {
     clerkState.isSignedIn = true;
     mockApi();
     renderAt("/");
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" });
   });
