@@ -243,3 +243,68 @@ async def test_bad_filters(api: AsyncClient, alice: dict[str, str], params: dict
 
 async def test_feed_needs_a_session(api: AsyncClient) -> None:
     assert (await api.get("/feed")).status_code == 401
+
+
+# --- The jobs map (#119) ------------------------------------------------------------------
+
+
+async def get_map(api: AsyncClient, user: dict[str, str]) -> dict[str, Any]:
+    response = await api.get("/feed/map", headers=user)
+    assert response.status_code == 200, response.text
+    body: dict[str, Any] = response.json()
+    return body
+
+
+async def test_map_pins_placed_jobs_best_fit_first(
+    api: AsyncClient, alice: dict[str, str], sessions: async_sessionmaker[AsyncSession]
+) -> None:
+    await add(sessions, title="Data Engineer", location="Austin, TX")
+    await add(sessions, title="Senior Software Engineer", location="Dallas, TX")
+    await add(sessions, title="Remote Engineer", location="Remote")
+    prefs = {
+        "titles": ["Senior Software Engineer"],
+        "locations": [{"city": "Austin", "region": "TX"}],
+    }
+    assert (await api.put("/preferences", headers=alice, json=prefs)).status_code == 200
+
+    body = await get_map(api, alice)
+    assert [pin["title"] for pin in body["pins"]] == ["Senior Software Engineer", "Data Engineer"]
+    dallas = body["pins"][0]
+    assert dallas["lat"] == pytest.approx(32.78, abs=0.05)
+    assert dallas["unverified_board"] is False
+    # The remote job passes the filters but has no pin.
+    assert body["unplaced"] == 1
+    assert body["center"] == {"lat": pytest.approx(30.267), "lng": pytest.approx(-97.743)}
+
+
+async def test_map_follows_the_feed_rules(
+    api: AsyncClient,
+    alice: dict[str, str],
+    bob: dict[str, str],
+    sessions: async_sessionmaker[AsyncSession],
+) -> None:
+    token = f"minotaur-{uuid.uuid4().hex[:8]}"
+    follow = {"ats_type": "lever", "board_token": token}
+    assert (await api.post("/companies/follow", headers=alice, json=follow)).status_code == 201
+    async with sessions() as session:
+        board = await board_company(session, "lever", token)
+        await session.commit()
+    await add(sessions, "lever", board.name, title="Maze Mapper", company_id=board.id)
+    dismissed = await add(sessions, title="Dismissed Engineer")
+    await add(sessions, title="Night Shift Engineer")
+    assert (await api.post(f"/jobs/{dismissed.id}/dismiss", headers=alice)).status_code == 204
+    prefs = {"excluded_keywords": ["night shift"]}
+    assert (await api.put("/preferences", headers=alice, json=prefs)).status_code == 200
+
+    # R28: the unverified board's job shows only to its follower, labeled.
+    [pin] = (await get_map(api, alice))["pins"]
+    assert (pin["title"], pin["unverified_board"]) == ("Maze Mapper", True)
+    assert {p["title"] for p in (await get_map(api, bob))["pins"]} == {
+        "Dismissed Engineer",
+        "Night Shift Engineer",
+    }
+    assert (await get_map(api, bob))["center"] is None
+
+
+async def test_map_needs_a_session(api: AsyncClient) -> None:
+    assert (await api.get("/feed/map")).status_code == 401

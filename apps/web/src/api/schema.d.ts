@@ -157,6 +157,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/feed/map": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Feed Map
+         * @description The feed's jobs that have a map point, best fit first, with the same visibility (R28),
+         *     dealbreakers and dismissals as the feed. Takes no location from the client.
+         */
+        get: operations["feed_map_feed_map_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/health": {
         parameters: {
             query?: never;
@@ -814,6 +835,14 @@ export interface components {
             /** Unverified Board */
             unverified_board: boolean;
         };
+        /** JobMap */
+        JobMap: {
+            center: components["schemas"]["MapPoint"] | null;
+            /** Pins */
+            pins: components["schemas"]["MapPin"][];
+            /** Unplaced */
+            unplaced: number;
+        };
         /** Language */
         Language: {
             /** Fluency */
@@ -852,6 +881,35 @@ export interface components {
             postalCode?: string | null;
             /** Region */
             region?: string | null;
+        };
+        /** MapPin */
+        MapPin: {
+            /** Company */
+            company: string;
+            /** Fit Score */
+            fit_score: number;
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
+            /** Location */
+            location: string | null;
+            /** Title */
+            title: string;
+            /** Unverified Board */
+            unverified_board: boolean;
+        };
+        /** MapPoint */
+        MapPoint: {
+            /** Lat */
+            lat: number;
+            /** Lng */
+            lng: number;
         };
         /** Me */
         Me: {
@@ -1691,6 +1749,33 @@ export interface operations {
             };
             /** @description A filter is out of range, or the state isn't in the US */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    feed_map_feed_map_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JobMap"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

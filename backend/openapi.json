@@ -1160,6 +1160,38 @@
         "title": "JobDetail",
         "type": "object"
       },
+      "JobMap": {
+        "properties": {
+          "center": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/MapPoint"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "pins": {
+            "items": {
+              "$ref": "#/components/schemas/MapPin"
+            },
+            "title": "Pins",
+            "type": "array"
+          },
+          "unplaced": {
+            "title": "Unplaced",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "center",
+          "pins",
+          "unplaced"
+        ],
+        "title": "JobMap",
+        "type": "object"
+      },
       "Language": {
         "additionalProperties": false,
         "properties": {
@@ -1291,6 +1323,80 @@
           }
         },
         "title": "Location",
+        "type": "object"
+      },
+      "MapPin": {
+        "properties": {
+          "company": {
+            "title": "Company",
+            "type": "string"
+          },
+          "fit_score": {
+            "title": "Fit Score",
+            "type": "integer"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "title": "Lng",
+            "type": "number"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "unverified_board": {
+            "title": "Unverified Board",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "company",
+          "unverified_board",
+          "location",
+          "lat",
+          "lng",
+          "fit_score"
+        ],
+        "title": "MapPin",
+        "type": "object"
+      },
+      "MapPoint": {
+        "properties": {
+          "lat": {
+            "title": "Lat",
+            "type": "number"
+          },
+          "lng": {
+            "title": "Lng",
+            "type": "number"
+          }
+        },
+        "required": [
+          "lat",
+          "lng"
+        ],
+        "title": "MapPoint",
         "type": "object"
       },
       "Me": {
@@ -3149,6 +3255,36 @@
           }
         ],
         "summary": "Feed",
+        "tags": [
+          "feed"
+        ]
+      }
+    },
+    "/feed/map": {
+      "get": {
+        "description": "The feed's jobs that have a map point, best fit first, with the same visibility (R28),\ndealbreakers and dismissals as the feed. Takes no location from the client.",
+        "operationId": "feed_map_feed_map_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobMap"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Feed Map",
         "tags": [
           "feed"
         ]
