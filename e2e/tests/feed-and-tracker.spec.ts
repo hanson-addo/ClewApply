@@ -23,8 +23,9 @@ test.beforeEach(async ({ page }) => {
 const isPhone = () => test.info().project.name === "phone";
 const card = (page: Page, title: string) =>
   page.getByRole("link", { name: new RegExp(`^${title}, `) });
-const column = (page: Page, label: string) =>
-  page.getByRole("tabpanel", { name: new RegExp(`^${label} \\(`) });
+// By id: on desktop a column is a region named by its heading, "Saved (2)"; on phones it's a
+// tab panel named by its tab, "Saved 2".
+const column = (page: Page, label: string) => page.locator(`#apps-col-${label.toLowerCase()}`);
 const statusOf = (page: Page, title: string) => page.getByLabel(`Status of ${title}`);
 
 async function openFeed(page: Page, label: string) {

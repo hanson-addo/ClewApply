@@ -87,7 +87,9 @@ export function JobsPage() {
   }, [api, filters, loadKey]);
 
   // The toast waits while it has keyboard focus or the pointer is over it, so Undo stays reachable.
-  const [toastHeld, setToastHeld] = useState(false);
+  const [toastHovered, setToastHovered] = useState(false);
+  const [toastFocused, setToastFocused] = useState(false);
+  const toastHeld = toastHovered || toastFocused;
   useEffect(() => {
     if (!toast || toastHeld) return;
     const timer = setTimeout(() => setToast(null), TOAST_MS);
@@ -287,12 +289,12 @@ export function JobsPage() {
           className="jobs-toast"
           role="status"
           aria-live="polite"
-          onFocus={() => setToastHeld(true)}
+          onFocus={() => setToastFocused(true)}
           onBlur={(event) => {
-            if (!event.currentTarget.contains(event.relatedTarget)) setToastHeld(false);
+            if (!event.currentTarget.contains(event.relatedTarget)) setToastFocused(false);
           }}
-          onMouseEnter={() => setToastHeld(true)}
-          onMouseLeave={() => setToastHeld(false)}
+          onMouseEnter={() => setToastHovered(true)}
+          onMouseLeave={() => setToastHovered(false)}
         >
           {toast && (
             <p>
@@ -304,7 +306,8 @@ export function JobsPage() {
                   onClick={() => {
                     const undo = toast.undo;
                     setToast(null);
-                    setToastHeld(false);
+                    setToastHovered(false);
+                    setToastFocused(false);
                     undo?.();
                   }}
                 >

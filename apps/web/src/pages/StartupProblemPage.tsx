@@ -2,10 +2,13 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 
 import { Logo } from "../components/Logo";
 
-/** Shown when Clerk's sign-in script can't load, so the app never sits on "Loading…". */
+/**
+ * Shown when Clerk's sign-in script can't load, so the app never sits on "Loading…". A div,
+ * not main: the routes beside it may render their own main landmark.
+ */
 export function SignInUnavailablePage() {
   return (
-    <main className="setup-needed" role="alert">
+    <div className="setup-needed" role="alert">
       <Logo variant="onLight" />
       <h1>Sign-in couldn&apos;t load</h1>
       <p>
@@ -14,7 +17,7 @@ export function SignInUnavailablePage() {
         your Clerk dashboard (it starts with <code>pk_test_</code>), then restart{" "}
         <code>docker compose up</code>.
       </p>
-    </main>
+    </div>
   );
 }
 
