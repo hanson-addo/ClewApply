@@ -350,7 +350,7 @@ describe("profile page", () => {
     await u.click(home);
     dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Discard" }));
-    expect(await screen.findByRole("heading", { name: /you're in/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
     expect(saved).toHaveLength(0);
   });
 
@@ -368,7 +368,7 @@ describe("profile page", () => {
     await act(() => router.navigate(-1));
     dialog = await screen.findByRole("dialog", { name: "Save your changes?" });
     await u.click(within(dialog).getByRole("button", { name: "Save" }));
-    expect(await screen.findByRole("heading", { name: /you're in/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /welcome back/i })).toBeInTheDocument();
     expect(saved).toHaveLength(1);
   });
 

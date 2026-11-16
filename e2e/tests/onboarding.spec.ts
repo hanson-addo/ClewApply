@@ -22,7 +22,7 @@ const RESUME = ["Ariadne Testuser", "Thread engineer at Labyrinth Logistics, 202
 test("upload a resume and confirm the profile (UP-09)", async ({ page, request }) => {
   await signInForApi(page, request, "onboarding");
   await page.goto("/");
-  await page.getByRole("link", { name: "Add your resume" }).click();
+  await page.getByRole("link", { name: "Add your resume" }).first().click();
   await expect(page).toHaveURL(/\/onboarding\/upload$/);
 
   const consent = page.getByRole("checkbox", { name: /Let Clew's AI read my resume/ });
