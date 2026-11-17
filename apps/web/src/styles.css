@@ -2386,7 +2386,7 @@ input:focus-visible + .upload-choose,
   padding: var(--clew-space-5);
   border: 1px solid color-mix(in srgb, var(--clew-text-on-inverse) 18%, transparent);
   border-radius: var(--clew-radius-xl);
-  background: color-mix(in srgb, var(--clew-bg-inverse) 62%, transparent);
+  background: color-mix(in srgb, var(--clew-bg-inverse) 84%, transparent);
   backdrop-filter: blur(18px) saturate(140%);
   box-shadow: var(--clew-shadow-overlay);
   color: var(--clew-text-on-inverse);

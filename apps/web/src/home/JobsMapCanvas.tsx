@@ -16,7 +16,7 @@ import type { Feature, FeatureCollection, Point as GeoPoint, Polygon } from "geo
 import { useEffect, useRef, useState } from "react";
 
 import { type Camera, cameraAt, type NearPin, ringAround, US_CAMERA, zoomForRadius } from "./stageMath";
-import { mapStyle } from "./mapStyle";
+import { DUSK_OPACITY, duskAt, mapStyle } from "./mapStyle";
 import type { Frame } from "./useScrollExpand";
 import type { MapPin, Point } from "./useJobMap";
 
@@ -137,6 +137,9 @@ export default function JobsMapCanvas(props: Props) {
 
     instance.on("load", () => {
       const first = latest.current;
+      // The small, US-wide card starts at dusk; the open map is the light street map.
+      const dark = first.motion !== "none" && !first.expanded;
+      instance.setPaintProperty("dusk", "background-opacity", dark ? DUSK_OPACITY : 0);
       instance.addSource("jobs", {
         type: "geojson",
         data: pinData(first.pins),
@@ -156,7 +159,7 @@ export default function JobsMapCanvas(props: Props) {
         id: "ring-line",
         type: "line",
         source: "ring",
-        paint: { "line-color": coral[400], "line-width": 2, "line-opacity": 0.7, "line-dasharray": [2, 2] },
+        paint: { "line-color": coral[600], "line-width": 2, "line-opacity": 0.8, "line-dasharray": [2, 2] },
       });
       instance.addLayer({
         id: "clusters",
@@ -252,6 +255,7 @@ export default function JobsMapCanvas(props: Props) {
       if (!instance || latest.current.motion === "none") return;
       const was = lastT.current;
       lastT.current = t;
+      if (instance.getLayer("dusk")) instance.setPaintProperty("dusk", "background-opacity", duskAt(t));
       if (t <= 0) {
         // Small card: keep whatever the user has panned to, just re-centre it in the card.
         if (was > 0) instance.jumpTo({ ...US_CAMERA, padding });
