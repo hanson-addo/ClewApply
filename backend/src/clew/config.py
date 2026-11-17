@@ -57,6 +57,8 @@ class Settings(BaseSettings):
     resume_uploads_per_hour: int = Field(default=10, ge=1)
     resumes_stored_max: int = Field(default=20, ge=1)
     profile_saves_per_hour: int = Field(default=60, ge=1)
+    # Each export reads every resume file back from storage.
+    data_exports_per_hour: int = Field(default=5, ge=1)
     # Older profile versions are deleted by `python -m clew.maintenance prune-profile-versions`.
     profile_versions_kept: int = Field(default=200, ge=1)
 

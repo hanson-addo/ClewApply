@@ -3512,6 +3512,33 @@
       }
     },
     "/me": {
+      "delete": {
+        "description": "Deletes the account: every resume file, then the profile, every version, applications,\nsettings, drafts and history. Signing in again later starts a new, empty account.",
+        "operationId": "delete_me_me_delete",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint."
+          },
+          "503": {
+            "description": "File storage is unavailable; nothing was deleted from the database"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Delete Me",
+        "tags": [
+          "account"
+        ]
+      },
       "get": {
         "description": "Who is signed in. The first call after sign-up creates the Clew account.",
         "operationId": "me_me_get",
@@ -3620,6 +3647,41 @@
           }
         ],
         "summary": "Set Ai Consent",
+        "tags": [
+          "account"
+        ]
+      }
+    },
+    "/me/export": {
+      "post": {
+        "description": "A zip of everything Clew stores for the user: data.json and their resume files.",
+        "operationId": "export_data_me_export_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/zip": {}
+            },
+            "description": "clew-data.zip"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint."
+          },
+          "429": {
+            "description": "Too many exports this hour"
+          },
+          "503": {
+            "description": "File storage is unavailable"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Export Data",
         "tags": [
           "account"
         ]

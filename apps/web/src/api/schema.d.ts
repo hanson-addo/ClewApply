@@ -296,7 +296,12 @@ export interface paths {
         get: operations["me_me_get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Me
+         * @description Deletes the account: every resume file, then the profile, every version, applications,
+         *     settings, drafts and history. Signing in again later starts a new, empty account.
+         */
+        delete: operations["delete_me_me_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -322,6 +327,26 @@ export interface paths {
          */
         put: operations["set_ai_consent_me_ai_consent_put"];
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Export Data
+         * @description A zip of everything Clew stores for the user: data.json and their resume files.
+         */
+        post: operations["export_data_me_export_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2011,6 +2036,45 @@ export interface operations {
             };
         };
     };
+    delete_me_me_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File storage is unavailable; nothing was deleted from the database */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     get_ai_consent_me_ai_consent_get: {
         parameters: {
             query?: never;
@@ -2082,6 +2146,54 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
                 };
+            };
+        };
+    };
+    export_data_me_export_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description clew-data.zip */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/zip": unknown;
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint. */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Too many exports this hour */
+            429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description File storage is unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

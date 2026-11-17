@@ -2285,3 +2285,92 @@ input:focus-visible + .upload-choose,
   flex: none;
 }
 
+
+/* --- Settings (#31) --- */
+
+.settings-page {
+  display: grid;
+  gap: var(--clew-space-6);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--clew-space-8) var(--clew-space-4) var(--clew-space-12);
+}
+
+.settings-page h1 {
+  margin: 0;
+}
+
+.settings-card {
+  padding: var(--clew-space-6);
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  box-shadow: var(--clew-shadow-raised);
+}
+
+.settings-card h2 {
+  margin: 0 0 var(--clew-space-3);
+  font-size: var(--clew-font-size-xl);
+}
+
+.settings-card p {
+  margin: 0 0 var(--clew-space-4);
+  color: var(--clew-text-secondary);
+}
+
+.settings-danger {
+  border-top: 2px solid var(--clew-status-danger-fg);
+}
+
+.settings-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--clew-space-2) var(--clew-space-6);
+  margin: 0 0 var(--clew-space-3);
+}
+
+.settings-facts dt {
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.settings-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-action {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.settings-card .settings-status,
+.settings-card .settings-error,
+.settings-card .settings-hint {
+  margin: var(--clew-space-3) 0 0;
+  font-size: var(--clew-font-size-sm);
+}
+
+.settings-card .settings-status:empty {
+  display: none;
+}
+
+.settings-error {
+  color: var(--clew-status-danger-fg);
+}
+
+.settings-confirm-label {
+  display: block;
+  margin: var(--clew-space-4) 0 var(--clew-space-2);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+@media (max-width: 47.99rem) {
+  .settings-card {
+    padding: var(--clew-space-5) var(--clew-space-4);
+  }
+
+  .settings-action {
+    width: 100%;
+    justify-content: center;
+  }
+}

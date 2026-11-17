@@ -77,6 +77,11 @@ function AccountMenu({ email, onSignOut }: { email: string | null; onSignOut: ()
             </Link>
           </li>
           <li>
+            <Link to="/settings" className="account-menu-item" onClick={() => setOpen(false)}>
+              Settings
+            </Link>
+          </li>
+          <li>
             <button type="button" className="account-menu-item" onClick={onSignOut}>
               Sign out
             </button>
