@@ -33,7 +33,10 @@ REVERIFY_RESPONSE: dict[int | str, dict[str, Any]] = {
 }
 TOO_MANY_EXPORTS = "You've downloaded your data several times this hour. Try again later."
 EXPORT_FAILED = "We couldn't prepare your file. Try again in a few minutes."
-DELETE_FAILED = "Your account wasn't deleted. Some resume files may already be removed. Try again, or contact us."
+DELETE_FAILED = (
+    "Your account wasn't deleted. Some resume files may already be removed. "
+    "Try again, or contact us."
+)
 
 
 class Me(BaseModel):
