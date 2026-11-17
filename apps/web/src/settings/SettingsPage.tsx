@@ -6,6 +6,7 @@ import { useNavigate } from "react-router";
 import { config } from "../config";
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { PageBand } from "../components/PageBand";
 
 /** How long a prepared download stays offered before the file is dropped from memory. */
 const DOWNLOAD_MINUTES = 15;
@@ -266,7 +267,10 @@ export function SettingsPage() {
         onSignOut={() => void signOut({ redirectUrl: "/sign-in" })}
       />
       <main id="main" className="settings-page">
-        <h1>Settings</h1>
+        <div className="page-intro settings-intro">
+          <PageBand kind="profile" />
+          <h1>Settings</h1>
+        </div>
         <section className="settings-card" aria-labelledby="account-title">
           <h2 id="account-title">Account</h2>
           <dl className="settings-facts">

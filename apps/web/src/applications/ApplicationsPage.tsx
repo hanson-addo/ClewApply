@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { PageBand } from "../components/PageBand";
 import { useMediaQuery } from "../components/useMediaQuery";
 import { AddApplicationDialog } from "./AddApplicationDialog";
 import { ApplicationDetail } from "./ApplicationDetail";
@@ -16,6 +17,7 @@ import {
   COLUMNS,
   STATUS_CHOICES,
   stepText,
+  summaryOf,
   type Application,
   type Column,
   type Status,
@@ -165,10 +167,16 @@ export function ApplicationsPage() {
     <>
       {header}
       <main id="main" className="apps-page">
-        <div className="apps-head">
-          <h1 id="apps-heading" tabIndex={-1}>
-            Applications
-          </h1>
+        <div className="apps-head page-intro">
+          <PageBand kind="applications" />
+          <div>
+            <h1 id="apps-heading" tabIndex={-1}>
+              Applications
+            </h1>
+            {board.status === "ready" && apps.length > 0 && (
+              <p className="apps-summary">{summaryOf(byColumn)}</p>
+            )}
+          </div>
           <button ref={addButton} type="button" className="button button-primary" onClick={() => setAdding(true)}>
             Add an application
           </button>

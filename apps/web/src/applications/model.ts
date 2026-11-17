@@ -10,7 +10,7 @@ export const COLUMNS: readonly { id: Column; label: string; empty: string }[] = 
   { id: "saved", label: "Saved", empty: "Save a job from your feed to keep it here." },
   { id: "applied", label: "Applied", empty: "Jobs you've applied to show up here." },
   { id: "interview", label: "Interview", empty: "Move a card here when you get an interview." },
-  { id: "offer", label: "Offer", empty: "Offers you get show up here." },
+  { id: "offer", label: "Offer", empty: "The way out of the maze. Offers land here." },
   { id: "closed", label: "Closed", empty: "Rejected and withdrawn applications end up here." },
 ];
 
@@ -75,4 +75,16 @@ export function dateToIso(value: string): string | undefined {
 
 export function byNewest(a: Application, b: Application): number {
   return b.updated_at.localeCompare(a.updated_at);
+}
+
+/** The line under the board's title, such as "5 active, 2 interviews". Closed cards don't count. */
+export function summaryOf(byColumn: ReadonlyMap<Column, readonly unknown[]>): string {
+  const count = (column: Column) => byColumn.get(column)?.length ?? 0;
+  const active = count("saved") + count("applied") + count("interview") + count("offer");
+  const interviews = count("interview");
+  const offers = count("offer");
+  const parts = [`${active} active`];
+  if (interviews) parts.push(`${interviews} ${interviews === 1 ? "interview" : "interviews"}`);
+  if (offers) parts.push(`${offers} ${offers === 1 ? "offer" : "offers"}`);
+  return parts.join(", ");
 }

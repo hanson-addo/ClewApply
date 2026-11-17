@@ -4,6 +4,7 @@ import { Navigate, NavLink, useBlocker, useNavigate, useParams } from "react-rou
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { PageBand } from "../components/PageBand";
 import { ErrorSummary } from "../components/ErrorSummary";
 import { useQuestion } from "../components/QuestionDialog";
 import {
@@ -380,7 +381,8 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
     <>
       <AppHeader email={loaded?.email ?? null} onSignOut={() => void signOutSafely()} />
       <main id="main" className="profile-page">
-        <div className="profile-head">
+        <div className="profile-head page-intro">
+          <PageBand kind="profile" />
           <p className="profile-eyebrow">Your profile</p>
           <h1 id="profile-page-title" ref={heading} tabIndex={-1}>
             {title}

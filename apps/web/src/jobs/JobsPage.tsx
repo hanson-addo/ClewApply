@@ -4,6 +4,7 @@ import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 
 import { useApi } from "../auth/useApi";
 import { AppHeader } from "../components/AppHeader";
+import { PageBand } from "../components/PageBand";
 import { FitScore } from "./FitScore";
 import { JobDetailPanel } from "./JobDetailPanel";
 import {
@@ -185,16 +186,24 @@ export function JobsPage() {
     <>
       <AppHeader email={null} onSignOut={() => void signOut({ redirectUrl: "/sign-in" })} />
       <main id="main" className={`jobs-page${hasDetail ? " jobs-has-detail" : ""}`}>
+        <div className="page-intro jobs-intro">
+          <PageBand kind="jobs" />
+          <h1 id="jobs-heading" tabIndex={-1}>
+            Jobs for you
+          </h1>
+          <p className="jobs-count" role="status" aria-live="polite">
+            {list.status === "ready" && (
+              <>
+                Sorted by best fit · <span>{`${list.total} ${list.total === 1 ? "job" : "jobs"}`}</span>
+              </>
+            )}
+            {list.status === "loading" && "Loading jobs"}
+          </p>
+        </div>
+
         <FilterPanel key={query} filters={filters} count={filterCount} onApply={applyFilters} />
 
         <section className="jobs-list-col" aria-labelledby="jobs-heading">
-          <h1 id="jobs-heading" tabIndex={-1}>
-            Your jobs
-          </h1>
-          <p className="jobs-count" role="status" aria-live="polite">
-            {list.status === "ready" && `${list.total} ${list.total === 1 ? "job" : "jobs"}`}
-            {list.status === "loading" && "Loading jobs"}
-          </p>
 
           {list.status === "loading" && (
             <ul className="jobs-list" aria-busy="true" aria-label="Loading jobs">

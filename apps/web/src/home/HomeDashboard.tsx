@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { Link } from "react-router";
 
 import { COLUMNS } from "../applications/model";
+import { PageBand } from "../components/PageBand";
 import { FitScore } from "../jobs/FitScore";
 import {
   activeCount,
@@ -50,7 +51,8 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
   const counts = pipelineCounts(data.apps ?? []);
   const name = firstName(data.name);
   return (
-    <section className="home-hero clew-inverse" aria-labelledby="home-title">
+    <section className="home-hero page-intro clew-inverse" aria-labelledby="home-title">
+      <PageBand kind="home" />
       <div className="home-hero-copy">
         <p className="home-eyebrow">{greetingFor(hour)}</p>
         <h1 id="home-title" className="home-title">
