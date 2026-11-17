@@ -4,7 +4,7 @@ import { createClerkClient } from "@clerk/backend";
 import { clerk } from "@clerk/testing/playwright";
 import { expect, type Page, test } from "@playwright/test";
 
-import { poolEmail, TEST_EMAIL_CODE } from "../env";
+import { poolEmail, TEST_EMAIL_CODE, TEST_USER_SEATS } from "../env";
 
 /** Made-up name for test users. The Clerk instance may require first and last name. */
 export const TEST_FIRST_NAME = "Ariadne";
@@ -12,13 +12,25 @@ export const TEST_LAST_NAME = "Testuser";
 
 const backend = () => createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
 
-/** This worker's pool user (env.ts), created the first time a test asks for it. */
-let pooled: { slot: number; id: string; email: string } | undefined;
+/** This worker's pool users (env.ts), by seat, each created the first time a test asks for it. */
+const pooled = new Map<string, { id: string; email: string }>();
+
+/** Seats handed out so far in the running test: the first user it asks for gets seat 0. */
+let seats: { testId: string; next: number } | undefined;
 
 async function poolUser(): Promise<{ id: string; email: string }> {
-  const slot = test.info().parallelIndex;
-  if (pooled?.slot === slot) return pooled;
-  const email = poolEmail(slot);
+  const info = test.info();
+  // A retry is a fresh start for the test, so it begins at seat 0 again.
+  const run = `${info.testId}#${info.retry}`;
+  if (seats?.testId !== run) seats = { testId: run, next: 0 };
+  const seat = seats.next;
+  if (seat >= TEST_USER_SEATS) {
+    throw new Error(`A test can use at most ${TEST_USER_SEATS} test users; ask for fewer or add a seat in env.ts.`);
+  }
+  seats.next += 1;
+  const email = poolEmail(info.parallelIndex, seat);
+  const known = pooled.get(email);
+  if (known) return known;
   const clerkApi = backend();
   const { data } = await clerkApi.users.getUserList({ emailAddress: [email] });
   const user =
@@ -29,8 +41,9 @@ async function poolUser(): Promise<{ id: string; email: string }> {
       lastName: TEST_LAST_NAME,
       skipPasswordRequirement: true,
     }));
-  pooled = { slot, id: user.id, email };
-  return pooled;
+  const entry = { id: user.id, email };
+  pooled.set(email, entry);
+  return entry;
 }
 
 /**
@@ -48,8 +61,9 @@ function resetClewAccount(clerkUserId: string): void {
 }
 
 /**
- * A Clerk test user with an empty Clew account, for specs that aren't about sign-up: this
- * worker's pool user, wiped first. `label` names the test in failures only.
+ * A Clerk test user with an empty Clew account, for specs that aren't about sign-up: one of this
+ * worker's pool users, wiped first. Each call in a test gets the next seat, so a test with two
+ * users (alice and bob) gets two different accounts. `label` names the test in failures only.
  */
 export async function createTestUser(label: string): Promise<string> {
   const user = await poolUser();

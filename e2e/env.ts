@@ -65,13 +65,16 @@ export const TEST_EMAIL_CODE = "424242";
 /**
  * Signed-in specs share a small pool of Clerk test users, one per Playwright worker, instead of
  * creating a user per test (a run used to create dozens, and the development instance holds at
- * most 100). Each test still starts on an empty Clew account: its data is wiped first.
+ * most 100). Each worker has two seats, so a run holds at most six. Each test still starts on an empty Clew account: its data is wiped first.
  */
 export const TEST_USER_POOL_SIZE = 3;
 
-/** The pool user for one worker slot, the same address all run long. */
-export function poolEmail(slot: number): string {
-  return `${TEST_USER_PREFIX}pool-${slot}+clerk_test@example.com`;
+/** Users one test may hold at once (alice and bob in the isolation tests): seats per slot. */
+export const TEST_USER_SEATS = 2;
+
+/** The pool user for one worker slot and seat, the same address all run long. */
+export function poolEmail(slot: number, seat: number): string {
+  return `${TEST_USER_PREFIX}pool-${slot}-${seat}+clerk_test@example.com`;
 }
 
 /**

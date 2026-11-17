@@ -12,7 +12,7 @@
 // - It only touches users whose email starts with "e2e-" and contains "+clerk_test@", the
 //   addresses the tests make. Real accounts are never listed or deleted.
 // - It keeps test users made in the last hour, so a test run in progress keeps its pool of
-//   up to three users.
+//   test users.
 // - It shows the count and asks before deleting anything.
 
 import { existsSync, readFileSync } from "node:fs";
@@ -43,7 +43,8 @@ function findKey() {
 
 export function isTestUser(user, now = Date.now()) {
   const emails = (user.email_addresses ?? []).map((e) => e.email_address ?? "");
-  const looksLikeTest = emails.some((e) => e.startsWith(PREFIX) && e.includes("+clerk_test@"));
+  // Every address must be a test address, so a user who also has a real one is never deleted.
+  const looksLikeTest = emails.length > 0 && emails.every((e) => e.startsWith(PREFIX) && e.includes("+clerk_test@"));
   return looksLikeTest && now - user.created_at > KEEP_NEWER_THAN_MS;
 }
 

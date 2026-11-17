@@ -8,14 +8,23 @@ const hoursAgo = (h) => now - h * 60 * 60 * 1000;
 const user = (email, createdAt) => ({ email_addresses: [{ email_address: email }], created_at: createdAt });
 
 test("an old e2e test user is deleted", () => {
-  assert.equal(isTestUser(user("e2e-123-1-pool-0+clerk_test@example.com", hoursAgo(2)), now), true);
+  assert.equal(isTestUser(user("e2e-123-1-pool-0-0+clerk_test@example.com", hoursAgo(2)), now), true);
 });
 
 test("a test user from a run in progress is kept", () => {
-  assert.equal(isTestUser(user("e2e-123-1-pool-0+clerk_test@example.com", hoursAgo(0.5)), now), false);
+  assert.equal(isTestUser(user("e2e-123-1-pool-0-0+clerk_test@example.com", hoursAgo(0.5)), now), false);
 });
 
 test("a real account is never touched", () => {
   assert.equal(isTestUser(user("someone@example.com", hoursAgo(48)), now), false);
   assert.equal(isTestUser(user("e2e-fan@example.com", hoursAgo(48)), now), false);
+});
+
+test("a test user who also has a real address is kept", () => {
+  const mixed = {
+    email_addresses: [{ email_address: "e2e-123-1-pool-0-0+clerk_test@example.com" }, { email_address: "someone@example.com" }],
+    created_at: hoursAgo(48),
+  };
+  assert.equal(isTestUser(mixed, now), false);
+  assert.equal(isTestUser({ email_addresses: [], created_at: hoursAgo(48) }, now), false);
 });
