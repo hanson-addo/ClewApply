@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.account import build_export, delete_account, file_chunks
 from clew.api.resumes import Store
+from clew.auth.clerk_admin import ClerkAdmin, get_clerk_admin
 from clew.auth.deps import CurrentUser
 from clew.auth.reverify import RecentSignIn
 from clew.config import get_settings
@@ -22,6 +23,7 @@ from clew.usage import lock_user, used_within
 router = APIRouter(tags=["account"])
 
 Session = Annotated[AsyncSession, Depends(get_session)]
+Clerk = Annotated[ClerkAdmin, Depends(get_clerk_admin)]
 
 REVERIFY_RESPONSE: dict[int | str, dict[str, Any]] = {
     403: {
@@ -31,7 +33,7 @@ REVERIFY_RESPONSE: dict[int | str, dict[str, Any]] = {
 }
 TOO_MANY_EXPORTS = "You've downloaded your data several times this hour. Try again later."
 EXPORT_FAILED = "We couldn't prepare your file. Try again in a few minutes."
-DELETE_FAILED = "We couldn't delete your account. Nothing was removed. Try again, or contact us."
+DELETE_FAILED = "We couldn't delete your account, so it's still here. Try again, or contact us."
 
 
 class Me(BaseModel):
@@ -95,17 +97,20 @@ async def export_data(user: CurrentUser, session: Session, store: Store) -> Stre
     status_code=status.HTTP_204_NO_CONTENT,
     responses={
         401: {"description": "Not signed in"},
-        503: {"description": "File storage is unavailable; nothing was deleted from the database"},
+        503: {"description": "File storage is unavailable; the account was not deleted"},
         **REVERIFY_RESPONSE,
     },
 )
-async def delete_me(user: CurrentUser, session: Session, store: Store) -> Response:
+async def delete_me(user: CurrentUser, session: Session, store: Store, clerk: Clerk) -> Response:
     """Deletes the account: every resume file, then the profile, every version, applications,
-    settings, drafts and history. Signing in again later starts a new, empty account."""
+    settings, drafts and history, then the sign-in account at Clerk (email, sessions)."""
     try:
         await delete_account(session, store, user.id)
     except StorageUnavailable:
         await session.rollback()
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, DELETE_FAILED) from None
     await session.commit()
+    # Clew's data is gone at this point. If Clerk can't be reached, that's logged and the user
+    # still gets their answer; the Clerk user can be removed later from the Clerk dashboard.
+    await clerk.delete_user(user.auth_provider_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -299,7 +299,7 @@ export interface paths {
         /**
          * Delete Me
          * @description Deletes the account: every resume file, then the profile, every version, applications,
-         *     settings, drafts and history. Signing in again later starts a new, empty account.
+         *     settings, drafts and history, then the sign-in account at Clerk (email, sessions).
          */
         delete: operations["delete_me_me_delete"];
         options?: never;
@@ -2066,7 +2066,7 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description File storage is unavailable; nothing was deleted from the database */
+            /** @description File storage is unavailable; the account was not deleted */
             503: {
                 headers: {
                     [name: string]: unknown;

@@ -109,7 +109,7 @@ describe("Settings", () => {
     await userEvent.type(within(dialog).getByLabelText("Type DELETE to confirm"), "DELETE");
     await userEvent.click(within(dialog).getByRole("button", { name: "Delete my account" }));
 
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Nothing was removed.");
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent("so it's still here");
     expect(clerkState.signOut).not.toHaveBeenCalled();
   });
 

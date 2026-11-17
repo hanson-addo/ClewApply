@@ -18,7 +18,7 @@ type ExportState =
   | { status: "failed"; message: string };
 
 const EXPORT_FAILED = "We couldn't prepare your file. Try again in a few minutes.";
-const DELETE_FAILED = "We couldn't delete your account. Nothing was removed. Try again, or contact us.";
+const DELETE_FAILED = "We couldn't delete your account, so it's still here. Try again, or contact us.";
 
 function sizeLabel(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
@@ -166,8 +166,8 @@ function DeleteDialog({ onClose }: { onClose: () => void }) {
       </h2>
       <div className="dialog-body">
         <p>
-          This deletes your profile, every version, your resumes, your applications and your
-          settings. It can&apos;t be undone.
+          This deletes your profile, every version, your resumes, your applications, your settings
+          and your sign-in. It can&apos;t be undone.
         </p>
         <label htmlFor={fieldId} className="settings-confirm-label">
           Type DELETE to confirm
@@ -210,8 +210,8 @@ function DeleteCard() {
     <section className="settings-card settings-danger" aria-labelledby="delete-card-title">
       <h2 id="delete-card-title">Delete account</h2>
       <p>
-        This deletes your profile, every version, your resumes, your applications and your
-        settings. It can&apos;t be undone.
+        This deletes your profile, every version, your resumes, your applications, your settings
+        and your sign-in. It can&apos;t be undone.
       </p>
       <button ref={opener} type="button" className="button button-danger settings-action" onClick={() => setOpen(true)}>
         Delete my account

@@ -3513,7 +3513,7 @@
     },
     "/me": {
       "delete": {
-        "description": "Deletes the account: every resume file, then the profile, every version, applications,\nsettings, drafts and history. Signing in again later starts a new, empty account.",
+        "description": "Deletes the account: every resume file, then the profile, every version, applications,\nsettings, drafts and history, then the sign-in account at Clerk (email, sessions).",
         "operationId": "delete_me_me_delete",
         "responses": {
           "204": {
@@ -3526,7 +3526,7 @@
             "description": "Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint."
           },
           "503": {
-            "description": "File storage is unavailable; nothing was deleted from the database"
+            "description": "File storage is unavailable; the account was not deleted"
           }
         },
         "security": [

@@ -7,13 +7,17 @@ import zipfile
 from collections.abc import AsyncIterator
 from typing import Any
 
+import httpx
 import pytest
 from httpx import ASGITransport, AsyncClient
+from pydantic import SecretStr
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from clew.account import EXPORTED
+from clew.auth.clerk_admin import ClerkBackendApi, NoClerkAdmin, get_clerk_admin
 from clew.auth.deps import get_token_verifier
+from clew.config import get_settings
 from clew.main import create_app
 from clew.models import Resume, User
 from clew.scanning import get_malware_scanner
@@ -27,19 +31,35 @@ KEY = SigningKey("kid_account")
 FRESH = [2, -1]  # Clerk "fva": first factor 2 minutes ago, no second factor.
 
 
+class FakeClerk:
+    def __init__(self) -> None:
+        self.deleted: list[str] = []
+        self.ok = True
+
+    async def delete_user(self, clerk_user_id: str) -> bool:
+        self.deleted.append(clerk_user_id)
+        return self.ok
+
+
 @pytest.fixture
 def store() -> MemoryStore:
     return MemoryStore()
 
 
 @pytest.fixture
-async def api(store: MemoryStore) -> AsyncIterator[AsyncClient]:
+def clerk() -> FakeClerk:
+    return FakeClerk()
+
+
+@pytest.fixture
+async def api(store: MemoryStore, clerk: FakeClerk) -> AsyncIterator[AsyncClient]:
     app = create_app()
     test_verifier = verifier(KEY)
     scanner = FakeScanner()
     app.dependency_overrides[get_token_verifier] = lambda: test_verifier
     app.dependency_overrides[get_object_store] = lambda: store
     app.dependency_overrides[get_malware_scanner] = lambda: scanner
+    app.dependency_overrides[get_clerk_admin] = lambda: clerk
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
 
@@ -196,7 +216,37 @@ async def test_delete_removes_files_and_every_row(
     assert (await api.post("/me/export", headers=other)).status_code == 200
 
 
-async def test_signing_in_again_starts_an_empty_account(api: AsyncClient) -> None:
+async def test_delete_removes_the_sign_in_account_at_clerk(
+    api: AsyncClient, clerk: FakeClerk
+) -> None:
+    who = await set_up(api, "user_acct_clerk")
+    assert (await api.delete("/me", headers=who)).status_code == 204
+    assert clerk.deleted == ["user_acct_clerk"]
+
+
+async def test_clerk_failing_still_deletes_clews_data(
+    api: AsyncClient, clerk: FakeClerk, db: AsyncSession
+) -> None:
+    who = await set_up(api, "user_acct_clerk_down")
+    clerk.ok = False
+    assert (await api.delete("/me", headers=who)).status_code == 204
+    assert (
+        await db.scalar(select(User.id).where(User.auth_provider_id == "user_acct_clerk_down"))
+        is None
+    )
+
+
+async def test_storage_failure_leaves_the_clerk_account(
+    api: AsyncClient, store: MemoryStore, clerk: FakeClerk
+) -> None:
+    who = await set_up(api, "user_acct_clerk_kept")
+    store.fail = True
+    assert (await api.delete("/me", headers=who)).status_code == 503
+    assert clerk.deleted == []
+
+
+async def test_a_still_valid_token_after_deleting_starts_an_empty_account(api: AsyncClient) -> None:
+    # Clerk ends the sessions, but a token issued just before stays valid for up to a minute.
     who = await set_up(api, "user_acct_again")
     first = (await api.get("/me", headers=who)).json()["id"]
     assert (await api.delete("/me", headers=who)).status_code == 204
@@ -214,7 +264,7 @@ async def test_storage_failure_deletes_nothing_from_the_database(
     store.fail = True
     response = await api.delete("/me", headers=who)
     assert response.status_code == 503
-    assert "Nothing was removed" in response.json()["detail"]
+    assert "it's still here" in response.json()["detail"]
     store.fail = False
     user = await db.scalar(select(User).where(User.auth_provider_id == "user_acct_storage_down"))
     assert user is not None
@@ -233,3 +283,46 @@ async def test_the_api_role_can_only_delete_the_bound_user(app_db: AsyncSession)
         await app_db.execute(text("DELETE FROM users WHERE false"))
     await app_db.rollback()
     assert await app_db.scalar(select(func.count()).select_from(User)) is not None
+
+
+# --- Clerk Backend API ------------------------------------------------------------------------
+
+
+def clerk_api(handler: Any) -> ClerkBackendApi:
+    return ClerkBackendApi(SecretStr("sk_test_placeholder"), transport=httpx.MockTransport(handler))
+
+
+async def test_clerk_api_deletes_the_user_with_the_secret_key() -> None:
+    seen: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        seen.append(request)
+        return httpx.Response(200, json={"deleted": True})
+
+    assert await clerk_api(handler).delete_user("user_abc/../x") is True
+    assert seen[0].method == "DELETE"
+    assert str(seen[0].url) == "https://api.clerk.com/v1/users/user_abc%2F..%2Fx"
+    assert seen[0].headers["Authorization"] == "Bearer sk_test_placeholder"
+
+
+@pytest.mark.parametrize(("status", "ok"), [(404, True), (500, False), (401, False)])
+async def test_clerk_api_answers(status: int, ok: bool) -> None:
+    assert await clerk_api(lambda _: httpx.Response(status)).delete_user("user_abc") is ok
+
+
+async def test_clerk_api_unreachable() -> None:
+    def handler(request: httpx.Request) -> httpx.Response:
+        raise httpx.ConnectError("down", request=request)
+
+    assert await clerk_api(handler).delete_user("user_abc") is False
+
+
+async def test_without_a_secret_key_the_clerk_user_is_kept(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "")
+    get_settings.cache_clear()
+    try:
+        admin = get_clerk_admin()
+        assert isinstance(admin, NoClerkAdmin)
+        assert await admin.delete_user("user_abc") is False
+    finally:
+        get_settings.cache_clear()

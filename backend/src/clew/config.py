@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     # carry it as "iss", and its public keys are fetched from <issuer>/.well-known/jwks.json.
     # Required in production; without it, local/test runs answer signed-in routes with 503.
     clerk_issuer: str | None = None
+    # Clerk secret key (sk_...), used only to delete a user's Clerk account when they delete
+    # their Clew account. Without it, Clew deletes its own data and the Clerk user is kept.
+    clerk_secret_key: SecretStr | None = None
     # S3-compatible object storage for resume files (MinIO locally, see docker-compose.yml).
     # Without a bucket, the resume routes answer 503. Leave the endpoint unset for AWS S3.
     s3_bucket: str | None = None
