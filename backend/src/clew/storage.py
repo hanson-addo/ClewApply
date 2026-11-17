@@ -26,6 +26,8 @@ class ObjectStore(Protocol):
 
     async def get(self, key: str, max_bytes: int) -> bytes: ...
 
+    async def delete(self, key: str) -> None: ...
+
     def download_url(
         self, key: str, *, filename: str, content_type: str, expires_in: int
     ) -> str: ...
@@ -72,6 +74,15 @@ class S3ObjectStore:
             logger.error("storage_object_too_large")
             raise StorageUnavailable
         return data
+
+    async def delete(self, key: str) -> None:
+        """Removes the object. Deleting a key that is already gone succeeds, so a retry after
+        a partial failure is safe. The bucket must not keep old versions (R2 doesn't)."""
+        try:
+            await asyncio.to_thread(self._client.delete_object, Bucket=self._bucket, Key=key)
+        except (BotoCoreError, ClientError) as exc:
+            logger.error("storage_delete_failed", extra={"error": type(exc).__name__})
+            raise StorageUnavailable from exc
 
     def download_url(self, key: str, *, filename: str, content_type: str, expires_in: int) -> str:
         # Signing is local (no network call). "attachment" makes browsers download the file

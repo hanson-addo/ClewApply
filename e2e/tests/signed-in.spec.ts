@@ -8,7 +8,7 @@ import {
   enterEmailCode,
   fillNameIfAsked,
   SIGN_IN_TIMEOUT,
-  signInAsNewUser,
+  signInWithFreshAccount,
 } from "./clerk-helpers";
 
 // Sign-in journeys against the Clerk development instance (test plan §3.1). They need the
@@ -88,7 +88,7 @@ test.describe("sign up and sign in", () => {
   });
 
   test("signing in again finds the same account", async ({ page }) => {
-    await signInAsNewUser(page, "same-account");
+    await signInWithFreshAccount(page, "same-account");
     const first = await openHomeAndReadMe(page);
     const second = await openHomeAndReadMe(page);
     expect(second.id).toBe(first.id);
@@ -97,7 +97,7 @@ test.describe("sign up and sign in", () => {
 
 test.describe("signed in", () => {
   test("sign out returns to sign-in and the app stays closed (AUTH-08)", async ({ page }) => {
-    await signInAsNewUser(page, "signout");
+    await signInWithFreshAccount(page, "signout");
     await page.goto("/");
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
@@ -113,7 +113,7 @@ test.describe("signed in", () => {
   });
 
   test("no session token is kept in browser storage (AUTH-06)", async ({ page }) => {
-    await signInAsNewUser(page, "storage");
+    await signInWithFreshAccount(page, "storage");
     await page.goto("/");
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
 
@@ -130,7 +130,7 @@ test.describe("signed in", () => {
   test("home page: no serious accessibility issues, no sideways scroll (X-01, X-02) @phone", async ({
     page,
   }) => {
-    await signInAsNewUser(page, "a11y");
+    await signInWithFreshAccount(page, "a11y");
     await page.goto("/");
     await expect(welcome(page)).toBeVisible({ timeout: SIGN_IN_TIMEOUT });
     await expectNoBlockingA11yIssues(page);
@@ -157,7 +157,7 @@ test.describe("signed in", () => {
           body: JSON.stringify(failure.body),
         }),
       );
-      await signInAsNewUser(page, "x06");
+      await signInWithFreshAccount(page, "x06");
       await page.goto("/");
       await expect(page.getByRole("alert")).toHaveText(failure.message);
     });

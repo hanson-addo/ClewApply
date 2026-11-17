@@ -48,6 +48,9 @@ class SessionClaims:
 
     subject: str
     email: str | None
+    # Minutes since the user last proved a first factor (code, passkey) in this session, from
+    # Clerk's "fva" claim; None if the token doesn't say. Used for reverification.
+    first_factor_age: int | None = None
 
 
 def http_jwks_fetcher(url: str, timeout: float = 5.0) -> JwksFetcher:
@@ -177,4 +180,18 @@ class TokenVerifier:
         if not isinstance(subject, str) or not subject:
             raise InvalidToken("invalid")
         email = claims.get("email")
-        return SessionClaims(subject=subject, email=email if isinstance(email, str) else None)
+        return SessionClaims(
+            subject=subject,
+            email=email if isinstance(email, str) else None,
+            first_factor_age=_first_factor_age(claims.get("fva")),
+        )
+
+
+def _first_factor_age(fva: object) -> int | None:
+    """Clerk's "fva" is [first factor age, second factor age] in minutes; -1 means never."""
+    if not isinstance(fva, list) or not fva:
+        return None
+    age = fva[0]
+    if not isinstance(age, int) or isinstance(age, bool) or age < 0:
+        return None
+    return age

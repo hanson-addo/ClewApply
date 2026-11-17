@@ -1,0 +1,11 @@
+{
+  "_comment": "High or critical npm advisories the audit check lets through. Each needs a reason and an expiry date (YYYY-MM-DD); past it, the check fails again so the exception is looked at. Owner decision 2026-11-17 for GHSA-fc5q-39xc-vjpf.",
+  "exceptions": [
+    {
+      "advisory": "GHSA-fc5q-39xc-vjpf",
+      "package": "picomatch",
+      "reason": "No fixed version exists yet (every release up to 4.0.7 is affected). It reaches only build and test tools (vite, vitest, tinyglobby), never code shipped to users.",
+      "expires": "2026-12-31"
+    }
+  ]
+}

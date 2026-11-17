@@ -9,7 +9,13 @@ ISSUER = "https://clew-test.clerk.accounts.dev"
 
 @pytest.fixture(autouse=True)
 def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in ("CLEW_ENV", "CLEW_DATABASE_URL", "CLEW_CORS_ORIGINS", "CLEW_CLERK_ISSUER"):
+    for name in (
+        "CLEW_ENV",
+        "CLEW_DATABASE_URL",
+        "CLEW_CORS_ORIGINS",
+        "CLEW_CLERK_ISSUER",
+        "CLEW_CLERK_SECRET_KEY",
+    ):
         monkeypatch.delenv(name, raising=False)
 
 
@@ -17,6 +23,7 @@ def production_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CLEW_DATABASE_URL", DB_URL)
     monkeypatch.setenv("CLEW_CLERK_ISSUER", ISSUER)
     monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
+    monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "test-secret-key")
 
 
 def test_env_defaults_to_production(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -35,6 +42,26 @@ def test_production_requires_clerk_issuer(monkeypatch: pytest.MonkeyPatch) -> No
     monkeypatch.delenv("CLEW_CLERK_ISSUER")
     with pytest.raises(ValidationError, match="CLEW_CLERK_ISSUER is required"):
         Settings(_env_file=None)
+
+
+@pytest.mark.parametrize("value", [None, ""], ids=["unset", "blank"])
+def test_production_requires_clerk_secret_key(
+    monkeypatch: pytest.MonkeyPatch, value: str | None
+) -> None:
+    production_env(monkeypatch)
+    if value is None:
+        monkeypatch.delenv("CLEW_CLERK_SECRET_KEY")
+    else:
+        monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", value)
+    with pytest.raises(ValidationError, match="CLEW_CLERK_SECRET_KEY is required"):
+        Settings(_env_file=None)
+
+
+def test_blank_clerk_secret_key_is_unset_locally(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLEW_ENV", "local")
+    monkeypatch.setenv("CLEW_DATABASE_URL", DB_URL)
+    monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "")
+    assert Settings(_env_file=None).clerk_secret_key is None
 
 
 def test_production_requires_cors_origins(monkeypatch: pytest.MonkeyPatch) -> None:

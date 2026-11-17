@@ -1,7 +1,7 @@
 import { expect, type APIRequestContext, type Page } from "@playwright/test";
 
 import { API_URL } from "../env";
-import { signInAsNewUser } from "./clerk-helpers";
+import { signInWithFreshAccount } from "./clerk-helpers";
 
 /** A header with a fresh Clerk session token from the user signed in on `page`. */
 export async function bearer(page: Page): Promise<Record<string, string>> {
@@ -16,7 +16,7 @@ export async function bearer(page: Page): Promise<Record<string, string>> {
 }
 
 /**
- * Signs a new test user in and leaves `page` on the app with a live session, so API calls can
+ * Signs a test user with an empty account in and leaves `page` on the app with a live session, so API calls can
  * be made as that user the way the web app makes them. The first call creates the account.
  */
 export async function signInForApi(
@@ -24,7 +24,7 @@ export async function signInForApi(
   request: APIRequestContext,
   label: string,
 ): Promise<void> {
-  await signInAsNewUser(page, label);
+  await signInWithFreshAccount(page, label);
   await page.goto("/");
   await page.waitForFunction(
     () => Boolean((window as unknown as { Clerk?: { session?: unknown } }).Clerk?.session),

@@ -54,8 +54,12 @@ jobs:
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version-file: ${{ matrix.dir }}/.nvmrc
+      - name: Test the audit script
+        run: node --test "$GITHUB_WORKSPACE/.github/scripts/npm-audit.test.mjs"
+      # Fails on high or critical advisories, except those listed with a reason and an
+      # expiry date in .github/npm-audit-exceptions.json (owner decision, 2026-11-17).
       - name: Audit the lock file (fails on high or critical)
-        run: npm audit --audit-level=high
+        run: node "$GITHUB_WORKSPACE/.github/scripts/npm-audit.mjs"
 
   semgrep:
     name: Static analysis (Semgrep)

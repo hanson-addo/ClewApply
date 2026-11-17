@@ -9,6 +9,8 @@ export const clerkState = {
   failed: false,
   token: "test-session-token" as string | null,
   signOut: vi.fn<(opts?: unknown) => Promise<void>>(async () => {}),
+  // How many times useReverification showed its "confirm it's you" step.
+  reverified: 0,
 };
 
 export function resetClerk() {
@@ -17,6 +19,26 @@ export function resetClerk() {
   clerkState.failed = false;
   clerkState.token = "test-session-token";
   clerkState.signOut.mockClear();
+  clerkState.reverified = 0;
+}
+
+function isHint(result: unknown): boolean {
+  return (
+    typeof result === "object" &&
+    result !== null &&
+    "clerk_error" in result &&
+    (result as { clerk_error?: { reason?: string } }).clerk_error?.reason === "reverification-error"
+  );
+}
+
+/** Like Clerk's: on a reverification hint it "confirms it's you" once and calls again. */
+function useReverification<T extends (...args: never[]) => Promise<unknown>>(fetcher: T): T {
+  return (async (...args: Parameters<T>) => {
+    const first = await fetcher(...args);
+    if (!isHint(first)) return first;
+    clerkState.reverified += 1;
+    return fetcher(...args);
+  }) as T;
 }
 
 const getToken = async () => clerkState.token;
@@ -29,6 +51,7 @@ export const clerkModule = {
     getToken,
   }),
   useClerk: () => ({ signOut: clerkState.signOut }),
+  useReverification,
   ClerkLoading: ({ children }: { children: ReactNode }) =>
     !clerkState.isLoaded && !clerkState.failed ? <>{children}</> : null,
   ClerkFailed: ({ children }: { children: ReactNode }) =>

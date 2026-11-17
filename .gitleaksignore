@@ -1,0 +1,3 @@
+# Test placeholder strings in an earlier commit of #125, not real keys (the value is now "test-secret-key").
+ca1fbe0089c5fd9e13082c852ea0b950210c29bc:backend/tests/test_account.py:stripe-access-token:292
+ca1fbe0089c5fd9e13082c852ea0b950210c29bc:backend/tests/test_account.py:stripe-access-token:305

@@ -20,6 +20,7 @@ from clew.api import (
     resume_parse,
     resumes,
 )
+from clew.auth.reverify import ReverificationRequired, reverification_handler
 from clew.config import get_settings
 from clew.db.role_check import app_role_problems
 from clew.db.session import get_engine
@@ -71,6 +72,7 @@ def create_app() -> FastAPI:
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type"],
     )
+    app.add_exception_handler(ReverificationRequired, reverification_handler)
     app.include_router(health.router)
     app.include_router(me.router)
     app.include_router(consent.router)

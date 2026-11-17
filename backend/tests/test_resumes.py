@@ -45,6 +45,11 @@ class MemoryStore:
             raise StorageUnavailable
         return self.objects[key][0]
 
+    async def delete(self, key: str) -> None:
+        if self.fail:
+            raise StorageUnavailable
+        self.objects.pop(key, None)
+
     def download_url(self, key: str, *, filename: str, content_type: str, expires_in: int) -> str:
         return f"https://storage.test/{key}?filename={filename}&expires={expires_in}"
 
