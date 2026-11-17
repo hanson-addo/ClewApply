@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { act, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router";
 import { describe, expect, it, vi } from "vitest";
@@ -49,5 +49,30 @@ describe("account menu", () => {
     const { account } = renderHeader(null);
     await userEvent.click(account);
     expect(screen.getByRole("button", { name: "Sign out" })).toBeInTheDocument();
+  });
+});
+
+describe("header over the band", () => {
+  it("is see-through at the top of the page and solid once the page scrolls", () => {
+    let report: ((entries: { isIntersecting: boolean }[]) => void) | undefined;
+    class FakeObserver {
+      constructor(callback: (entries: { isIntersecting: boolean }[]) => void) {
+        report = callback;
+      }
+      observe() {}
+      disconnect() {}
+    }
+    vi.stubGlobal("IntersectionObserver", FakeObserver);
+    try {
+      renderHeader();
+      const header = screen.getByRole("banner");
+      expect(header).toHaveAttribute("data-at-top");
+      act(() => report?.([{ isIntersecting: false }]));
+      expect(header).not.toHaveAttribute("data-at-top");
+      act(() => report?.([{ isIntersecting: true }]));
+      expect(header).toHaveAttribute("data-at-top");
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 });

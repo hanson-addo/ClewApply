@@ -8,6 +8,7 @@ x-backend-env: &backend-env
   CLEW_MIGRATIONS_DATABASE_URL: postgresql+asyncpg://clew:clew@postgres:5432/clew
   CLEW_CORS_ORIGINS: '["http://localhost:5173"]'
   CLEW_CLERK_ISSUER: ${CLEW_CLERK_ISSUER:-}
+  CLEW_CLERK_SECRET_KEY: ${CLEW_CLERK_SECRET_KEY:-}
   CLEW_S3_BUCKET: clew-resumes
   CLEW_S3_ENDPOINT_URL: http://minio:9000
   # Download links are opened by your browser, which reaches MinIO on localhost.

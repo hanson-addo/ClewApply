@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { cardLine, closedLabel, columnOf, dateToIso, sentText, stepText, type Application } from "./model";
+import {
+  cardLine,
+  closedLabel,
+  columnOf,
+  dateToIso,
+  sentText,
+  stepText,
+  summaryOf,
+  type Application,
+  type Column,
+} from "./model";
 
 // Made-up companies and jobs only.
 const APP: Application = {
@@ -56,5 +66,23 @@ describe("card text", () => {
   it("turns a date input into midday UTC", () => {
     expect(dateToIso("2026-10-20")).toBe("2026-10-20T12:00:00Z");
     expect(dateToIso("")).toBeUndefined();
+  });
+});
+
+describe("summaryOf", () => {
+  const board = (counts: Partial<Record<Column, number>>) =>
+    new Map<Column, unknown[]>(
+      Object.entries(counts).map(([column, n]) => [column as Column, Array.from({ length: n })]),
+    );
+
+  it("counts everything but closed as active", () => {
+    expect(summaryOf(board({ saved: 2, applied: 3, closed: 4 }))).toBe("5 active");
+  });
+
+  it("names interviews and offers when there are some", () => {
+    expect(summaryOf(board({ applied: 1, interview: 2, offer: 1 }))).toBe(
+      "4 active, 2 interviews, 1 offer",
+    );
+    expect(summaryOf(board({ interview: 1 }))).toBe("1 active, 1 interview");
   });
 });

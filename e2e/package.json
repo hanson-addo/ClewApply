@@ -8,7 +8,8 @@
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "report": "playwright show-report",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test:scripts": "node --test scripts/*.test.mjs"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.11.0",

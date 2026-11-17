@@ -3,7 +3,7 @@ import { setupClerkTestingToken } from "@clerk/testing/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { hasClerk } from "../env";
-import { SIGN_IN_TIMEOUT, signInAsNewUser } from "./clerk-helpers";
+import { SIGN_IN_TIMEOUT, signInWithFreshAccount } from "./clerk-helpers";
 import { hasSeededJobs, MAZE, ROUTE, THREAD } from "./seed";
 
 // The job feed (#106-#108) and the Applications board (#109, #110), end to end on desktop and
@@ -29,16 +29,16 @@ const column = (page: Page, label: string) => page.locator(`#apps-col-${label.to
 const statusOf = (page: Page, title: string) => page.getByLabel(`Status of ${title}`);
 
 async function openFeed(page: Page, label: string) {
-  await signInAsNewUser(page, label);
+  await signInWithFreshAccount(page, label);
   await page.goto("/jobs");
-  await expect(page.getByRole("heading", { level: 1, name: "Your jobs" })).toBeVisible({
+  await expect(page.getByRole("heading", { level: 1, name: "Jobs for you" })).toBeVisible({
     timeout: SIGN_IN_TIMEOUT,
   });
   await expect(card(page, THREAD.title)).toBeVisible();
 }
 
 async function openBoard(page: Page, label: string) {
-  await signInAsNewUser(page, label);
+  await signInWithFreshAccount(page, label);
   await page.goto("/applications");
   await expect(page.getByRole("heading", { level: 1, name: "Applications" })).toBeVisible({
     timeout: SIGN_IN_TIMEOUT,
@@ -324,7 +324,7 @@ test.describe("on a phone", () => {
 
     await card(page, THREAD.title).click();
     await expect(page.getByRole("heading", { name: THREAD.title, exact: true })).toBeVisible();
-    await expect(page.getByRole("heading", { level: 1, name: "Your jobs" })).toBeHidden();
+    await expect(page.getByRole("heading", { level: 1, name: "Jobs for you" })).toBeHidden();
     await expectNoSidewaysScroll(page);
 
     await page.getByRole("link", { name: "Back to jobs" }).click();

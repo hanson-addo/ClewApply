@@ -14,6 +14,7 @@ import { ProfilePage } from "./profile/ProfilePage";
 import { SetupNeededPage } from "./pages/SetupNeededPage";
 import { SignInUnavailablePage } from "./pages/StartupProblemPage";
 import { SignInPage } from "./pages/SignInPage";
+import { AccountDeletedPage, SettingsPage } from "./settings/SettingsPage";
 
 export function AppRoutes() {
   return (
@@ -44,6 +45,15 @@ export function AppRoutes() {
           </RequireSignIn>
         }
       />
+      <Route
+        path="/settings"
+        element={
+          <RequireSignIn>
+            <SettingsPage />
+          </RequireSignIn>
+        }
+      />
+      <Route path="/account-deleted" element={<AccountDeletedPage />} />
       <Route path="/onboarding" element={<Navigate to="/onboarding/upload" replace />} />
       <Route
         path="/onboarding/upload"

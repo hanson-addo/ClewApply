@@ -77,6 +77,11 @@ function AccountMenu({ email, onSignOut }: { email: string | null; onSignOut: ()
             </Link>
           </li>
           <li>
+            <Link to="/settings" className="account-menu-item" onClick={() => setOpen(false)}>
+              Settings
+            </Link>
+          </li>
+          <li>
             <button type="button" className="account-menu-item" onClick={onSignOut}>
               Sign out
             </button>
@@ -87,14 +92,35 @@ function AccountMenu({ email, onSignOut }: { email: string | null; onSignOut: ()
   );
 }
 
+/**
+ * True until the page scrolls. At the top the header is see-through, so a page's indigo band
+ * runs up behind it in one piece; once the page moves, the header turns solid. One observer
+ * on a 1px marker, so nothing runs while scrolling.
+ */
+function useAtTop() {
+  const marker = useRef<HTMLSpanElement>(null);
+  const [atTop, setAtTop] = useState(true);
+  useEffect(() => {
+    const node = marker.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setAtTop(entry?.isIntersecting ?? true));
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+  return { marker, atTop };
+}
+
 /** Indigo bar on every signed-in page: skip link, logo, main nav and the account menu. */
 export function AppHeader({ email, onSignOut }: { email: string | null; onSignOut: () => void }) {
+  const { marker, atTop } = useAtTop();
   return (
     <>
+      <span ref={marker} className="app-top-marker" aria-hidden="true" />
+      <span className="page-thread" aria-hidden="true" />
       <a href="#main" className="clew-skip-link">
         Skip to main content
       </a>
-      <header className="app-header clew-inverse">
+      <header className="app-header clew-inverse" data-at-top={atTop || undefined}>
         <Link to="/" className="app-header-home" aria-label="Clew home">
           <Logo variant="onDark" size={36} />
         </Link>

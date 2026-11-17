@@ -940,11 +940,6 @@ h2[tabindex="-1"]:focus {
   border: 2px solid var(--clew-focus-ring);
 }
 
-.job-card-selected .fit-score {
-  background: var(--clew-action-primary-bg);
-  color: var(--clew-action-primary-fg);
-}
-
 .job-card-skeleton {
   min-height: 8rem;
   background: var(--clew-bg-subtle);
@@ -1002,27 +997,40 @@ h2[tabindex="-1"]:focus {
   font-size: var(--clew-font-size-xs);
 }
 
+
 .fit-score {
+  position: relative;
   flex: none;
   width: 52px;
   height: 52px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--clew-radius-md);
-  background: var(--clew-bg-selected);
-  color: var(--clew-text-selected);
+  display: grid;
+  place-items: center;
+  color: var(--clew-text-primary);
+}
+
+.fit-score-ring {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: none;
+  stroke-width: 4;
+}
+
+.fit-score-track {
+  stroke: var(--clew-color-ink-150);
+}
+
+.fit-score-arc {
+  stroke: var(--clew-color-coral-500);
+  stroke-linecap: round;
 }
 
 .fit-score-number {
-  font-size: var(--clew-font-size-lg);
-  font-weight: var(--clew-font-weight-bold);
+  position: relative;
+  font-size: var(--clew-font-size-md);
+  font-weight: var(--clew-font-weight-heavy);
   line-height: 1;
-}
-
-.fit-score-label {
-  font-size: var(--clew-font-size-xs);
 }
 
 .pill {
@@ -2287,6 +2295,95 @@ input:focus-visible + .upload-choose,
 }
 
 
+/* --- Settings (#31) --- */
+
+.settings-page {
+  display: grid;
+  gap: var(--clew-space-6);
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: var(--clew-space-8) var(--clew-space-4) var(--clew-space-12);
+}
+
+.settings-page h1 {
+  margin: 0;
+}
+
+.settings-card {
+  padding: var(--clew-space-6);
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  box-shadow: var(--clew-shadow-raised);
+}
+
+.settings-card h2 {
+  margin: 0 0 var(--clew-space-3);
+  font-size: var(--clew-font-size-xl);
+}
+
+.settings-card p {
+  margin: 0 0 var(--clew-space-4);
+  color: var(--clew-text-secondary);
+}
+
+.settings-danger {
+  border-top: 2px solid var(--clew-status-danger-fg);
+}
+
+.settings-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: var(--clew-space-2) var(--clew-space-6);
+  margin: 0 0 var(--clew-space-3);
+}
+
+.settings-facts dt {
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.settings-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-action {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.settings-card .settings-status,
+.settings-card .settings-error,
+.settings-card .settings-hint {
+  margin: var(--clew-space-3) 0 0;
+  font-size: var(--clew-font-size-sm);
+}
+
+.settings-card .settings-status:empty {
+  display: none;
+}
+
+.settings-error {
+  color: var(--clew-status-danger-fg);
+}
+
+.settings-confirm-label {
+  display: block;
+  margin: var(--clew-space-4) 0 var(--clew-space-2);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+@media (max-width: 47.99rem) {
+  .settings-card {
+    padding: var(--clew-space-5) var(--clew-space-4);
+  }
+
+  .settings-action {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
 /* --- Home: jobs map (#119 step 6) -------------------------------------------------------- */
 
 /*
@@ -2599,4 +2696,304 @@ input:focus-visible + .upload-choose,
     animation: none;
     transition: none;
   }
+}
+
+/* --- The new look on every signed-in page (#127) ----------------------------------------- */
+/*
+ * A lavender base with a faint grain, an indigo band behind each page's title (the maze slides
+ * along it from tab to tab), white cards that sit over the band's lower edge, and a coral
+ * thread down the left on wide screens. Motion is two CSS transitions on transforms, 300ms,
+ * and none at all with reduced motion.
+ */
+
+:root {
+  --app-card-border: #e4e1f5;
+  --app-card-shadow: 0 1px 2px rgba(16, 25, 53, 0.06), 0 12px 32px rgba(16, 25, 53, 0.1);
+  --app-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.06 0 0 0 0 0.1 0 0 0 0 0.2 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body {
+  background-color: var(--clew-color-ink-50);
+  background-image: var(--app-grain);
+  /* The band is as wide as the screen; clip (not hidden) keeps the sticky header working. */
+  overflow-x: clip;
+}
+
+.app-top-marker {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.app-header {
+  transition: background-color 200ms ease-out, border-color 200ms ease-out;
+}
+
+/* At the top of a page with a band, the band shows through the header as one indigo piece. */
+body:has(.page-band) .app-header[data-at-top] {
+  background: transparent;
+  backdrop-filter: none;
+  border-bottom-color: transparent;
+}
+
+.app-nav-link {
+  border-radius: 0;
+  color: var(--clew-color-ink-300);
+}
+
+.app-nav-link:hover {
+  color: var(--clew-text-on-inverse);
+}
+
+.app-nav-link[aria-current="page"] {
+  background: transparent;
+  color: var(--clew-text-on-inverse);
+  box-shadow: inset 0 -2px 0 var(--clew-color-coral-500);
+}
+
+/* A page's title block. Its band paints behind it, up under the header and down under the
+   first cards; the cards after it are positioned so they paint over the band. */
+.page-intro {
+  position: relative;
+  isolation: isolate;
+  color: var(--clew-text-on-inverse);
+}
+
+:where(.page-intro) ~ :where(:not(dialog)) {
+  position: relative;
+}
+
+.page-intro h1 {
+  color: var(--clew-text-on-inverse);
+}
+
+.page-band {
+  --band-overlap: 3.5rem;
+
+  position: absolute;
+  z-index: -1;
+  top: -12rem;
+  bottom: calc(-1 * var(--band-overlap));
+  left: calc(50% - 50vw);
+  width: 100vw;
+  overflow: hidden;
+  background: var(--clew-color-ink-900);
+  pointer-events: none;
+}
+
+.page-band[data-band="home"] {
+  --band-overlap: 5.5rem;
+}
+
+.page-band[data-band="jobs"] {
+  --band-overlap: 4.5rem;
+}
+
+.page-band-maze {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 400%;
+  height: 100%;
+  fill: none;
+  stroke: var(--clew-color-ink-50);
+  stroke-width: 2;
+  opacity: 0.07;
+  transition: transform 300ms ease-out;
+}
+
+.page-band[data-at="jobs"] .page-band-maze {
+  transform: translateX(-25%);
+}
+
+.page-band[data-at="applications"] .page-band-maze {
+  transform: translateX(-50%);
+}
+
+.page-band[data-at="profile"] .page-band-maze {
+  transform: translateX(-75%);
+}
+
+/* The glow: a soft coral light that sits somewhere different on each tab. */
+.page-band-glow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 900px;
+  height: 680px;
+  background: radial-gradient(closest-side, rgba(255, 107, 74, 0.32), transparent);
+  transform: translate(calc(78vw - 450px), calc(12rem - 340px));
+  transition: transform 300ms ease-out;
+}
+
+.page-band[data-at="jobs"] .page-band-glow {
+  transform: translate(calc(50vw - 450px), calc(14rem - 340px));
+}
+
+.page-band[data-at="applications"] .page-band-glow {
+  transform: translate(calc(20vw - 450px), calc(20rem - 340px));
+}
+
+.page-band[data-at="profile"] .page-band-glow {
+  transform: translate(calc(88vw - 450px), calc(20rem - 340px));
+}
+
+/* The thread: Theseus's line down the left edge, only where there's room beside the page. */
+.page-thread {
+  display: none;
+}
+
+@media (min-width: 88rem) {
+  body:has(.page-band) .page-thread {
+    display: block;
+    position: fixed;
+    z-index: 1;
+    top: 0;
+    bottom: 0;
+    left: 1.75rem;
+    width: 10px;
+    background:
+      radial-gradient(circle, var(--clew-color-coral-500) 4px, transparent 4.5px) 0 220px / 10px 320px repeat-y,
+      linear-gradient(var(--clew-color-coral-500), var(--clew-color-coral-500)) center / 2.5px 100% no-repeat;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .page-band-maze,
+  .page-band-glow,
+  .app-header {
+    transition: none;
+  }
+}
+
+/* Cards: white, a hairline edge and a soft two-layer shadow, everywhere. */
+.home-card,
+.stat-tile,
+.job-card,
+.jobs-empty,
+.jobs-detail-hint,
+.jobs-filters-form,
+.job-detail,
+.app-card,
+.profile-form,
+.profile-history,
+.settings-card {
+  border: 1px solid var(--app-card-border);
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  box-shadow: var(--app-card-shadow);
+}
+
+.job-card:hover {
+  border-color: var(--clew-border-control);
+}
+
+.job-card-selected {
+  border: 2px solid var(--clew-focus-ring);
+}
+
+.job-card-title a::after {
+  border-radius: var(--clew-radius-xl);
+}
+
+.jobs-detail-hint {
+  margin: 0;
+  padding: var(--clew-space-6);
+}
+
+/* Home: the hero is the band itself now, not a card on the page. */
+.home-hero.page-intro {
+  overflow: visible;
+  padding: var(--clew-space-6) 0 var(--clew-space-4);
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+/* Jobs: the title spans the whole grid, above the filters, list and detail. */
+.jobs-intro {
+  grid-column: 1 / -1;
+  padding: var(--clew-space-4) 0 var(--clew-space-2);
+}
+
+.jobs-intro h1 {
+  margin: 0;
+  font-size: var(--clew-font-size-3xl);
+}
+
+.jobs-intro .jobs-count {
+  margin: var(--clew-space-1) 0 0;
+  color: var(--clew-color-ink-300);
+}
+
+/* Applications: a slim band; columns are pale lanes holding white cards. */
+.apps-head.page-intro {
+  padding: var(--clew-space-4) 0 var(--clew-space-2);
+  margin-bottom: var(--clew-space-8);
+}
+
+.apps-summary {
+  margin: var(--clew-space-1) 0 0;
+  color: var(--clew-color-ink-300);
+}
+
+@media (min-width: 64rem) {
+  .apps-column {
+    padding: var(--clew-space-4);
+    border: 1px solid var(--app-card-border);
+    border-radius: var(--clew-radius-xl);
+    background: #f9f8ff;
+  }
+}
+
+/* Offer is the way out of the maze: a coral dot by its name, a dashed empty slot. */
+#apps-col-offer-heading::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: var(--clew-space-2);
+  border-radius: 50%;
+  background: var(--clew-color-coral-500);
+  vertical-align: middle;
+}
+
+#apps-col-offer .apps-column-empty {
+  padding: var(--clew-space-4);
+  border: 1.5px dashed #c9c5e3;
+  border-radius: var(--clew-radius-lg);
+  text-align: center;
+}
+
+/* Settings: a slim band with the title. */
+.settings-intro {
+  padding: var(--clew-space-2) 0 var(--clew-space-4);
+}
+
+@media (max-width: 47.99rem) {
+  .page-band[data-band="profile"] {
+    --band-overlap: 1.25rem;
+  }
+}
+
+/* Profile: a slim band with the title; the section list and the form sit below it. */
+.profile-head.page-intro {
+  padding: var(--clew-space-4) 0 var(--clew-space-2);
+  margin-bottom: var(--clew-space-8);
+}
+
+.profile-head.page-intro .profile-eyebrow {
+  color: var(--clew-color-coral-400);
+}
+
+.profile-head.page-intro .profile-lede {
+  margin-bottom: 0;
+  color: var(--clew-color-ink-300);
+}
+
+.profile-history {
+  padding: var(--clew-space-5);
 }
