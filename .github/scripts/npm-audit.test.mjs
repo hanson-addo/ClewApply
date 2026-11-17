@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { advisories, verdict } from "./npm-audit.mjs";
+import { advisories, invalidExceptions, verdict } from "./npm-audit.mjs";
 
 const report = {
   vulnerabilities: {
@@ -34,4 +34,15 @@ test("any other high or critical advisory still fails; moderate ones never do", 
   };
   const result = verdict(advisories(other), [exception], "2026-11-17");
   assert.deepEqual(result.blocking.map((a) => a.id), ["GHSA-xxxx-yyyy-zzzz"]);
+});
+
+test("each exception needs a GHSA id, a reason and an expiry within 90 days", () => {
+  assert.deepEqual(invalidExceptions([exception], "2026-11-17"), []);
+  const bad = [
+    { ...exception, reason: " " },
+    { ...exception, expires: "next year" },
+    { ...exception, expires: "2027-06-01" },
+    { ...exception, advisory: "CVE-2026-1" },
+  ];
+  assert.equal(invalidExceptions(bad, "2026-11-17").length, 4);
 });
