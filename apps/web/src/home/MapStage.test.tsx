@@ -139,7 +139,7 @@ describe("MapStage", () => {
     const links = within(list).getAllByRole("link");
     expect(links[0]).toHaveAttribute("href", `/jobs/${pin(1).id}`);
     expect(links).toHaveLength(2);
-    expect(screen.getByText(/3 remote or unplaced jobs aren't on the map/)).toBeInTheDocument();
+    expect(screen.getByText(/3 more are remote or have no address/)).toBeInTheDocument();
   });
 
   it("labels jobs from unverified boards", () => {
@@ -178,6 +178,20 @@ describe("MapStage", () => {
     fireEvent.click(within(distance).getByRole("button", { name: "50 mi" }));
     expect(screen.getByText("radius 50")).toBeInTheDocument();
     expect(screen.getByText("2 jobs within 50 miles", { selector: ".clew-sr-only" })).toBeInTheDocument();
+  });
+
+  it("says plainly when nothing is inside the radius, how far the nearest jobs are, and offers to widen", async () => {
+    webgl.ok = true;
+    // Saved place Austin; the only jobs are in Dallas, about 182 miles away.
+    renderStage(ready([pin(1, DALLAS), pin(2, DALLAS), pin(3, DALLAS)], 2));
+    expect(await screen.findByText("No matching jobs within 25 miles yet.")).toBeInTheDocument();
+    expect(screen.getByText("Nearest: 3 jobs about 180 miles away.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Widen to 50 mi" }));
+    expect(screen.getByText("radius 50")).toBeInTheDocument();
+    expect(screen.getByText("No matching jobs within 50 miles yet.")).toBeInTheDocument();
+    // Already at the widest: no button.
+    expect(screen.queryByRole("button", { name: /Widen to/ })).not.toBeInTheDocument();
+    expect(screen.getByText(/2 more are remote or have no address/)).toBeInTheDocument();
   });
 
   it("gives the five best fits the large pins and still draws every pin", async () => {

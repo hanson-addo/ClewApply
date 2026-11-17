@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import { useMediaQuery } from "../components/useMediaQuery";
 import { FitScore } from "../jobs/FitScore";
 import { MapArt } from "./BrandArt";
-import { DEFAULT_RADIUS, pinsWithin, RADII, type Radius, topPins } from "./stageMath";
+import { aboutMiles, DEFAULT_RADIUS, type Nearest, nearestOutside, pinsWithin, RADII, type Radius, topPins } from "./stageMath";
 import { useCountUp } from "./useCountUp";
 import { type JobMapState, type MapPin, milesBetween, type Point, roundPoint } from "./useJobMap";
 import { canDrawMap } from "./webgl";
@@ -76,8 +76,10 @@ function GlassPanel({
   radius,
   onRadius,
   onFindMe,
+  nearest,
 }: {
   count: number;
+  nearest: Nearest | null;
   focus: "here" | "saved" | null;
   near: Near;
   radius: Radius;
@@ -87,17 +89,32 @@ function GlassPanel({
   const shown = useCountUp(count);
   const noun = count === 1 ? "job" : "jobs";
   const where = focus ? `within ${radius} miles` : "on the map";
+  const empty = focus !== null && count === 0;
+  const wider = RADII.find((option) => option > radius);
   return (
     <div className="map-glass">
       <p className="map-glass-eyebrow">
         {focus === "here" ? "Around you" : focus === "saved" ? "Around your saved place" : "Across the US"}
       </p>
-      <p className="map-glass-count" aria-hidden="true">
-        <span className="map-glass-number">{shown.toLocaleString()}</span> {noun} {where}
-      </p>
-      <p className="clew-sr-only" role="status">
-        {count.toLocaleString()} {noun} {where}
-      </p>
+      {empty ? (
+        <div className="map-glass-empty" role="status">
+          <p className="map-glass-empty-title">No matching jobs within {radius} miles yet.</p>
+          {nearest && (
+            <p>
+              Nearest: {nearest.count.toLocaleString()} {nearest.count === 1 ? "job" : "jobs"} {aboutMiles(nearest.miles)} away.
+            </p>
+          )}
+        </div>
+      ) : (
+        <>
+          <p className="map-glass-count" aria-hidden="true">
+            <span className="map-glass-number">{shown.toLocaleString()}</span> {noun} {where}
+          </p>
+          <p className="clew-sr-only" role="status">
+            {count.toLocaleString()} {noun} {where}
+          </p>
+        </>
+      )}
       {focus && (
         <div className="map-radius" role="group" aria-label="Distance">
           {RADII.map((option) => (
@@ -112,6 +129,11 @@ function GlassPanel({
             </button>
           ))}
         </div>
+      )}
+      {empty && wider && (
+        <button type="button" className="button button-inverse-outline map-glass-cta" onClick={() => onRadius(wider)}>
+          Widen to {wider} mi
+        </button>
       )}
       {near.status !== "on" && (
         <button type="button" className="button button-primary map-glass-cta" onClick={onFindMe} disabled={near.status === "finding"}>
@@ -151,6 +173,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
 
   const inRadius = useMemo(() => pinsWithin(pins, focus, radius), [pins, focus, radius]);
   const top = useMemo(() => topPins(inRadius), [inRadius]);
+  const nearest = useMemo(() => (inRadius.length === 0 ? nearestOutside(pins, focus) : null), [inRadius, pins, focus]);
 
   const listed = useMemo(() => {
     const rows = pins.map((pin) => ({
@@ -243,7 +266,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
 
   const unplaced = state.status === "ready" && state.unplaced > 0 && (
     <p className="map-unplaced">
-      {state.unplaced.toLocaleString()} remote or unplaced {state.unplaced === 1 ? "job isn't" : "jobs aren't"} on the map.{" "}
+      {state.unplaced.toLocaleString()} more {state.unplaced === 1 ? "is" : "are"} remote or {state.unplaced === 1 ? "has" : "have"} no address.{" "}
       <Link to="/jobs">See all jobs</Link>
     </p>
   );
@@ -270,6 +293,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
         radius={radius}
         onRadius={setRadius}
         onFindMe={findMe}
+        nearest={nearest}
       />
       {selected && <PinCard pin={selected.pin} distance={selected.distance} onClose={() => setSelectedId(null)} />}
     </div>

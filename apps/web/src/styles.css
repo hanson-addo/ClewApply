@@ -2422,6 +2422,18 @@ input:focus-visible + .upload-choose,
   justify-self: start;
 }
 
+.map-glass-empty {
+  display: grid;
+  gap: var(--clew-space-1);
+}
+
+.map-glass-empty-title {
+  font-family: var(--clew-font-family-display);
+  font-size: var(--clew-font-size-lg);
+  font-weight: var(--clew-font-weight-bold);
+  line-height: var(--clew-font-line-height-tight);
+}
+
 .map-glass-note {
   color: var(--clew-text-on-inverse-muted);
   font-size: var(--clew-font-size-sm);

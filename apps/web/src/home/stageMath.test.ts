@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { cameraFor, pinsWithin, ringAround, topPins, US_CAMERA, zoomForRadius } from "./stageMath";
+import { aboutMiles, cameraFor, nearestOutside, pinsWithin, ringAround, topPins, US_CAMERA, zoomForRadius } from "./stageMath";
 import { milesBetween, type MapPin } from "./useJobMap";
 
 const pin = (id: string, lat: number, lng: number, fit_score: number): MapPin => ({
@@ -43,6 +43,19 @@ describe("pins and ring", () => {
   it("keeps pins inside the radius, nearest first", () => {
     expect(pinsWithin(pins, austin, 25).map((p) => p.id)).toEqual(["b", "a"]);
     expect(pinsWithin(pins, null, 25).map((p) => p.id)).toEqual(["a", "b", "c"]);
+  });
+
+  it("finds how far the nearest jobs are, and how many sit about that far", () => {
+    expect(nearestOutside(pins.slice(2), austin)).toEqual({ miles: expect.closeTo(182, -1), count: 1 });
+    expect(nearestOutside(pins, austin)?.count).toBe(2);
+    expect(nearestOutside(pins, null)).toBeNull();
+    expect(nearestOutside([], austin)).toBeNull();
+  });
+
+  it("rounds distances the way people say them", () => {
+    expect(aboutMiles(7.4)).toBe("about 7 miles");
+    expect(aboutMiles(82)).toBe("about 80 miles");
+    expect(aboutMiles(1234)).toBe("about 1,250 miles");
   });
 
   it("picks the best fits for the large pins", () => {

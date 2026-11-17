@@ -21,6 +21,17 @@ STARTER_BOARDS: tuple[tuple[Ats, str, str], ...] = (
     ("ashby", "openai", "OpenAI"),
     ("ashby", "ramp", "Ramp"),
     ("ashby", "linear", "Linear"),
+    # Employers hiring on site in many US metros, so a user almost anywhere sees local jobs
+    # on the map. Each was checked on 2026-11-17: a public board with 30+ open jobs across
+    # 5+ US metros.
+    ("greenhouse", "doordashusa", "DoorDash"),
+    ("greenhouse", "lyft", "Lyft"),
+    ("greenhouse", "toast", "Toast"),
+    ("greenhouse", "samsara", "Samsara"),
+    ("greenhouse", "flexport", "Flexport"),
+    ("greenhouse", "carvana", "Carvana"),
+    ("greenhouse", "sweetgreen", "sweetgreen"),
+    ("greenhouse", "gusto", "Gusto"),
 )
 
 

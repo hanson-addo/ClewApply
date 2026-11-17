@@ -62,3 +62,23 @@ export function pinsWithin(pins: MapPin[], focus: Point | null, miles: number): 
 export function topPins<T extends MapPin>(pins: T[], count = TOP_PINS): T[] {
   return [...pins].sort((a, b) => b.fit_score - a.fit_score || a.id.localeCompare(b.id)).slice(0, count);
 }
+
+export type Nearest = { miles: number; count: number };
+
+/**
+ * For an empty radius: how far the nearest jobs are, and how many sit about that far (within
+ * 10 miles, or 10%, of the nearest one). Null with no focus or no pins at all.
+ */
+export function nearestOutside(pins: MapPin[], focus: Point | null): Nearest | null {
+  if (!focus || pins.length === 0) return null;
+  const distances = pins.map((pin) => milesBetween(focus, { lat: pin.lat, lng: pin.lng })).sort((a, b) => a - b);
+  const closest = distances[0] ?? 0;
+  const reach = closest + Math.max(10, closest * 0.1);
+  return { miles: closest, count: distances.filter((d) => d <= reach).length };
+}
+
+/** A friendly rounded distance: "about 80 miles", "about 1,200 miles". */
+export function aboutMiles(miles: number): string {
+  const step = miles < 20 ? 1 : miles < 200 ? 5 : 50;
+  return `about ${(Math.round(miles / step) * step).toLocaleString()} miles`;
+}
