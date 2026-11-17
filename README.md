@@ -34,7 +34,7 @@ Open http://localhost:5173. The API is on http://localhost:8000 (docs at /docs).
 - The virus scanner downloads its signatures the first time it starts, which takes a few minutes. Until then uploads answer "try again".
 - Reading resumes needs `CLEW_ANTHROPIC_API_KEY` in `.env`. Without it, uploads still work and the app says reading is unavailable.
 - Federal jobs need `CLEW_USAJOBS_API_KEY` and `CLEW_USAJOBS_EMAIL` (a free key from developer.usajobs.gov). The worker reads USAJobs daily at 07:00 UTC and company boards hourly. To fetch now: `docker compose exec worker python -m clew.maintenance fetch-jobs`.
-- After a change to `backend/uv.lock` or `apps/web/package-lock.json`, run `docker compose up --build`.
+- After every `git pull`, run `docker compose up --build -V`. `--build` installs any new packages, the API brings the database up to date as it starts, and `-V` replaces the web app's old copy of its packages, which Docker would otherwise keep. Your data is in named volumes, so it stays.
 - Never commit `.env`; git ignores it.
 
 The API logs in to Postgres as `clew_app`, a role that row-level security applies to, and migrations run as `clew`, the owner. A new Docker volume creates `clew_app` for you. If your volume is older than that, run this once: `docker compose exec postgres psql -U clew -c "ALTER ROLE clew_app LOGIN PASSWORD 'clew_app'"`. Details are in [docs/setup/database.md](docs/setup/database.md).
