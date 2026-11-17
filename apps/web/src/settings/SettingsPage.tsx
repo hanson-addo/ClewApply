@@ -1,6 +1,7 @@
 import { useAuth, useClerk, useReverification } from "@clerk/react";
 import { isReverificationCancelledError } from "@clerk/react/errors";
 import { useEffect, useId, useRef, useState } from "react";
+import { useNavigate } from "react-router";
 
 import { config } from "../config";
 import { useApi } from "../auth/useApi";
@@ -120,6 +121,7 @@ function DownloadCard() {
 function DeleteDialog({ onClose }: { onClose: () => void }) {
   const requestDelete = useAccountRequest("DELETE", "/me");
   const { signOut } = useClerk();
+  const navigate = useNavigate();
   const ref = useRef<HTMLDialogElement>(null);
   const cancel = useRef<HTMLButtonElement>(null);
   const fieldId = useId();
@@ -141,7 +143,13 @@ function DeleteDialog({ onClose }: { onClose: () => void }) {
     try {
       const result = await requestDelete();
       if (result instanceof Response && result.status === 204) {
-        await signOut({ redirectUrl: "/account-deleted" });
+        // The account is gone. Clerk may already have ended the session, so signing out can
+        // fail; that changes nothing for the user, who goes to the "deleted" page either way.
+        try {
+          await signOut({ redirectUrl: "/account-deleted" });
+        } catch {
+          navigate("/account-deleted", { replace: true });
+        }
         return;
       }
       setError(DELETE_FAILED);

@@ -289,7 +289,7 @@ async def test_the_api_role_can_only_delete_the_bound_user(app_db: AsyncSession)
 
 
 def clerk_api(handler: Any) -> ClerkBackendApi:
-    return ClerkBackendApi(SecretStr("sk_test_placeholder"), transport=httpx.MockTransport(handler))
+    return ClerkBackendApi(SecretStr("test-secret-key"), transport=httpx.MockTransport(handler))
 
 
 async def test_clerk_api_deletes_the_user_with_the_secret_key() -> None:
@@ -302,7 +302,7 @@ async def test_clerk_api_deletes_the_user_with_the_secret_key() -> None:
     assert await clerk_api(handler).delete_user("user_abc/../x") is True
     assert seen[0].method == "DELETE"
     assert str(seen[0].url) == "https://api.clerk.com/v1/users/user_abc%2F..%2Fx"
-    assert seen[0].headers["Authorization"] == "Bearer sk_test_placeholder"
+    assert seen[0].headers["Authorization"] == "Bearer test-secret-key"
 
 
 @pytest.mark.parametrize(("status", "ok"), [(404, True), (500, False), (401, False)])

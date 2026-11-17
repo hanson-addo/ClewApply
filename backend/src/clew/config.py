@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     # carry it as "iss", and its public keys are fetched from <issuer>/.well-known/jwks.json.
     # Required in production; without it, local/test runs answer signed-in routes with 503.
     clerk_issuer: str | None = None
-    # Clerk secret key (sk_...), used only to delete a user's Clerk account when they delete
-    # their Clew account. Without it, Clew deletes its own data and the Clerk user is kept.
+    # Clerk secret key, used only to delete a user's Clerk account when they delete their Clew
+    # account. Required in production; local/test runs without it keep the Clerk user.
     clerk_secret_key: SecretStr | None = None
     # S3-compatible object storage for resume files (MinIO locally, see docker-compose.yml).
     # Without a bucket, the resume routes answer 503. Leave the endpoint unset for AWS S3.
@@ -103,7 +103,7 @@ class Settings(BaseSettings):
             raise ValueError("CLEW_USAJOBS_EMAIL must be one email address")
         return email
 
-    @field_validator("anthropic_api_key", "usajobs_api_key", mode="before")
+    @field_validator("anthropic_api_key", "usajobs_api_key", "clerk_secret_key", mode="before")
     @classmethod
     def blank_secret_is_unset(cls, value: object) -> object:
         return None if value == "" else value
@@ -112,6 +112,9 @@ class Settings(BaseSettings):
     def production_needs_sign_in(self) -> "Settings":
         if self.env == "production" and self.clerk_issuer is None:
             raise ValueError("CLEW_CLERK_ISSUER is required in production")
+        if self.env == "production" and self.clerk_secret_key is None:
+            # Deleting an account promises the sign-in goes too, which needs this key.
+            raise ValueError("CLEW_CLERK_SECRET_KEY is required in production")
         if self.env == "production" and not self.cors_origins:
             raise ValueError("CLEW_CORS_ORIGINS is required in production")
         return self

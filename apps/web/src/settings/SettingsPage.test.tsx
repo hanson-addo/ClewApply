@@ -101,6 +101,19 @@ describe("Settings", () => {
     expect(calls).toContain("DELETE /me");
   });
 
+  it("goes to the deleted page even if signing out fails after the account is gone", async () => {
+    handlers["DELETE /me"] = () => new Response(null, { status: 204 });
+    clerkState.signOut.mockRejectedValueOnce(new Error("session already revoked"));
+    renderAt("/settings");
+    await userEvent.click(await screen.findByRole("button", { name: "Delete my account" }));
+    const dialog = screen.getByRole("dialog", { name: "Delete your account?" });
+    await userEvent.type(within(dialog).getByLabelText("Type DELETE to confirm"), "DELETE");
+    await userEvent.click(within(dialog).getByRole("button", { name: "Delete my account" }));
+
+    expect(await screen.findByRole("heading", { name: "Your account is deleted." })).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   it("keeps the dialog open with a clear message when deleting fails", async () => {
     handlers["DELETE /me"] = () => Response.json({ detail: "x" }, { status: 503 });
     renderAt("/settings");
