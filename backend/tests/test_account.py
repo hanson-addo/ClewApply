@@ -264,7 +264,7 @@ async def test_storage_failure_deletes_nothing_from_the_database(
     store.fail = True
     response = await api.delete("/me", headers=who)
     assert response.status_code == 503
-    assert "it's still here" in response.json()["detail"]
+    assert "wasn't deleted" in response.json()["detail"]
     store.fail = False
     user = await db.scalar(select(User).where(User.auth_provider_id == "user_acct_storage_down"))
     assert user is not None

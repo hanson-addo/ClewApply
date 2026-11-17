@@ -18,7 +18,7 @@ type ExportState =
   | { status: "failed"; message: string };
 
 const EXPORT_FAILED = "We couldn't prepare your file. Try again in a few minutes.";
-const DELETE_FAILED = "We couldn't delete your account, so it's still here. Try again, or contact us.";
+const DELETE_FAILED = "Your account wasn't deleted. Some resume files may already be removed. Try again, or contact us.";
 
 function sizeLabel(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
