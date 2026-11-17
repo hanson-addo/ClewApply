@@ -16,8 +16,9 @@ export const MAP_CREDIT =
 
 const ink = tokens.color.ink;
 
-export function mapStyle(): StyleSpecification {
-  return {
+/** `buildings` adds 3D building blocks where the tiles carry heights (from about zoom 13). */
+export function mapStyle({ buildings = false }: { buildings?: boolean } = {}): StyleSpecification {
+  const style: StyleSpecification = {
     version: 8,
     glyphs: `${TILE_HOST}/fonts/{fontstack}/{range}.pbf`,
     sources: {
@@ -77,4 +78,20 @@ export function mapStyle(): StyleSpecification {
       },
     ],
   };
+  if (buildings) {
+    style.layers.push({
+      id: "buildings",
+      type: "fill-extrusion",
+      source: "openmaptiles",
+      "source-layer": "building",
+      minzoom: 13,
+      paint: {
+        "fill-extrusion-color": ink[700],
+        "fill-extrusion-height": ["coalesce", ["get", "render_height"], 0],
+        "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+        "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 14, 0.85],
+      },
+    });
+  }
+  return style;
 }

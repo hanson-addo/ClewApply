@@ -15,7 +15,7 @@ import {
   type Progress,
 } from "./model";
 import { YarnArt } from "./BrandArt";
-import { MapCard } from "./MapCard";
+import { MapStage } from "./MapStage";
 import { useCountUp } from "./useCountUp";
 import type { Dashboard } from "./useDashboard";
 import type { JobMapState } from "./useJobMap";
@@ -246,8 +246,7 @@ function Pipeline({ apps }: { apps: NonNullable<Dashboard["apps"]> }) {
   );
 }
 
-/** A teaser for the jobs map. Honest about not being built yet. */
-/** The signed-in home: a hero, your numbers, top matches, setup, pipeline and the jobs map. */
+/** The signed-in home: a hero and setup beside the jobs map, then your numbers, top matches and pipeline. */
 export function HomeDashboard({
   data,
   map,
@@ -260,24 +259,32 @@ export function HomeDashboard({
   const progress = setupProgress(data.hasProfile === true, data.prefs, data.apps?.length ?? null);
   return (
     <div className="home-grid">
-      <Hero data={data} progress={progress} hour={hour} />
+      {/* The greeting and setup sit beside the map, which opens to full width on scroll. */}
+      <MapStage
+        state={map}
+        intro={
+          <>
+            <Hero data={data} progress={progress} hour={hour} />
+            {/* Unknown profile state: no checklist, so it never says "Add your resume" by mistake. */}
+            {data.hasProfile !== null && !progress.complete && <Checklist progress={progress} />}
+          </>
+        }
+      />
       {data.hasProfile && <Stats data={data} />}
-      <div className="home-columns">
-        <div className="home-col">
-          {data.hasProfile && data.jobs && <TopMatches jobs={data.jobs} />}
-          {data.hasProfile && !data.jobs && (
-            <p role="status" className="home-note">
-              We couldn&apos;t load your matches just now. Open Jobs to try again.
-            </p>
-          )}
-          {/* Unknown profile state: no checklist, so it never says "Add your resume" by mistake. */}
-          {data.hasProfile !== null && !progress.complete && <Checklist progress={progress} />}
+      {data.hasProfile && (
+        <div className="home-columns">
+          <div className="home-col">
+            {data.jobs ? (
+              <TopMatches jobs={data.jobs} />
+            ) : (
+              <p role="status" className="home-note">
+                We couldn&apos;t load your matches just now. Open Jobs to try again.
+              </p>
+            )}
+          </div>
+          <div className="home-col">{data.apps && <Pipeline apps={data.apps} />}</div>
         </div>
-        <div className="home-col">
-          {data.hasProfile && data.apps && <Pipeline apps={data.apps} />}
-          <MapCard state={map} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
