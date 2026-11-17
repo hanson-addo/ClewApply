@@ -88,6 +88,10 @@ export default function JobsMapCanvas(props: Props) {
     latest.current = props;
   });
 
+  /** On a phone the panel covers the bottom of the open map, so the area is centred above it. */
+  const openPadding = () =>
+    latest.current.motion === "lite" ? { top: 0, right: 0, left: 0, bottom: 220 } : { top: 0, right: 0, left: 0, bottom: 0 };
+
   /** Where the camera ends up once the map fills the page. */
   const target = (): Camera => {
     const { focus, radius, motion } = latest.current;
@@ -253,7 +257,7 @@ export default function JobsMapCanvas(props: Props) {
         if (was > 0) instance.jumpTo({ ...US_CAMERA, padding });
         else instance.setPadding(padding);
       } else if (t >= 1) {
-        if (was < 1) instance.jumpTo({ ...target(), padding });
+        if (was < 1) instance.jumpTo({ ...target(), padding: openPadding() });
       } else {
         instance.jumpTo({ ...cameraAt(t, US_CAMERA, target()), padding });
       }
@@ -324,7 +328,7 @@ export default function JobsMapCanvas(props: Props) {
     const from = shownRadius.current;
     shownRadius.current = radius;
     if (lastT.current >= 1 || motion === "none") {
-      instance.easeTo({ ...target(), padding: 0, duration: motion === "none" ? 0 : 900 });
+      instance.easeTo({ ...target(), padding: openPadding(), duration: motion === "none" ? 0 : 900 });
     }
     if (motion === "none" || from === radius) {
       source?.setData(ringData(focus, radius));
