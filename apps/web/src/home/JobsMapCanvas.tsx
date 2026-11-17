@@ -3,7 +3,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { tokens } from "@clew/design-tokens";
 import {
   AttributionControl,
-  type ExpressionSpecification,
   type GeoJSONSource,
   Map as MapLibre,
   type MapLayerMouseEvent,
@@ -15,28 +14,25 @@ import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
 import type { Feature, FeatureCollection, Point as GeoPoint, Polygon } from "geojson";
 import { useEffect, useRef, useState } from "react";
 
-import { type Camera, cameraAt, type NearPin, ringAround, US_CAMERA, zoomForRadius } from "./stageMath";
-import { DUSK_OPACITY, duskAt, mapStyle } from "./mapStyle";
-import type { Frame } from "./useScrollExpand";
+import { mapStyle } from "./mapStyle";
+import { type Camera, cameraFor, type NearPin, ringAround, SETTLE_ZOOM } from "./stageMath";
 import type { MapPin, Point } from "./useJobMap";
 
 // The bundler moves the worker file, so tell MapLibre where it ended up.
 setWorkerUrl(workerUrl);
 
 const { coral, ink } = tokens.color;
-const PIN_RADIUS = 7;
+const FADE_MS = 500;
+const SETTLE_MS = 1000;
+const PIN_LAYERS = ["clusters", "cluster-count", "pins"] as const;
 
-export type Motion = "full" | "lite" | "none";
-
-type PinProps = { id: string; order: number };
-
-function pinData(pins: MapPin[]): FeatureCollection<GeoPoint, PinProps> {
+function pinData(pins: MapPin[]): FeatureCollection<GeoPoint, { id: string }> {
   return {
     type: "FeatureCollection",
-    features: pins.map((pin, order) => ({
+    features: pins.map((pin) => ({
       type: "Feature",
       geometry: { type: "Point", coordinates: [pin.lng, pin.lat] },
-      properties: { id: pin.id, order },
+      properties: { id: pin.id },
     })),
   };
 }
@@ -48,78 +44,72 @@ function ringData(focus: Point | null, miles: number): FeatureCollection<Polygon
   return { type: "FeatureCollection", features };
 }
 
-const COLLAPSED_LAYERS = ["clusters", "cluster-count", "pins"];
-const EXPANDED_LAYERS = ["ring-fill", "ring-line", "near-pins"];
-
 type Props = {
-  /** Every pin, clustered, for the small card. */
+  /** Every placed pin, clustered where they're dense. */
   pins: MapPin[];
-  /** Pins inside the radius, nearest first, for the full map (the top pins are drawn apart). */
-  near: NearPin[];
   /** The best-fitting pins inside the radius: large coral pins with a score. */
   top: NearPin[];
-  /** Where the full map looks: the user's rounded location, else their saved place. */
+  /** Where the map looks: the user's rounded location, else their saved place. */
   focus: Point | null;
   /** The user's rounded location, only ever used here in the browser. */
   here: Point | null;
   radius: number;
-  expanded: boolean;
-  motion: Motion;
-  /** Hands the scroll stage the function it calls every frame while the map grows. */
-  onDriver: (drive: ((frame: Frame) => void) | null) => void;
+  /** True once the map has scrolled into view: pins fade in and the camera settles, once. */
+  revealed: boolean;
+  /** No fades or camera moves. */
+  still: boolean;
+  /** On a phone the panel covers the bottom of the map, so the area is centred above it. */
+  phone: boolean;
   onSelect: (id: string) => void;
 };
 
+/** On a phone the panel covers the bottom of the map, so the area is centred above it. */
+const paddingFor = (phone: boolean) => ({ top: 0, right: 0, left: 0, bottom: phone ? 220 : 0 });
+
+/** Where the map looks, for the map's current size. */
+function cameraOf(el: HTMLElement | null, { focus, radius, phone }: Pick<Props, "focus" | "radius" | "phone">): Camera {
+  const shortSide = el ? Math.min(el.clientWidth, el.clientHeight - paddingFor(phone).bottom) || 600 : 600;
+  return cameraFor(focus, radius, shortSide);
+}
+
 /**
  * The drawn map. Loaded only when Home shows the map, so the map library never weighs down the
- * first paint. Pins are map layers and the large top pins are buttons with text set as text, so
- * no job text is ever written into the map as HTML. The card for a picked pin is React.
+ * first paint. It's built once at its full size and never resized or driven per frame: the page
+ * reveals it with a CSS fade, and the map itself only fades its pins in and settles one zoom
+ * level, both on the GPU. Pins are map layers and the large top pins are buttons with text set
+ * as text, so no job text is ever written into the map as HTML. The card for a picked pin is React.
  */
 export default function JobsMapCanvas(props: Props) {
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapLibre | null>(null);
   const [loaded, setLoaded] = useState(false);
   const latest = useRef(props);
-  const lastT = useRef(-1);
-  const shownRadius = useRef(props.radius);
 
   // Declared first, so the effects below always see the newest props.
   useEffect(() => {
     latest.current = props;
   });
 
-  /** On a phone the panel covers the bottom of the open map, so the area is centred above it. */
-  const openPadding = () =>
-    latest.current.motion === "lite" ? { top: 0, right: 0, left: 0, bottom: 220 } : { top: 0, right: 0, left: 0, bottom: 0 };
-
-  /** Where the camera ends up once the map fills the page. */
-  const target = (): Camera => {
-    const { focus, radius, motion } = latest.current;
-    const pitch = motion === "none" ? 0 : motion === "lite" ? 30 : 52;
-    const el = container.current;
-    const shortSide = el ? Math.min(el.clientWidth, el.clientHeight) || 600 : 600;
-    if (!focus) return { center: US_CAMERA.center, zoom: 3.6, pitch: Math.min(pitch, 30) };
-    return { center: [focus.lng, focus.lat], zoom: zoomForRadius(radius, focus.lat, shortSide), pitch };
-  };
-
   useEffect(() => {
     if (!container.current) return;
-    const { motion, expanded } = latest.current;
+    const { still, revealed } = latest.current;
     const coarse = window.matchMedia?.("(pointer: coarse)").matches ?? false;
-    const start = expanded ? target() : US_CAMERA;
+    const end = cameraOf(container.current, latest.current);
+    // Until it's revealed, the map waits one zoom level out, then settles in.
+    const start = still || revealed ? end : { ...end, zoom: end.zoom - SETTLE_ZOOM };
     const instance = new MapLibre({
       container: container.current,
-      style: mapStyle({ buildings: motion === "full" }),
+      style: mapStyle(),
       center: start.center,
       zoom: start.zoom,
-      pitch: start.pitch,
-      maxPitch: 60,
+      maxPitch: 0,
       attributionControl: false,
       dragRotate: false,
       pitchWithRotate: false,
       // On touch, one finger scrolls the page and two move the map.
       cooperativeGestures: coarse,
     });
+    instance.jumpTo({ ...start, padding: paddingFor(latest.current.phone) });
     instance.touchZoomRotate.disableRotation();
     instance.keyboard.disableRotation();
     instance.addControl(new NavigationControl({ showCompass: false }), "top-right");
@@ -137,9 +127,10 @@ export default function JobsMapCanvas(props: Props) {
 
     instance.on("load", () => {
       const first = latest.current;
-      // The small, US-wide card starts at dusk; the open map is the light street map.
-      const dark = first.motion !== "none" && !first.expanded;
-      instance.setPaintProperty("dusk", "background-opacity", dark ? DUSK_OPACITY : 0);
+      const hidden = !first.still && !first.revealed;
+      // Pins start see-through and fade in together when the map is revealed.
+      const fade = { duration: first.still ? 0 : FADE_MS, delay: 0 };
+      const opacity = hidden ? 0 : 1;
       instance.addSource("jobs", {
         type: "geojson",
         data: pinData(first.pins),
@@ -147,19 +138,18 @@ export default function JobsMapCanvas(props: Props) {
         clusterRadius: 44,
         clusterMaxZoom: 11,
       });
-      instance.addSource("near", { type: "geojson", data: pinData(first.near) });
       instance.addSource("ring", { type: "geojson", data: ringData(first.focus, first.radius) });
       instance.addLayer({
         id: "ring-fill",
         type: "fill",
         source: "ring",
-        paint: { "fill-color": coral[500], "fill-opacity": 0.08 },
+        paint: { "fill-color": coral[500], "fill-opacity": 0.06 },
       });
       instance.addLayer({
         id: "ring-line",
         type: "line",
         source: "ring",
-        paint: { "line-color": coral[600], "line-width": 2, "line-opacity": 0.8, "line-dasharray": [2, 2] },
+        paint: { "line-color": coral[600], "line-width": 1.5, "line-opacity": 0.6 },
       });
       instance.addLayer({
         id: "clusters",
@@ -168,11 +158,13 @@ export default function JobsMapCanvas(props: Props) {
         filter: ["has", "point_count"],
         paint: {
           "circle-color": coral[500],
-          "circle-opacity": 0.9,
-          "circle-radius": ["step", ["get", "point_count"], 16, 10, 20, 50, 26],
-          "circle-stroke-color": coral[400],
-          "circle-stroke-width": 3,
-          "circle-stroke-opacity": 0.35,
+          "circle-radius": ["step", ["get", "point_count"], 15, 10, 19, 50, 24],
+          "circle-stroke-color": "#ffffff",
+          "circle-stroke-width": 2,
+          "circle-opacity": opacity,
+          "circle-opacity-transition": fade,
+          "circle-stroke-opacity": opacity,
+          "circle-stroke-opacity-transition": fade,
         },
       });
       instance.addLayer({
@@ -183,9 +175,9 @@ export default function JobsMapCanvas(props: Props) {
         layout: {
           "text-field": ["get", "point_count_abbreviated"],
           "text-font": ["Noto Sans Bold"],
-          "text-size": 13,
+          "text-size": 12,
         },
-        paint: { "text-color": ink[900] },
+        paint: { "text-color": ink[900], "text-opacity": opacity, "text-opacity-transition": fade },
       });
       instance.addLayer({
         id: "pins",
@@ -194,21 +186,13 @@ export default function JobsMapCanvas(props: Props) {
         filter: ["!", ["has", "point_count"]],
         paint: {
           "circle-color": coral[500],
-          "circle-radius": PIN_RADIUS,
-          "circle-stroke-color": ink[50],
+          "circle-radius": 6,
+          "circle-stroke-color": "#ffffff",
           "circle-stroke-width": 2,
-        },
-      });
-      instance.addLayer({
-        id: "near-pins",
-        type: "circle",
-        source: "near",
-        paint: {
-          "circle-color": coral[500],
-          "circle-radius": PIN_RADIUS,
-          "circle-stroke-color": ink[50],
-          "circle-stroke-width": 2,
-          "circle-pitch-alignment": "map",
+          "circle-opacity": opacity,
+          "circle-opacity-transition": fade,
+          "circle-stroke-opacity": opacity,
+          "circle-stroke-opacity-transition": fade,
         },
       });
       setLoaded(true);
@@ -222,16 +206,14 @@ export default function JobsMapCanvas(props: Props) {
       const [lng, lat] = feature.geometry.coordinates;
       if (lng === undefined || lat === undefined) return;
       void source.getClusterExpansionZoom(clusterId).then((zoom) => {
-        instance.easeTo({ center: [lng, lat], zoom });
+        instance.easeTo({ center: [lng, lat], zoom, duration: latest.current.still ? 0 : 500 });
       });
     });
-    const pick = (event: MapLayerMouseEvent) => {
+    instance.on("click", "pins", (event: MapLayerMouseEvent) => {
       const id = event.features?.[0]?.properties?.id as string | undefined;
       if (id) latest.current.onSelect(id);
-    };
-    instance.on("click", "pins", pick);
-    instance.on("click", "near-pins", pick);
-    for (const layer of ["clusters", "pins", "near-pins"]) {
+    });
+    for (const layer of ["clusters", "pins"]) {
       instance.on("mouseenter", layer, () => (instance.getCanvas().style.cursor = "pointer"));
       instance.on("mouseleave", layer, () => (instance.getCanvas().style.cursor = ""));
     }
@@ -247,54 +229,45 @@ export default function JobsMapCanvas(props: Props) {
     // Built once; the effects below move it or swap its data instead of rebuilding it.
   }, []);
 
-  // The scroll stage drives the camera: the US at the start, the user's area at the end.
-  const { onDriver } = props;
-  useEffect(() => {
-    onDriver(({ t, padding }) => {
-      const instance = map.current;
-      if (!instance || latest.current.motion === "none") return;
-      const was = lastT.current;
-      lastT.current = t;
-      if (instance.getLayer("dusk")) instance.setPaintProperty("dusk", "background-opacity", duskAt(t));
-      if (t <= 0) {
-        // Small card: keep whatever the user has panned to, just re-centre it in the card.
-        if (was > 0) instance.jumpTo({ ...US_CAMERA, padding });
-        else instance.setPadding(padding);
-      } else if (t >= 1) {
-        if (was < 1) instance.jumpTo({ ...target(), padding: openPadding() });
-      } else {
-        instance.jumpTo({ ...cameraAt(t, US_CAMERA, target()), padding });
-      }
-    });
-    return () => onDriver(null);
-  }, [onDriver]);
+  const { pins, top, focus, here, radius, revealed, still, phone } = props;
 
-  const { pins, near, top, focus, here, radius, expanded, motion } = props;
+  // Revealed: the pins fade in together and the camera settles one zoom level, once.
+  useEffect(() => {
+    const instance = map.current;
+    if (!loaded || !instance || !revealed || still) return;
+    for (const layer of PIN_LAYERS) {
+      const prop = layer === "cluster-count" ? "text-opacity" : "circle-opacity";
+      instance.setPaintProperty(layer, prop, 1);
+      if (layer !== "cluster-count") instance.setPaintProperty(layer, "circle-stroke-opacity", 1);
+    }
+    instance.easeTo({ ...cameraOf(container.current, latest.current), padding: paddingFor(latest.current.phone), duration: SETTLE_MS });
+  }, [loaded, revealed, still]);
 
   useEffect(() => {
     if (loaded) map.current?.getSource<GeoJSONSource>("jobs")?.setData(pinData(pins));
   }, [loaded, pins]);
 
-  // Small card: clusters. Full map: the ring and the nearby pins, which pop in nearest first.
+  // A new place or radius: redraw the ring and ease over to it.
+  const first = useRef(true);
   useEffect(() => {
     const instance = map.current;
     if (!loaded || !instance) return;
-    for (const id of COLLAPSED_LAYERS) instance.setLayoutProperty(id, "visibility", expanded ? "none" : "visible");
-    for (const id of EXPANDED_LAYERS) instance.setLayoutProperty(id, "visibility", expanded ? "visible" : "none");
-    instance.getSource<GeoJSONSource>("near")?.setData(pinData(near));
-    if (!expanded) return;
-    return popIn(instance, near.length, motion);
-  }, [loaded, expanded, near, motion]);
+    instance.getSource<GeoJSONSource>("ring")?.setData(ringData(focus, radius));
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    instance.easeTo({ ...cameraOf(container.current, latest.current), padding: paddingFor(phone), duration: still ? 0 : 700 });
+  }, [loaded, focus, radius, phone, still]);
 
-  // The large top pins, dropped in one after another once the map is full.
+  // The large top pins, which fade in with the rest once the map is revealed.
   useEffect(() => {
     const instance = map.current;
-    if (!loaded || !instance || !expanded) return;
-    const markers = top.map((pin, index) => {
+    if (!loaded || !instance) return;
+    const markers = top.map((pin) => {
       const el = document.createElement("button");
       el.type = "button";
       el.className = "map-top-pin";
-      el.style.setProperty("--drop-delay", `${300 + index * 110}ms`);
       el.setAttribute("aria-label", `${pin.title} at ${pin.company}, fit ${pin.fit_score}`);
       const badge = document.createElement("span");
       badge.className = "map-top-pin-score";
@@ -309,9 +282,9 @@ export default function JobsMapCanvas(props: Props) {
     return () => {
       for (const marker of markers) marker.remove();
     };
-  }, [loaded, expanded, top]);
+  }, [loaded, top]);
 
-  // "You are here": a pulsing coral beacon at the user's rounded location.
+  // "You are here": a small coral dot at the user's rounded location.
   useEffect(() => {
     const instance = map.current;
     if (!loaded || !instance || !here) return;
@@ -324,32 +297,6 @@ export default function JobsMapCanvas(props: Props) {
     };
   }, [loaded, here]);
 
-  // The ring grows or shrinks to the new radius, and a full map refits to it.
-  useEffect(() => {
-    const instance = map.current;
-    if (!loaded || !instance) return;
-    const source = instance.getSource<GeoJSONSource>("ring");
-    const from = shownRadius.current;
-    shownRadius.current = radius;
-    if (lastT.current >= 1 || motion === "none") {
-      instance.easeTo({ ...target(), padding: openPadding(), duration: motion === "none" ? 0 : 900 });
-    }
-    if (motion === "none" || from === radius) {
-      source?.setData(ringData(focus, radius));
-      return;
-    }
-    let frame = 0;
-    const began = performance.now();
-    const step = (now: number) => {
-      const k = Math.min(1, (now - began) / 450);
-      const eased = 1 - (1 - k) ** 3;
-      source?.setData(ringData(focus, from + (radius - from) * eased));
-      if (k < 1) frame = requestAnimationFrame(step);
-    };
-    frame = requestAnimationFrame(step);
-    return () => cancelAnimationFrame(frame);
-  }, [loaded, focus, radius, motion]);
-
   return (
     <div
       ref={container}
@@ -358,47 +305,4 @@ export default function JobsMapCanvas(props: Props) {
       aria-label="Map of matching jobs. Use the list view to browse them with a keyboard."
     />
   );
-}
-
-/**
- * Pops the nearby pins in with a small overshoot, nearest first. One paint expression keyed on
- * each pin's order, updated per frame for about a second, then set back to a plain value.
- */
-function popIn(instance: MapLibre, count: number, motion: Motion): () => void {
-  const rest = () => {
-    instance.setPaintProperty("near-pins", "circle-radius", PIN_RADIUS);
-    instance.setPaintProperty("near-pins", "circle-opacity", 1);
-    instance.setPaintProperty("near-pins", "circle-stroke-opacity", 1);
-  };
-  if (motion === "none" || count === 0) {
-    rest();
-    return () => {};
-  }
-  const stagger = Math.min(40, 900 / count);
-  const length = motion === "lite" ? 280 : 460;
-  const overshoot = motion === "lite" ? 1.1 : 1.5;
-  const total = stagger * count + length;
-  const began = performance.now();
-  let frame = 0;
-  const step = (now: number) => {
-    const elapsed = now - began;
-    const local: ExpressionSpecification = ["-", elapsed, ["*", ["get", "order"], stagger]];
-    instance.setPaintProperty("near-pins", "circle-radius", [
-      "interpolate", ["linear"], local,
-      0, 0,
-      length * 0.55, PIN_RADIUS * overshoot,
-      length * 0.8, PIN_RADIUS * 0.9,
-      length, PIN_RADIUS,
-    ]);
-    const fade: ExpressionSpecification = ["interpolate", ["linear"], local, 0, 0, length * 0.3, 1];
-    instance.setPaintProperty("near-pins", "circle-opacity", fade);
-    instance.setPaintProperty("near-pins", "circle-stroke-opacity", fade);
-    if (elapsed < total) frame = requestAnimationFrame(step);
-    else rest();
-  };
-  frame = requestAnimationFrame(step);
-  return () => {
-    cancelAnimationFrame(frame);
-    rest();
-  };
 }

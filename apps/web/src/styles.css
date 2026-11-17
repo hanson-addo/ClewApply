@@ -2036,13 +2036,11 @@ input:focus-visible + .upload-choose,
 
 .home-grid > :not(.home-columns, .map-stage),
 .map-intro-main > *,
-.map-intro > .home-card,
 .home-columns .home-card {
   animation: home-rise 480ms var(--clew-motion-easing) both;
 }
 
-.home-grid > :nth-child(2),
-.map-intro > .home-card {
+.home-grid > :nth-child(2) {
   animation-delay: 60ms;
 }
 
@@ -2289,23 +2287,16 @@ input:focus-visible + .upload-choose,
 }
 
 
-/* --- Home: scroll-to-expand map (#119 step 6) -------------------------------------------- */
+/* --- Home: jobs map (#119 step 6) -------------------------------------------------------- */
 
 /*
- * The intro (greeting and setup) sits beside the "Jobs near you" card. The real map lives in
- * .map-layer, a full-page-width layer over the whole stage whose .map-sticky child sticks under
- * the header. useScrollExpand clips the full-size map down to the card's box, then lets the clip
- * grow with the scroll, so the map never resizes or re-lays out while it opens.
+ * The intro (greeting and setup), then a wide "Jobs near you" map. The map is drawn once at its
+ * full size and revealed with one short fade and rise when it scrolls into view: no resizing,
+ * no sticky scroll section, nothing redrawn per frame by the page.
  */
 .map-stage {
-  position: relative;
-}
-
-.map-intro {
-  position: relative;
   display: grid;
   gap: var(--clew-space-6);
-  align-items: start;
 }
 
 .map-intro-main {
@@ -2314,67 +2305,44 @@ input:focus-visible + .upload-choose,
   min-width: 0;
 }
 
-@media (min-width: 64rem) {
-  .map-intro {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
-  }
-
-  /* Wide screens: the card stays level with the greeting while the map opens. */
-  .map-stage.is-scrolling .map-intro > .home-card {
-    position: sticky;
-    top: calc(var(--map-header-height, 4rem) + var(--clew-space-4));
-  }
-}
-
-.map-runway {
-  pointer-events: none;
-}
-
-.map-layer {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: calc(50% - var(--map-page-width, 100vw) / 2);
-  width: var(--map-page-width, 100vw);
-  z-index: 1;
-  pointer-events: none;
-}
-
-.map-sticky {
-  position: sticky;
-  top: var(--map-header-height, 4rem);
-  height: calc(100svh - var(--map-header-height, 4rem));
-}
-
 .map-window {
-  position: absolute;
-  inset: 0;
+  position: relative;
+  height: clamp(26rem, 68svh, 42rem);
   overflow: hidden;
-  background: var(--clew-bg-inverse);
-  pointer-events: auto;
-  /* Until the first frame measures the card, show nothing rather than a full-page flash. */
-  clip-path: inset(0 0 100% 0);
+  border-radius: var(--clew-radius-xl);
+  background: #f2f2ef;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 600ms var(--clew-motion-easing),
+    transform 600ms var(--clew-motion-easing);
 }
 
-.map-window .jobs-map-canvas,
-.map-static .jobs-map-canvas {
+.map-window.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.map-window .jobs-map-canvas {
   width: 100%;
   height: 100%;
 }
 
-.map-static {
-  position: relative;
-  height: min(44rem, 80svh);
-  margin-top: var(--clew-space-6);
-  margin-left: calc(50% - var(--map-page-width, 100vw) / 2);
-  width: var(--map-page-width, 100vw);
+.map-window .map-loading {
+  color: var(--clew-text-secondary);
 }
 
-.map-static .map-window {
-  clip-path: none;
+/* The large top pins fade in with the map's own pins, all together. */
+.map-window .map-top-pin {
+  opacity: 0;
+  transition: opacity 500ms var(--clew-motion-easing);
 }
 
-/* The frosted panel. It fades in over the last stretch of the opening. */
+.map-window.is-revealed .map-top-pin {
+  opacity: 1;
+}
+
+/* The frosted panel: how many jobs, how far, and "near me". */
 .map-glass {
   position: absolute;
   top: var(--clew-space-6);
@@ -2386,31 +2354,10 @@ input:focus-visible + .upload-choose,
   padding: var(--clew-space-5);
   border: 1px solid color-mix(in srgb, var(--clew-text-on-inverse) 18%, transparent);
   border-radius: var(--clew-radius-xl);
-  background: color-mix(in srgb, var(--clew-bg-inverse) 84%, transparent);
-  backdrop-filter: blur(18px) saturate(140%);
+  background: color-mix(in srgb, var(--clew-bg-inverse) 88%, transparent);
+  backdrop-filter: blur(12px);
   box-shadow: var(--clew-shadow-overlay);
   color: var(--clew-text-on-inverse);
-  /* Fades in over the last stretch of the opening, once the window has room for it. */
-  opacity: clamp(0, calc((var(--map-t, 1) - 0.82) * 5.6), 1);
-  transform: translateY(calc((1 - clamp(0, calc((var(--map-t, 1) - 0.82) * 5.6), 1)) * 16px));
-}
-
-.map-scroll-hint {
-  position: absolute;
-  left: 50%;
-  bottom: var(--clew-space-6);
-  z-index: 2;
-  margin: 0;
-  padding: var(--clew-space-2) var(--clew-space-4);
-  border-radius: var(--clew-radius-pill);
-  background: color-mix(in srgb, var(--clew-bg-inverse) 80%, transparent);
-  color: var(--clew-text-on-inverse);
-  font-size: var(--clew-font-size-sm);
-  font-weight: var(--clew-font-weight-semibold);
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: clamp(0, calc(1 - var(--map-t, 1) * 8), 1);
-  transform: translateX(-50%);
 }
 
 .map-glass p {
@@ -2531,8 +2478,7 @@ input:focus-visible + .upload-choose,
 }
 
 /*
- * The large coral pin for a top match, with its fit score, dropping in with a bounce. MapLibre
- * positions the button with a transform, so the drop animates the inner shape instead.
+ * The large coral pin for a top match, with its fit score.
  */
 .map-top-pin {
   position: relative;
@@ -2559,9 +2505,7 @@ input:focus-visible + .upload-choose,
   color: var(--clew-color-ink-900);
   font-size: var(--clew-font-size-sm);
   font-weight: var(--clew-font-weight-heavy);
-  filter: drop-shadow(0 6px 10px rgba(16, 25, 53, 0.45));
-  animation: map-pin-drop 640ms cubic-bezier(0.34, 1.4, 0.64, 1) both;
-  animation-delay: var(--drop-delay, 0ms);
+  filter: drop-shadow(0 3px 6px rgba(16, 25, 53, 0.3));
 }
 
 .map-top-pin-score::after {
@@ -2578,17 +2522,7 @@ input:focus-visible + .upload-choose,
   background: var(--clew-color-coral-400);
 }
 
-@keyframes map-pin-drop {
-  from {
-    opacity: 0;
-    transform: translateY(-48px) scale(0.7);
-  }
-  60% {
-    opacity: 1;
-  }
-}
-
-/* "You are here": a coral dot with a soft pulse. */
+/* "You are here": a still coral dot with a soft halo. */
 .map-beacon {
   position: relative;
   width: 18px;
@@ -2605,15 +2539,8 @@ input:focus-visible + .upload-choose,
   inset: -3px;
   border-radius: 50%;
   background: var(--clew-color-coral-500);
-  opacity: 0.5;
-  animation: map-beacon-pulse 2s var(--clew-motion-easing) infinite;
-}
-
-@keyframes map-beacon-pulse {
-  to {
-    opacity: 0;
-    transform: scale(4);
-  }
+  opacity: 0.2;
+  transform: scale(2.2);
 }
 
 @media (max-width: 47.99rem) {
@@ -2652,16 +2579,12 @@ input:focus-visible + .upload-choose,
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .map-glass,
-  .map-pin-card,
-  .map-top-pin-score {
+  .map-window,
+  .map-window .map-top-pin,
+  .map-pin-card {
+    opacity: 1;
+    transform: none;
     animation: none;
     transition: none;
-  }
-
-  .map-beacon::after {
-    animation: none;
-    opacity: 0.25;
-    transform: scale(2.2);
   }
 }

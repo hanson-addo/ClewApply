@@ -11,13 +11,13 @@ vi.mock("./webgl", () => ({ canDrawMap: () => webgl.ok }));
 
 type CanvasProps = {
   pins: MapPin[];
-  near: NearPin[];
   top: NearPin[];
   focus: { lat: number; lng: number } | null;
   here: { lat: number; lng: number } | null;
   radius: number;
-  expanded: boolean;
-  motion: string;
+  revealed: boolean;
+  still: boolean;
+  phone: boolean;
   onSelect: (id: string) => void;
 };
 
@@ -28,10 +28,9 @@ vi.mock("./JobsMapCanvas", () => ({
       <span>{props.here ? `here ${props.here.lat},${props.here.lng}` : "no location"}</span>
       <span>{props.focus ? `focus ${props.focus.lat},${props.focus.lng}` : "no focus"}</span>
       <span>{`radius ${props.radius}`}</span>
-      <span>{props.expanded ? "expanded" : "small"}</span>
-      <span>{`motion ${props.motion}`}</span>
+      <span>{props.revealed ? "revealed" : "hidden"}</span>
+      <span>{props.still ? "still" : "moving"}</span>
       <span>{`top ${props.top.map((pin) => pin.fit_score).join(",")}`}</span>
-      <span>{`near ${props.near.length}`}</span>
       {props.pins.map((pin) => (
         <button key={pin.id} type="button" onClick={() => props.onSelect(pin.id)}>
           pin {pin.title}
@@ -89,6 +88,26 @@ function stubPermission(state: PermissionState) {
   return query;
 }
 
+/** A stand-in IntersectionObserver the test triggers by hand. */
+function stubIntersection() {
+  const observers: { fire: (visible: boolean) => void; disconnected: boolean }[] = [];
+  class Observer {
+    disconnected = false;
+    constructor(private readonly callback: IntersectionObserverCallback) {
+      observers.push(this);
+    }
+    observe() {}
+    disconnect() {
+      this.disconnected = true;
+    }
+    fire(visible: boolean) {
+      this.callback([{ isIntersecting: visible } as IntersectionObserverEntry], this as unknown as IntersectionObserver);
+    }
+  }
+  vi.stubGlobal("IntersectionObserver", Observer);
+  return observers;
+}
+
 function preferReducedMotion() {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: query.includes("prefers-reduced-motion"),
@@ -107,7 +126,7 @@ describe("MapStage", () => {
     vi.unstubAllGlobals();
   });
 
-  it("puts the intro beside the card", () => {
+  it("puts the intro above the map", () => {
     renderStage(ready([pin(1)]));
     expect(screen.getByRole("heading", { name: "Welcome back." })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Jobs near you" })).toBeInTheDocument();
@@ -128,13 +147,21 @@ describe("MapStage", () => {
     expect(screen.getByText("Unverified board")).toBeInTheDocument();
   });
 
-  it("opens from the small card: the map starts small and its panel can't be tabbed into", async () => {
+  it("waits out of view, then reveals the map once as it scrolls in", async () => {
     webgl.ok = true;
+    const observers = stubIntersection();
     renderStage(ready([pin(1), pin(2)]));
-    expect(await screen.findByText("small")).toBeInTheDocument();
-    expect(screen.getByText("motion full")).toBeInTheDocument();
-    expect(screen.getByText("Scroll to explore ↓")).toBeInTheDocument();
-    expect(document.querySelector(".map-glass")).toHaveAttribute("inert");
+    expect(await screen.findByText("hidden")).toBeInTheDocument();
+    expect(screen.getByText("moving")).toBeInTheDocument();
+    expect(document.querySelector(".map-window")).not.toHaveClass("is-revealed");
+    // No scroll-driven stage: no runway, no sticky layer, no scroll hint.
+    expect(document.querySelector(".map-runway, .map-sticky")).not.toBeInTheDocument();
+    expect(screen.queryByText(/Scroll to explore/)).not.toBeInTheDocument();
+
+    act(() => observers[0]?.fire(true));
+    expect(screen.getByText("revealed")).toBeInTheDocument();
+    expect(document.querySelector(".map-window")).toHaveClass("is-revealed");
+    expect(observers[0]?.disconnected).toBe(true);
   });
 
   it("counts jobs inside the radius around the saved place, and refilters when it changes", async () => {
@@ -153,11 +180,11 @@ describe("MapStage", () => {
     expect(screen.getByText("2 jobs within 50 miles", { selector: ".clew-sr-only" })).toBeInTheDocument();
   });
 
-  it("gives the five best fits the large pins and draws the rest as dots", async () => {
+  it("gives the five best fits the large pins and still draws every pin", async () => {
     webgl.ok = true;
     renderStage(ready([1, 2, 3, 4, 5, 6, 7].map((n) => pin(n))));
     expect(await screen.findByText("top 89,88,87,86,85")).toBeInTheDocument();
-    expect(screen.getByText("near 2")).toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: /^pin / })).toHaveLength(7);
   });
 
   it("shows the whole US when there's no saved place or location", async () => {
@@ -184,14 +211,13 @@ describe("MapStage", () => {
     expect(screen.queryByRole("group", { name: "Thread Analyst 1" })).not.toBeInTheDocument();
   });
 
-  it("switches to the list, which drops the scrolling map", async () => {
+  it("switches to the list, which drops the map", async () => {
     webgl.ok = true;
     renderStage(ready([pin(1), pin(2)]));
     await screen.findByTestId("map");
     expect(screen.getByRole("button", { name: "Map" })).toHaveAttribute("aria-pressed", "true");
     fireEvent.click(screen.getByRole("button", { name: "List" }));
     expect(screen.queryByTestId("map")).not.toBeInTheDocument();
-    expect(document.querySelector(".map-runway")).not.toBeInTheDocument();
     expect(screen.getByRole("list", { name: "Best matching jobs" })).toBeInTheDocument();
   });
 
@@ -243,15 +269,14 @@ describe("MapStage", () => {
     expect(screen.getByText("Sorted by distance from you.")).toBeInTheDocument();
   });
 
-  it("with reduced motion, shows the full map open and still, with no scrolling stage", async () => {
+  it("with reduced motion, shows the map at once and keeps it still", async () => {
     webgl.ok = true;
+    stubIntersection();
     preferReducedMotion();
     renderStage(ready([pin(1)]));
-    expect(await screen.findByText("expanded")).toBeInTheDocument();
-    expect(screen.getByText("motion none")).toBeInTheDocument();
-    expect(document.querySelector(".map-runway")).not.toBeInTheDocument();
-    expect(document.querySelector(".map-glass")).not.toHaveAttribute("inert");
-    expect(screen.getByText("The map is just below.")).toBeInTheDocument();
+    expect(await screen.findByText("revealed")).toBeInTheDocument();
+    expect(screen.getByText("still")).toBeInTheDocument();
+    expect(document.querySelector(".map-window")).toHaveClass("is-revealed");
   });
 
   it("handles loading, errors and no placed jobs", () => {

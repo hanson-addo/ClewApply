@@ -1,14 +1,12 @@
-import { lazy, type ReactNode, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, type ReactNode, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 
 import { useMediaQuery } from "../components/useMediaQuery";
 import { FitScore } from "../jobs/FitScore";
 import { MapArt } from "./BrandArt";
-import type { Motion } from "./JobsMapCanvas";
 import { DEFAULT_RADIUS, pinsWithin, RADII, type Radius, topPins } from "./stageMath";
 import { useCountUp } from "./useCountUp";
 import { type JobMapState, type MapPin, milesBetween, type Point, roundPoint } from "./useJobMap";
-import { type Frame, useScrollExpand } from "./useScrollExpand";
 import { canDrawMap } from "./webgl";
 
 // The map library is big, so it loads only when the map is shown.
@@ -78,7 +76,6 @@ function GlassPanel({
   radius,
   onRadius,
   onFindMe,
-  hidden,
 }: {
   count: number;
   focus: "here" | "saved" | null;
@@ -86,14 +83,12 @@ function GlassPanel({
   radius: Radius;
   onRadius: (radius: Radius) => void;
   onFindMe: () => void;
-  hidden: boolean;
 }) {
-  const shown = useCountUp(hidden ? 0 : count);
+  const shown = useCountUp(count);
   const noun = count === 1 ? "job" : "jobs";
   const where = focus ? `within ${radius} miles` : "on the map";
   return (
-    // Hidden panels are inert, so keyboard users never tab into controls they can't see.
-    <div className="map-glass" inert={hidden}>
+    <div className="map-glass">
       <p className="map-glass-eyebrow">
         {focus === "here" ? "Around you" : focus === "saved" ? "Around your saved place" : "Across the US"}
       </p>
@@ -134,12 +129,11 @@ function GlassPanel({
 }
 
 /**
- * The top of Home: the intro (greeting, resume and setup) beside a "Jobs near you" card. As the
- * user scrolls, the card's map grows into a full-width section that sticks while it opens, flies
- * from the whole US down to the user's area, and drops in the pins; then it lets go and the rest
- * of Home follows. Location is asked for only on a press of "Show jobs near me" (or used straight
- * away when the browser already allows it), rounded to about 1 km at once, and used only here in
- * the browser: never sent, saved or logged.
+ * The top of Home: the intro (greeting, resume and setup), then a wide "Jobs near you" map. The
+ * map opens on the user's area and fades in once as it scrolls into view, with its pins, a ring
+ * for the chosen distance and the five best fits. Location is asked for only on a press of
+ * "Show jobs near me" (or used straight away when the browser already allows it), rounded to
+ * about 1 km at once, and used only here in the browser: never sent, saved or logged.
  */
 export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNode }) {
   const [drawable] = useState(canDrawMap);
@@ -157,10 +151,6 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
 
   const inRadius = useMemo(() => pinsWithin(pins, focus, radius), [pins, focus, radius]);
   const top = useMemo(() => topPins(inRadius), [inRadius]);
-  const rest = useMemo(() => {
-    const topIds = new Set(top.map((pin) => pin.id));
-    return inRadius.filter((pin) => !topIds.has(pin.id));
-  }, [inRadius, top]);
 
   const listed = useMemo(() => {
     const rows = pins.map((pin) => ({
@@ -177,20 +167,26 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
   }, [pins, selectedId, here]);
 
   const hasMap = state.status === "ready" && pins.length > 0 && drawable && view === "map";
-  const scrolling = hasMap && !reduced;
-  const motion: Motion = reduced ? "none" : phone ? "lite" : "full";
 
-  const stage = useRef<HTMLDivElement>(null);
-  const introRef = useRef<HTMLDivElement>(null);
-  const slot = useRef<HTMLDivElement>(null);
-  const sticky = useRef<HTMLDivElement>(null);
+  // Revealed once, the first time the map scrolls into view.
   const win = useRef<HTMLDivElement>(null);
-  const driver = useRef<((frame: Frame) => void) | null>(null);
-  const onDriver = useCallback((drive: ((frame: Frame) => void) | null) => {
-    driver.current = drive;
-  }, []);
-  const { expanded: scrolledOpen, runway } = useScrollExpand(scrolling, { stage, intro: introRef, slot, sticky, win }, driver);
-  const expanded = reduced ? true : scrolledOpen;
+  const [revealed, setRevealed] = useState(() => typeof IntersectionObserver === "undefined");
+  useEffect(() => {
+    const el = win.current;
+    if (!hasMap || revealed || reduced || !el) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+          setRevealed(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [hasMap, revealed, reduced]);
+  const shown = revealed || reduced;
 
   // Escape closes the picked job's card.
   useEffect(() => {
@@ -253,18 +249,17 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
   );
 
   const mapWindow = hasMap && (
-    <div ref={win} className={`map-window${expanded ? " is-expanded" : ""}`}>
+    <div ref={win} className={`map-window${shown ? " is-revealed" : ""}`}>
       <Suspense fallback={<div className="map-loading">Loading the map…</div>}>
         <JobsMapCanvas
           pins={pins}
-          near={rest}
           top={top}
           focus={focus}
           here={here}
           radius={radius}
-          expanded={expanded}
-          motion={motion}
-          onDriver={onDriver}
+          revealed={shown}
+          still={reduced}
+          phone={phone}
           onSelect={setSelectedId}
         />
       </Suspense>
@@ -275,13 +270,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
         radius={radius}
         onRadius={setRadius}
         onFindMe={findMe}
-        hidden={!expanded}
       />
-      {!reduced && (
-        <p className="map-scroll-hint" aria-hidden="true">
-          Scroll to explore ↓
-        </p>
-      )}
       {selected && <PinCard pin={selected.pin} distance={selected.distance} onClose={() => setSelectedId(null)} />}
     </div>
   );
@@ -313,10 +302,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
         </>
       )}
 
-      {hasMap && !reduced && (
-        <div ref={slot} className="map-frame map-slot" />
-      )}
-      {hasMap && reduced && <p className="home-note">The map is just below.</p>}
+      {mapWindow}
 
       {state.status === "ready" && pins.length > 0 && !hasMap && (
         <>
@@ -346,22 +332,9 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
   );
 
   return (
-    <div ref={stage} className={`map-stage${scrolling ? " is-scrolling" : ""}`}>
-      <div ref={introRef} className="map-intro">
-        <div className="map-intro-main">{intro}</div>
-        {card}
-      </div>
-      {scrolling && (
-        <>
-          <div className="map-runway" style={{ height: runway }} aria-hidden="true" />
-          <div className="map-layer">
-            <div ref={sticky} className="map-sticky">
-              {mapWindow}
-            </div>
-          </div>
-        </>
-      )}
-      {hasMap && reduced && <div className="map-static">{mapWindow}</div>}
+    <div className="map-stage">
+      <div className="map-intro-main">{intro}</div>
+      {card}
     </div>
   );
 }

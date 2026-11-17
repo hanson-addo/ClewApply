@@ -259,7 +259,7 @@ export function HomeDashboard({
   const progress = setupProgress(data.hasProfile === true, data.prefs, data.apps?.length ?? null);
   return (
     <div className="home-grid">
-      {/* The greeting and setup sit beside the map, which opens to full width on scroll. */}
+      {/* The greeting and setup, then a wide map of jobs near the user. */}
       <MapStage
         state={map}
         intro={
