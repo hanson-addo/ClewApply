@@ -25,7 +25,7 @@ The config starts the API on port 8000 (with `CLEW_ENV=test`) and the web app on
 | `CLERK_SECRET_KEY` | Development secret key (`sk_test_…`). Never a production key |
 | `CLEW_CLERK_ISSUER` | The instance's Frontend API URL |
 
-In CI they come from GitHub Actions secrets, and only for this repository's own branches. Locally, export them in your shell; never commit them. The tests create Clerk users named `e2e-<run id>-…+clerk_test@example.com` (Clerk's test addresses, which use the fixed code 424242 and get no real email), and the teardown deletes only the current run's users, so runs that overlap on the shared instance never delete each other's.
+In CI they come from GitHub Actions secrets, and only for this repository's own branches. Locally, export them in your shell; never commit them. Signed-in tests share at most three Clerk test users per run, one per Playwright worker, named `e2e-<run id>-pool-<n>+clerk_test@example.com`; before each test the user's Clew account is wiped in the database (this needs `CLEW_MIGRATIONS_DATABASE_URL` and `psql`), so every test still starts as a brand-new user. Only the sign-up test creates its own user. These are Clerk's test addresses, which use the fixed code 424242 and get no real email. The teardown deletes only the current run's users, so runs that overlap on the shared instance never delete each other's.
 
 ### Upload tests
 

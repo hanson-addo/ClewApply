@@ -63,6 +63,18 @@ export function testEmail(label: string): string {
 export const TEST_EMAIL_CODE = "424242";
 
 /**
+ * Signed-in specs share a small pool of Clerk test users, one per Playwright worker, instead of
+ * creating a user per test (a run used to create dozens, and the development instance holds at
+ * most 100). Each test still starts on an empty Clew account: its data is wiped first.
+ */
+export const TEST_USER_POOL_SIZE = 3;
+
+/** The pool user for one worker slot, the same address all run long. */
+export function poolEmail(slot: number): string {
+  return `${TEST_USER_PREFIX}pool-${slot}+clerk_test@example.com`;
+}
+
+/**
  * Resume reading also needs Redis and the background worker. With these set, the config starts
  * the worker and a stand-in for the Anthropic API (fake-anthropic.mjs), so reading runs end to
  * end without a real key or real AI calls.

@@ -1,6 +1,14 @@
 import { defineConfig, devices, type PlaywrightTestConfig } from "@playwright/test";
 
-import { API_URL, FAKE_ANTHROPIC_URL, hasParsing, realParserKey, SETUP_URL, WEB_URL } from "./env";
+import {
+  API_URL,
+  FAKE_ANTHROPIC_URL,
+  hasParsing,
+  realParserKey,
+  SETUP_URL,
+  TEST_USER_POOL_SIZE,
+  WEB_URL,
+} from "./env";
 
 // Starts the real API and two production builds of the web app (with and without a Clerk key),
 // then drives them in Chromium. Test plan: ../docs/qa/e2e-test-plan.md
@@ -52,6 +60,8 @@ const parsingServers: WebServer[] = !hasParsing
 export default defineConfig({
   testDir: "./tests",
   fullyParallel: true,
+  // One pooled Clerk test user per worker (env.ts), so never more workers than pool users.
+  workers: isCI ? 2 : TEST_USER_POOL_SIZE,
   forbidOnly: isCI,
   retries: 0,
   reporter: isCI ? [["list"], ["html", { open: "never" }]] : "list",
