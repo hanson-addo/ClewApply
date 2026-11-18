@@ -46,6 +46,7 @@ from clew.models import (
     ProfileVersion,
     UsageEvent,
     UsageKind,
+    User,
 )
 from clew.usage import lock_user, used_within
 
@@ -219,6 +220,11 @@ async def create_token(body: TokenRequest, request: Request, session: Session) -
         raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, TOO_MANY_ATTEMPTS)
     user_id = await redeem_link_code(session, body.code)
     if user_id is None:
+        await session.rollback()
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, LINK_INVALID)
+    # `users` has no row policy; filter by the code's own user (see clew.auth.deps).
+    deleted = await session.scalar(select(User.deleted_at).where(User.id == user_id))
+    if deleted is not None:
         await session.rollback()
         raise HTTPException(status.HTTP_400_BAD_REQUEST, LINK_INVALID)
     await bind_user(session, user_id)

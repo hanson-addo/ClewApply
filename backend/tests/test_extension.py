@@ -170,6 +170,14 @@ async def test_an_expired_code_fails(api: AsyncClient, db: AsyncSession) -> None
     assert (await api.post("/extension/token", json={"code": code})).status_code == 400
 
 
+async def test_a_code_for_a_deleted_account_fails(api: AsyncClient, db: AsyncSession) -> None:
+    sub = new_sub()
+    code = await link_code(api, sub)
+    await db.execute(update(User).where(User.auth_provider_id == sub).values(deleted_at=func.now()))
+    await db.commit()
+    assert (await api.post("/extension/token", json={"code": code})).status_code == 400
+
+
 @pytest.mark.parametrize("code", ["clk_made-up", "not-a-code", "clx_looks-like-a-token"])
 async def test_unknown_codes_fail(api: AsyncClient, code: str) -> None:
     assert (await api.post("/extension/token", json={"code": code})).status_code == 400

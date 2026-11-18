@@ -133,6 +133,7 @@ export function ExtensionCard() {
         </ul>
       )}
       {connections && connections.length === 0 && <p className="settings-hint">No browsers are connected.</p>}
+      <p className="settings-hint">Signing out of Clew also disconnects the extension in every browser.</p>
       <button
         type="button"
         className="button button-primary settings-action"
