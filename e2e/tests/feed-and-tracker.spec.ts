@@ -72,7 +72,7 @@ async function expectNoSeriousAxeIssues(page: Page) {
 test.describe("job feed", () => {
   test("lists jobs once each, with the sites they were seen on", async ({ page }) => {
     await openFeed(page, "feed-list");
-    await expect(page.getByRole("status").filter({ hasText: /^\d+ jobs?$/ })).toBeVisible();
+    await expect(page.getByRole("status").filter({ hasText: /^Sorted by best fit · \d+ jobs?$/ })).toBeVisible();
     // The Greenhouse listing and the alert email are one job.
     await expect(card(page, THREAD.title)).toHaveCount(1);
     await expect(card(page, THREAD.title)).toHaveAccessibleName(

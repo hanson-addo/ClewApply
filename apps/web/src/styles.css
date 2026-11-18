@@ -1186,6 +1186,7 @@ h2[tabindex="-1"]:focus {
     display: block;
   }
 
+  .jobs-has-detail .jobs-intro,
   .jobs-has-detail .jobs-list-col,
   .jobs-has-detail .jobs-filters {
     display: none;
