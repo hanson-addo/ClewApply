@@ -240,3 +240,49 @@ it("reads Clew's date ranges", () => {
   expect(parseDates("to 2020")).toEqual({ start: null, end: { year: "2020", month: null } });
   expect(parseDates("whenever")).toBeNull();
 });
+
+describe("keyboard and screen readers", () => {
+  const status = (shadow: ShadowRoot) => shadow.querySelector("[role='status']")?.textContent;
+
+  it("moves focus into the panel when it opens", () => {
+    page(INTRO);
+    const { shadow } = open();
+    expect(shadow.activeElement?.textContent).toBe("Fill from Clew");
+    expect(document.activeElement?.id).toBe("clew-fill-panel");
+  });
+
+  it("keeps focus on the picker after choosing a job", () => {
+    page(POSITION);
+    const { shadow } = open();
+    const picker = shadow.querySelector("select");
+    if (!picker) throw new Error("no picker");
+    picker.focus();
+    picker.value = "bbbb2222";
+    picker.dispatchEvent(new CustomEvent("change", { detail: REAL }));
+    const after = shadow.querySelector("select");
+    expect(after?.value).toBe("bbbb2222");
+    expect(shadow.activeElement).toBe(after);
+  });
+
+  it("keeps focus in the panel and announces the result after filling", async () => {
+    page(INTRO);
+    const { shadow } = open();
+    box(shadow, "Headline").checked = true;
+    realClick(button(shadow, "Fill ticked fields"));
+    await settle();
+    expect(shadow.activeElement?.textContent).toBe("Fill from Clew");
+    expect(status(shadow)).toBe("Filled 1 of 1. Check the fields, then press Save on LinkedIn.");
+  });
+
+  it("announces when no form is open, then shows the form after Check again", () => {
+    page("<main></main>");
+    const { shadow } = open();
+    expect(status(shadow)).toBe("No LinkedIn edit form is open.");
+    // The user opens the intro form on LinkedIn, then presses Check again.
+    document.body.append(document.createRange().createContextualFragment(INTRO));
+    realClick(button(shadow, "Check again"));
+    expect(shadow.activeElement?.textContent).toBe("Fill from Clew");
+    expect(box(shadow, "Headline").checked).toBe(false);
+    expect(status(shadow)).toBe("");
+  });
+});

@@ -22,7 +22,7 @@ x-backend-env: &backend-env
   CLEW_ANTHROPIC_API_KEY: ${CLEW_ANTHROPIC_API_KEY:-}
   CLEW_USAJOBS_API_KEY: ${CLEW_USAJOBS_API_KEY:-}
   CLEW_USAJOBS_EMAIL: ${CLEW_USAJOBS_EMAIL:-}
-  # Optional locally: without it, a fixed local-only key is used for Sync Center fill records.
+  # Required in production. Here (CLEW_ENV=local) a fixed local-only key is used if blank.
   CLEW_FILL_FINGERPRINT_KEY: ${CLEW_FILL_FINGERPRINT_KEY:-}
 
 services:

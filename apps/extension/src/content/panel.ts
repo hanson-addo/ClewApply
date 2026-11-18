@@ -52,6 +52,9 @@ button.quiet { padding: 4px 8px; }
 button:disabled { opacity: 0.6; cursor: default; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #b23a1e; outline-offset: 2px; }
 .done { font-weight: 700; }
+h2:focus { outline: none; }
+h2:focus-visible { outline: 2px solid #b23a1e; outline-offset: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
 `;
 
 // Events stopped at the panel, so the site doesn't treat clicks and typing in the panel as
@@ -110,8 +113,22 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
   const panel = el(doc, "section", undefined, "panel");
   panel.setAttribute("role", "dialog");
   panel.setAttribute("aria-label", "Fill from Clew");
+  // The content is redrawn after each step; the live region stays, so screen readers hear
+  // what each step did.
+  const content = el(doc, "div");
+  const live = el(doc, "p", "", "sr-only");
+  live.setAttribute("role", "status");
+  panel.append(content, live);
   shadow.append(style, panel);
   doc.documentElement.append(host);
+  let heading: HTMLElement | null = null;
+
+  /** Shows a step and moves focus into it (the heading, unless `focus` says otherwise). */
+  const draw = (nodes: HTMLElement[], options: { focus?: HTMLElement; announce?: string } = {}) => {
+    content.replaceChildren(...nodes);
+    live.textContent = options.announce ?? "";
+    (options.focus ?? heading)?.focus();
+  };
 
   const onClick = (button: HTMLButtonElement, act: () => void) =>
     button.addEventListener("click", (event) => {
@@ -123,7 +140,9 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
     const close = el(doc, "button", "Close", "quiet");
     close.type = "button";
     onClick(close, () => host.remove());
-    head.append(el(doc, "h2", "Fill from Clew"), close);
+    heading = el(doc, "h2", "Fill from Clew");
+    heading.tabIndex = -1;
+    head.append(heading, close);
     return head;
   };
 
@@ -131,22 +150,28 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
     const again = el(doc, "button", "Check again");
     again.type = "button";
     onClick(again, render);
-    panel.replaceChildren(
-      header(),
-      el(doc, "p", `Open one of your profile's edit forms on ${SITE_NAME} (press a pencil, or Add), then press Check again.`),
-      el(doc, "p", "Clew fills your intro, about, experience and education.", "muted"),
-      again,
+    const ask = `Open one of your profile's edit forms on ${SITE_NAME} (press a pencil, or Add), then press Check again.`;
+    draw(
+      [header(), el(doc, "p", ask), el(doc, "p", "Clew fills your intro, about, experience and education.", "muted"), again],
+      { announce: `No ${SITE_NAME} edit form is open.` },
     );
   };
 
-  const showFields = (spec: FormSpec, fields: FillField[], entries: Entry[] | null, chosen: string | null) => {
+  const showFields = (
+    spec: FormSpec,
+    fields: FillField[],
+    entries: Entry[] | null,
+    chosen: string | null,
+    fromPicker = false,
+  ) => {
     const parts = new Map(spec.parts.map((p) => [p.part, p]));
     const nodes: HTMLElement[] = [header(), el(doc, "p", `${spec.title} form on ${SITE_NAME}.`, "muted")];
 
+    let pickerFocus: HTMLElement | undefined;
     if (entries) {
       const noun = spec.section === "work" ? "job" : "school";
       if (entries.length === 0) {
-        panel.replaceChildren(...nodes, el(doc, "p", `Your Clew profile has no ${noun} to fill.`));
+        draw([...nodes, el(doc, "p", `Your Clew profile has no ${noun} to fill.`)]);
         return;
       }
       const label = el(doc, "label", `Which ${noun} is this form for?`, "entry");
@@ -161,14 +186,15 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
         picker.append(option);
       }
       picker.addEventListener("change", (event) => {
-        if (trusted(event)) showFields(spec, fields, entries, picker.value || null);
+        if (trusted(event)) showFields(spec, fields, entries, picker.value || null, true);
       });
       label.append(picker);
       nodes.push(label);
       if (!chosen) {
-        panel.replaceChildren(...nodes);
+        draw(nodes, { focus: fromPicker ? picker : undefined });
         return;
       }
+      if (fromPicker) pickerFocus = picker;
     }
 
     const candidates = entries
@@ -176,7 +202,7 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
       : fields.filter((f) => !f.key.includes("."));
     const shown = candidates.filter((f) => parts.has(partOf(f)));
     if (shown.length === 0) {
-      panel.replaceChildren(...nodes, el(doc, "p", "Your Clew profile has nothing to fill on this form."));
+      draw([...nodes, el(doc, "p", "Your Clew profile has nothing to fill on this form.")], { focus: pickerFocus });
       return;
     }
     const list = el(doc, "ul");
@@ -204,7 +230,7 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
       if (ticked.length === 0) return;
       void fillTicked(spec, ticked, parts);
     });
-    panel.replaceChildren(...nodes, el(doc, "p", "Tick what you want filled."), list, fill);
+    draw([...nodes, el(doc, "p", "Tick what you want filled."), list, fill], { focus: pickerFocus });
   };
 
   const fillTicked = async (spec: FormSpec, ticked: FillField[], parts: Map<string, PartSpec>) => {
@@ -229,12 +255,18 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
     const done = el(doc, "button", "Close");
     done.type = "button";
     onClick(done, () => host.remove());
-    panel.replaceChildren(
-      header(),
-      results,
-      ...[...notes].map((note) => el(doc, "p", note)),
-      el(doc, "p", filled.length ? `Check the fields, then press Save on ${SITE_NAME}.` : "Nothing was filled.", "done"),
-      done,
+    const summary = filled.length
+      ? `Filled ${filled.length} of ${ticked.length}. Check the fields, then press Save on ${SITE_NAME}.`
+      : "Nothing was filled.";
+    draw(
+      [
+        header(),
+        results,
+        ...[...notes].map((note) => el(doc, "p", note)),
+        el(doc, "p", filled.length ? `Check the fields, then press Save on ${SITE_NAME}.` : "Nothing was filled.", "done"),
+        done,
+      ],
+      { announce: summary },
     );
     if (filled.length) await deps.report(filled).catch(() => undefined);
   };
