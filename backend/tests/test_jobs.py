@@ -33,6 +33,15 @@ async def test_job_detail_has_everything(
     assert detail["apply_source"] == "greenhouse"
     assert detail["seen_on"] == ["greenhouse", "usajobs"]
     assert 0 <= detail["fit_score"] <= 100
+    assert [part["label"] for part in detail["fit_parts"]] == [
+        "Title",
+        "Skills",
+        "Location",
+        "Posted",
+        "Level",
+        "Pay",
+    ]
+    assert all(0 <= part["value"] <= 100 for part in detail["fit_parts"])
 
 
 async def test_closed_jobs_can_still_be_opened(

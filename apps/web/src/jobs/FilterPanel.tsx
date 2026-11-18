@@ -2,22 +2,23 @@ import { useId, useState, type FormEvent } from "react";
 
 import { POSTED_WITHIN, SOURCES, sourceName, type Filters, type Source, type WorkType } from "./model";
 
-type Draft = { work: string; region: string; minSalary: string; postedWithin: string; source: string };
+type Draft = { work: string; minSalary: string; postedWithin: string; source: string };
 
 function toDraft(filters: Filters): Draft {
   return {
     work: filters.work ?? "",
-    region: filters.region ?? "",
     minSalary: filters.minSalary ? String(filters.minSalary) : "",
     postedWithin: filters.postedWithin ? String(filters.postedWithin) : "",
     source: filters.source ?? "",
   };
 }
 
-function fromDraft(draft: Draft): Filters {
+/** The panel's fields over the current filters; What and Where come from the band and stay. */
+function fromDraft(draft: Draft, current: Filters): Filters {
   const filters: Filters = {};
+  if (current.what) filters.what = current.what;
+  if (current.region) filters.region = current.region;
   if (draft.work === "remote" || draft.work === "not-remote") filters.work = draft.work as WorkType;
-  if (draft.region.trim()) filters.region = draft.region.trim();
   const salary = Number(draft.minSalary.replace(/[$,\s]/g, ""));
   if (Number.isInteger(salary) && salary > 0) filters.minSalary = Math.min(salary, 2_000_000);
   const days = POSTED_WITHIN.find((d) => String(d) === draft.postedWithin);
@@ -28,9 +29,9 @@ function fromDraft(draft: Draft): Filters {
 }
 
 /**
- * Feed filters. A column on wide screens; on narrower ones it folds behind a "Filters, 2 on"
- * toggle. Applying writes them to the address, so they survive reload (FEED-07). Give it a
- * `key` from the address, so it starts over when the filters change elsewhere.
+ * The quieter feed filters, folded behind "More filters" (or "More filters, 2 on") under the
+ * search in the band. Applying writes them to the address, so they survive reload (FEED-07).
+ * Give it a `key` from the address, so it starts over when the filters change elsewhere.
  */
 export function FilterPanel({
   filters,
@@ -48,23 +49,23 @@ export function FilterPanel({
   const set = (key: keyof Draft) => (value: string) => setDraft((d) => ({ ...d, [key]: value }));
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    onApply(fromDraft(draft));
+    onApply(fromDraft(draft, filters));
     setOpen(false);
   };
 
   return (
-    <aside className={`jobs-filters${open ? " jobs-filters-open" : ""}`} aria-label="Filters">
+    <aside className={`jobs-filters${open ? " jobs-filters-open" : ""}`} aria-label="More filters">
       <button
         type="button"
-        className="button button-secondary jobs-filters-toggle"
+        className="jobs-filters-toggle"
         aria-expanded={open}
         aria-controls={`${id}-form`}
         onClick={() => setOpen((o) => !o)}
       >
-        {count > 0 ? `Filters, ${count} on` : "Filters"}
+        {count > 0 ? `More filters, ${count} on` : "More filters"}
       </button>
       <form id={`${id}-form`} className="jobs-filters-form" onSubmit={submit}>
-        <h2 className="jobs-filters-title">Filters</h2>
+        <h2 className="jobs-filters-title">More filters</h2>
         <div className="field">
           <label className="field-label" htmlFor={`${id}-work`}>
             Work type
@@ -74,19 +75,6 @@ export function FilterPanel({
             <option value="remote">Remote</option>
             <option value="not-remote">On-site or hybrid</option>
           </select>
-        </div>
-        <div className="field">
-          <label className="field-label" htmlFor={`${id}-state`}>
-            State
-          </label>
-          <input
-            id={`${id}-state`}
-            className="field-input"
-            value={draft.region}
-            maxLength={40}
-            placeholder="TX or Texas"
-            onChange={(e) => set("region")(e.target.value)}
-          />
         </div>
         <div className="field">
           <label className="field-label" htmlFor={`${id}-pay`}>
@@ -139,7 +127,7 @@ export function FilterPanel({
               type="button"
               className="button button-ghost"
               onClick={() => {
-                onApply({});
+                onApply({ what: filters.what, region: filters.region });
                 setOpen(false);
               }}
             >

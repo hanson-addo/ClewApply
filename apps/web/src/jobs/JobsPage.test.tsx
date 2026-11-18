@@ -35,6 +35,11 @@ function detail(base: FeedJob, extra: Partial<JobDetail> = {}): JobDetail {
   return {
     ...base,
     description: "Wind thread through the maze.",
+    fit_parts: [
+      { label: "Title", value: 100 },
+      { label: "Skills", value: 50 },
+      { label: "Location", value: 0 },
+    ],
     status: "open",
     dismissed: false,
     listings: [
@@ -136,7 +141,24 @@ describe("job list", () => {
     expect(query?.get("min_salary")).toBe("90000");
     expect(query?.get("posted_within_days")).toBe("7");
     expect(query?.get("source")).toBe("lever");
-    expect(screen.getByRole("button", { name: "Filters, 5 on" })).toBeInTheDocument();
+    // State is the band's Where box, so More filters counts the other four.
+    expect(screen.getByRole("button", { name: "More filters, 4 on" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Where")).toHaveValue("TX");
+  });
+
+  it("searches What and Where from the band, keeping the other filters", async () => {
+    const { router } = renderAt("/jobs?work=remote");
+    await screen.findByText("3 jobs");
+    const search = screen.getByRole("search", { name: "Jobs" });
+    await user().type(within(search).getByLabelText("What"), "  maze   mapper ");
+    await user().type(within(search).getByLabelText("Where"), "Texas");
+    await user().click(within(search).getByRole("button", { name: "Search" }));
+    await waitFor(() =>
+      expect(router.state.location.search).toBe("?q=maze+mapper&work=remote&state=Texas"),
+    );
+    await waitFor(() => expect(feedQueries.at(-1)?.get("q")).toBe("maze mapper"));
+    expect(feedQueries.at(-1)?.get("region")).toBe("Texas");
+    expect(feedQueries.at(-1)?.get("remote")).toBe("true");
   });
 
   it("applies and clears filters through the address", async () => {
@@ -150,6 +172,14 @@ describe("job list", () => {
 
     await user().click(screen.getByRole("button", { name: "Clear filters" }));
     await waitFor(() => expect(router.state.location.search).toBe(""));
+  });
+
+  it("keeps What and Where when More filters are cleared", async () => {
+    const { router } = renderAt("/jobs?q=maze&state=TX&work=remote");
+    await screen.findByText("3 jobs");
+    const more = screen.getByRole("complementary", { name: "More filters" });
+    await user().click(within(more).getByRole("button", { name: "Clear filters" }));
+    await waitFor(() => expect(router.state.location.search).toBe("?q=maze&state=TX"));
   });
 
   it("guides a brand-new feed and a feed with no matches", async () => {
@@ -207,6 +237,16 @@ describe("job detail", () => {
     expect(apply).toHaveAttribute("target", "_blank");
     expect(apply).toHaveAttribute("rel", "noopener noreferrer");
     expect(screen.getByText("boards.greenhouse.io")).toBeInTheDocument();
+
+    // Why it fits you: a bar per part the score weighs, then the reasons in words.
+    const why = screen.getByRole("region", { name: "Why it fits you" });
+    const bars = within(why).getAllByRole("listitem").slice(0, 3);
+    expect(bars.map((bar) => bar.textContent)).toEqual([
+      "Title100 out of 100",
+      "Skills50 out of 100",
+      "Location0 out of 100",
+    ]);
+    expect(within(why).getByText("Remote, as you prefer")).toBeInTheDocument();
 
     const where = screen.getByRole("heading", { name: "Where it's posted" }).parentElement as HTMLElement;
     expect(within(where).getAllByRole("link")).toHaveLength(1);

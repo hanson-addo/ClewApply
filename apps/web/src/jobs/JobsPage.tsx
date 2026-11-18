@@ -10,6 +10,7 @@ import { JobDetailPanel } from "./JobDetailPanel";
 import {
   cardName,
   countFilters,
+  countMoreFilters,
   feedQuery,
   placeText,
   readFilters,
@@ -21,6 +22,7 @@ import {
   type Toast,
 } from "./model";
 import { FilterPanel } from "./FilterPanel";
+import { JobSearch } from "./JobSearch";
 
 type ListState =
   | { status: "loading" }
@@ -180,6 +182,7 @@ export function JobsPage() {
   );
 
   const filterCount = countFilters(filters);
+  const moreCount = countMoreFilters(filters);
   const hasDetail = Boolean(jobId);
 
   return (
@@ -199,9 +202,9 @@ export function JobsPage() {
             )}
             {list.status === "loading" && "Loading jobs"}
           </p>
+          <JobSearch key={query} filters={filters} onApply={applyFilters} />
+          <FilterPanel key={`more-${query}`} filters={filters} count={moreCount} onApply={applyFilters} />
         </div>
-
-        <FilterPanel key={query} filters={filters} count={filterCount} onApply={applyFilters} />
 
         <section className="jobs-list-col" aria-labelledby="jobs-heading">
 

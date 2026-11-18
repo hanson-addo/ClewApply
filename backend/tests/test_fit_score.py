@@ -158,6 +158,15 @@ def test_a_strong_match_scores_high_with_three_reasons() -> None:
         "Mentions 2 of your skills",
         "In Austin, TX, where you want to work",
     ]
+    # The bars under "Why it fits you": every part, each 0-100.
+    assert [(p.label, p.value) for p in result.parts] == [
+        ("Title", 100),
+        ("Skills", 100),
+        ("Location", 100),
+        ("Posted", 100),
+        ("Level", 100),
+        ("Pay", 100),
+    ]
 
 
 def test_a_weak_match_scores_low() -> None:
@@ -170,6 +179,10 @@ def test_a_weak_match_scores_low() -> None:
     old = job(posted_at=NOW - timedelta(days=60))
     assert fit(wants, old, NOW).score < 10
     assert fit(wants, old, NOW).reasons == []
+    parts = {p.label: p.value for p in fit(wants, old, NOW).parts}
+    assert parts["Title"] == 0
+    assert parts["Location"] == 0
+    assert 0 <= parts["Posted"] < 10
 
 
 def test_scores_stay_between_0_and_100() -> None:
