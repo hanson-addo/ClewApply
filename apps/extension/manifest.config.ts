@@ -4,6 +4,8 @@
  * mentions localhost anywhere (Security #2).
  */
 
+import { SITES } from "./src/sites.ts";
+
 export type Target = "production" | "development";
 
 export type Hosts = {
@@ -42,10 +44,12 @@ export function buildManifest(target: Target) {
     minimum_chrome_version: "116",
     action: { default_popup: "popup.html", default_title: "Clew" },
     background: { service_worker: "background.js", type: "module" },
-    // Step 1 needs storage and the API, nothing else: no cookies, tabs, history or all-sites
-    // access. Job-site hosts arrive in step 3 as optional permissions, asked for one at a time.
-    permissions: ["storage"],
+    // Storage for the token, scripting to open the fill panel when the user presses Fill, and
+    // the API. No cookies, tabs, history or all-sites access.
+    permissions: ["storage", "scripting"],
     host_permissions: [`${hosts.apiUrl}/*`],
+    // Job sites are asked for one at a time, when the user turns a site on (Security #10).
+    optional_host_permissions: Object.values(SITES).map((site) => site.origin),
     externally_connectable: { matches: [`${hosts.webOrigin}/*`] },
     content_security_policy: { extension_pages: "script-src 'self'; object-src 'self'" },
   };

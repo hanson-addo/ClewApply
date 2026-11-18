@@ -10,6 +10,8 @@ declare namespace chrome.runtime {
     /** The sending page's origin, set by Chrome (not by the sender). */
     origin?: string;
     url?: string;
+    /** For a content script, the tab it runs in. */
+    tab?: chrome.tabs.Tab;
   }
   type Listener = (
     message: unknown,
@@ -34,4 +36,28 @@ declare namespace chrome.storage {
     setAccessLevel(options: { accessLevel: "TRUSTED_CONTEXTS" | "TRUSTED_AND_UNTRUSTED_CONTEXTS" }): Promise<void>;
   }
   const local: StorageArea;
+}
+
+declare namespace chrome.tabs {
+  interface Tab {
+    id?: number;
+    /** Present only for sites the extension has a host permission for. */
+    url?: string;
+  }
+  function get(tabId: number): Promise<Tab>;
+  function query(query: { active: boolean; currentWindow: boolean }): Promise<Tab[]>;
+  function sendMessage(tabId: number, message: unknown): Promise<unknown>;
+}
+
+declare namespace chrome.permissions {
+  interface Permissions {
+    origins?: string[];
+  }
+  function contains(permissions: Permissions): Promise<boolean>;
+  function request(permissions: Permissions): Promise<boolean>;
+  function remove(permissions: Permissions): Promise<boolean>;
+}
+
+declare namespace chrome.scripting {
+  function executeScript(injection: { target: { tabId: number }; files: string[] }): Promise<unknown[]>;
 }

@@ -4,8 +4,26 @@
  */
 
 import { createApiClient } from "./api/client";
-import { isLinkMessage, isPopupMessage, type LinkResult, type Status } from "./messages";
+import {
+  isFilledMessage,
+  isLinkMessage,
+  isPopupMessage,
+  type FieldsMessage,
+  type FillTabResult,
+  type LinkResult,
+  type Status,
+} from "./messages";
+import { siteForUrl } from "./sites";
 import type { TokenStore } from "./tokenStore";
+
+/** The tab and scripting calls the fill flow makes, so tests can fake them. */
+export type BrowserApi = {
+  /** The tab's address; Chrome gives it only for sites the user turned on. */
+  tabUrl(tabId: number): Promise<string | undefined>;
+  hasPermission(origin: string): Promise<boolean>;
+  inject(tabId: number, file: string): Promise<void>;
+  sendToTab(tabId: number, message: FieldsMessage): Promise<void>;
+};
 
 export type Deps = {
   apiUrl: string;
@@ -16,6 +34,7 @@ export type Deps = {
   store: TokenStore;
   /** Which browser this is, shown in the web app's Settings, e.g. "Chrome on macOS". */
   label: () => string;
+  browser: BrowserApi;
 };
 
 /**
@@ -57,10 +76,69 @@ export async function handlePopup(
   deps: Deps,
   message: unknown,
   sender: chrome.runtime.MessageSender,
-): Promise<Status | { ok: true } | null> {
+): Promise<Status | FillTabResult | null> {
   if (!isOwnPage(deps, sender) || !isPopupMessage(message)) return null;
   if (message.type === "clew/sign-out") return signOut(deps);
+  if (message.type === "clew/fill-tab") return fillTab(deps, message.tabId);
   return status(deps);
+}
+
+/**
+ * The user pressed Fill in the popup: check the tab is a supported site's profile page that the
+ * user turned on, fetch the values, then inject that site's fill panel and hand it the values.
+ * The panel never sees the token and never calls the API.
+ */
+async function fillTab(deps: Deps, tabId: number): Promise<FillTabResult> {
+  const token = await deps.store.get();
+  if (!token) return { ok: false, error: "signed-out" };
+  try {
+    const site = siteForUrl(await deps.browser.tabUrl(tabId));
+    if (!site) return { ok: false, error: "wrong-page" };
+    if (!(await deps.browser.hasPermission(site.origin))) return { ok: false, error: "not-turned-on" };
+    const { data, response } = await createApiClient(deps.apiUrl, token).GET("/sync/fields/{site}", {
+      params: { path: { site: site.id } },
+    });
+    if (response.status === 401) {
+      await deps.store.clear();
+      return { ok: false, error: "signed-out" };
+    }
+    if (!data) return { ok: false, error: "unavailable" };
+    if (data.profile_version === null) return { ok: false, error: "no-profile" };
+    await deps.browser.inject(tabId, site.script);
+    await deps.browser.sendToTab(tabId, {
+      type: "clew/fields",
+      site: site.id,
+      profileVersion: data.profile_version,
+      fields: data.fields,
+    });
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "unavailable" };
+  }
+}
+
+/**
+ * A message from a fill panel: which fields the user filled. Accepted only from this
+ * extension's own content script, running on that site's profile page.
+ */
+export async function handleContent(
+  deps: Deps,
+  message: unknown,
+  sender: chrome.runtime.MessageSender,
+): Promise<{ ok: boolean } | null> {
+  if (sender.id !== deps.extensionId || !isFilledMessage(message)) return null;
+  const fromSite = (url: string | undefined) => siteForUrl(url)?.id === message.site;
+  if (!fromSite(sender.url) || !fromSite(sender.tab?.url)) return null;
+  const token = await deps.store.get();
+  if (!token) return { ok: false };
+  try {
+    const { response } = await createApiClient(deps.apiUrl, token).POST("/sync/fills", {
+      body: { site: message.site, profile_version: message.profileVersion, field_keys: message.keys },
+    });
+    return { ok: response.ok };
+  } catch {
+    return { ok: false };
+  }
 }
 
 async function status(deps: Deps): Promise<Status> {

@@ -1,14 +1,21 @@
 import { buildManifest, EXTENSION_ID, MANIFEST_KEY } from "../manifest.config";
 import { noDevHosts } from "../vite.config";
+import { contentGuard } from "../vite.content.config";
 
 describe("production manifest", () => {
   const manifest = buildManifest("production");
 
-  it("asks for storage and the Clew API only", () => {
-    expect(manifest.permissions).toEqual(["storage"]);
+  it("asks for storage, scripting and the Clew API only", () => {
+    expect(manifest.permissions).toEqual(["storage", "scripting"]);
     expect(manifest.host_permissions).toEqual(["https://api.clewapply.com/*"]);
     expect(manifest).not.toHaveProperty("optional_permissions");
+    // Nothing runs on a job site until the user presses Fill.
     expect(manifest).not.toHaveProperty("content_scripts");
+  });
+
+  it("asks for job sites only when the user turns one on, never all sites (Security #10)", () => {
+    expect(manifest.optional_host_permissions).toEqual(["https://www.linkedin.com/*"]);
+    expect(JSON.stringify(manifest)).not.toMatch(/<all_urls>|\*:\/\/\*\//);
   });
 
   it("lets only the Clew web app message the extension", () => {
@@ -61,5 +68,33 @@ describe("the production build check", () => {
 
   it("passes production hosts", () => {
     expect(() => check({ "background.js": { type: "chunk", code: 'fetch("https://api.clewapply.com/x")' } })).not.toThrow();
+  });
+});
+
+describe("the content-script build check (Security #8)", () => {
+  type Bundle = Record<string, { type: "chunk"; code: string }>;
+
+  function check(code: string) {
+    const plugin = contentGuard(["https://api.clewapply.com"]);
+    const error = vi.fn((message: string) => {
+      throw new Error(message);
+    });
+    const hook = plugin.writeBundle as unknown as (this: unknown, options: unknown, bundle: Bundle) => void;
+    hook.call({ error }, {}, { "linkedin.js": { type: "chunk", code } });
+  }
+
+  it.each([
+    "chrome.storage.local.get('x')",
+    "const s = chrome['storage']; s.local.get()",
+    "fetch('/x')",
+    "new XMLHttpRequest()",
+    "new WebSocket('wss://x')",
+    "const u = 'https://api.clewapply.com/sync'",
+  ])("fails when a content script could reach the token or the API: %s", (code) => {
+    expect(() => check(code)).toThrow(/linkedin\.js/);
+  });
+
+  it("passes a panel that only touches the page and messages the worker", () => {
+    expect(() => check("chrome.runtime.sendMessage({type:'clew/filled'}); input.value = 'x';")).not.toThrow();
   });
 });

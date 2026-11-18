@@ -71,3 +71,54 @@ body {
   opacity: 0.6;
   cursor: default;
 }
+
+.popup-site {
+  margin: 0 0 1rem;
+  padding: 0.75rem;
+  border: 1px solid #c9c5e6;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.popup-site-name {
+  margin: 0 0 0.25rem;
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.popup-site .popup-hint {
+  margin: 0 0 0.5rem;
+}
+
+/* Coral is a fill only, with indigo text. */
+.popup-button-primary {
+  border-color: #ff6b4a;
+  background: #ff6b4a;
+  font-weight: 700;
+}
+
+.popup-result {
+  margin: 0.5rem 0 0;
+  font-size: 0.8125rem;
+}
+
+.popup-result:empty {
+  display: none;
+}
+
+.popup-link {
+  margin-top: 0.5rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #b23a1e;
+  font: inherit;
+  font-size: 0.8125rem;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.popup-link:focus-visible {
+  outline: 2px solid #b23a1e;
+  outline-offset: 2px;
+}
