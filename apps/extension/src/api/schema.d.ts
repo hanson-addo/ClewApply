@@ -670,6 +670,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/sync/fills": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Record Fill
+         * @description Records what the extension filled on a site, as fingerprints of the profile's values.
+         */
+        post: operations["record_fill_sync_fills_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/sync/status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Sync Status
+         * @description Each site's state and the fields it's behind on, by name. Values are never returned.
+         */
+        get: operations["sync_status_sync_status_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -797,6 +837,13 @@ export interface components {
             summary?: string | null;
             /** Url */
             url?: string | null;
+        };
+        /** BehindField */
+        BehindField: {
+            /** Key */
+            key: string;
+            /** Label */
+            label: string;
         };
         /** Body_upload_resume_resumes_post */
         Body_upload_resume_resumes_post: {
@@ -935,6 +982,18 @@ export interface components {
             per_page: number;
             /** Total */
             total: number;
+        };
+        /** FillRecord */
+        FillRecord: {
+            /** Field Keys */
+            field_keys: string[];
+            /** Profile Version */
+            profile_version: number;
+            /**
+             * Site
+             * @enum {string}
+             */
+            site: "linkedin" | "indeed" | "usajobs";
         };
         /** FitPartOut */
         FitPartOut: {
@@ -1467,6 +1526,27 @@ export interface components {
              */
             updated_at: string;
         };
+        /** SiteStatus */
+        SiteStatus: {
+            /** Behind */
+            behind: components["schemas"]["BehindField"][];
+            /** Last Filled At */
+            last_filled_at: string | null;
+            /** Name */
+            name: string;
+            /** Profile Url */
+            profile_url: string;
+            /**
+             * Site
+             * @enum {string}
+             */
+            site: "linkedin" | "indeed" | "usajobs";
+            /**
+             * State
+             * @enum {string}
+             */
+            state: "not_set_up" | "behind" | "up_to_date";
+        };
         /** Skill */
         Skill: {
             /**
@@ -1491,6 +1571,11 @@ export interface components {
         /** StatusChange */
         StatusChange: {
             status: components["schemas"]["ApplicationStatus"];
+        };
+        /** SyncStatus */
+        SyncStatus: {
+            /** Sites */
+            sites: components["schemas"]["SiteStatus"][];
         };
         /** TokenRequest */
         TokenRequest: {
@@ -3145,6 +3230,90 @@ export interface operations {
             };
             /** @description Another resume is being read, or the daily limit is reached */
             429: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    record_fill_sync_fills_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["FillRecord"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The extension token is unknown, revoked or expired */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description That profile version doesn't exist. */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Some of those fields aren't filled on this site. */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The Sync Center isn't set up yet. */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    sync_status_sync_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SyncStatus"];
+                };
+            };
+            /** @description Not signed in */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description The Sync Center isn't set up yet. */
+            503: {
                 headers: {
                     [name: string]: unknown;
                 };

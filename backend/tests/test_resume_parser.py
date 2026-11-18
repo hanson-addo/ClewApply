@@ -216,6 +216,7 @@ def test_only_local_and_test_runs_follow_anthropic_base_url(
     monkeypatch.setenv("CLEW_ENV", env)
     monkeypatch.setenv("CLEW_CLERK_ISSUER", "https://clew-test.clerk.accounts.dev")
     monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "test-fingerprint-key")
     monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
     monkeypatch.setenv("CLEW_ANTHROPIC_API_KEY", "test-key-not-real")
     monkeypatch.setenv("ANTHROPIC_BASE_URL", "http://127.0.0.1:8787")

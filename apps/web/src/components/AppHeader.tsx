@@ -8,6 +8,7 @@ const LINKS = [
   { to: "/jobs", label: "Jobs", end: false },
   { to: "/applications", label: "Applications", end: false },
   { to: "/profile", label: "Profile", end: false },
+  { to: "/sync", label: "Sync", end: false },
 ];
 
 /**

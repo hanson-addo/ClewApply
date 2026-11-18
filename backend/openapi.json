@@ -494,6 +494,24 @@
         "title": "Basics",
         "type": "object"
       },
+      "BehindField": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ],
+        "title": "BehindField",
+        "type": "object"
+      },
       "Body_upload_resume_resumes_post": {
         "properties": {
           "file": {
@@ -961,6 +979,41 @@
           "has_more"
         ],
         "title": "FeedPage",
+        "type": "object"
+      },
+      "FillRecord": {
+        "properties": {
+          "field_keys": {
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Field Keys",
+            "type": "array"
+          },
+          "profile_version": {
+            "minimum": 1.0,
+            "title": "Profile Version",
+            "type": "integer"
+          },
+          "site": {
+            "enum": [
+              "linkedin",
+              "indeed",
+              "usajobs"
+            ],
+            "title": "Site",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site",
+          "profile_version",
+          "field_keys"
+        ],
+        "title": "FillRecord",
         "type": "object"
       },
       "FitPartOut": {
@@ -2470,6 +2523,65 @@
         "title": "ResumeParseOut",
         "type": "object"
       },
+      "SiteStatus": {
+        "properties": {
+          "behind": {
+            "items": {
+              "$ref": "#/components/schemas/BehindField"
+            },
+            "title": "Behind",
+            "type": "array"
+          },
+          "last_filled_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Filled At"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "profile_url": {
+            "title": "Profile Url",
+            "type": "string"
+          },
+          "site": {
+            "enum": [
+              "linkedin",
+              "indeed",
+              "usajobs"
+            ],
+            "title": "Site",
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "not_set_up",
+              "behind",
+              "up_to_date"
+            ],
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site",
+          "name",
+          "profile_url",
+          "state",
+          "behind",
+          "last_filled_at"
+        ],
+        "title": "SiteStatus",
+        "type": "object"
+      },
       "Skill": {
         "additionalProperties": false,
         "properties": {
@@ -2565,6 +2677,22 @@
           "status"
         ],
         "title": "StatusChange",
+        "type": "object"
+      },
+      "SyncStatus": {
+        "properties": {
+          "sites": {
+            "items": {
+              "$ref": "#/components/schemas/SiteStatus"
+            },
+            "title": "Sites",
+            "type": "array"
+          }
+        },
+        "required": [
+          "sites"
+        ],
+        "title": "SyncStatus",
         "type": "object"
       },
       "TokenRequest": {
@@ -2823,7 +2951,7 @@
     },
     "securitySchemes": {
       "HTTPBearer": {
-        "description": "Clew extension token",
+        "description": "Clerk session token",
         "scheme": "bearer",
         "type": "http"
       }
@@ -4668,6 +4796,81 @@
         "summary": "Restart Parse",
         "tags": [
           "resumes"
+        ]
+      }
+    },
+    "/sync/fills": {
+      "post": {
+        "description": "Records what the extension filled on a site, as fingerprints of the profile's values.",
+        "operationId": "record_fill_sync_fills_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FillRecord"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "The extension token is unknown, revoked or expired"
+          },
+          "404": {
+            "description": "That profile version doesn't exist."
+          },
+          "422": {
+            "description": "Some of those fields aren't filled on this site."
+          },
+          "503": {
+            "description": "The Sync Center isn't set up yet."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Record Fill",
+        "tags": [
+          "sync"
+        ]
+      }
+    },
+    "/sync/status": {
+      "get": {
+        "description": "Each site's state and the fields it's behind on, by name. Values are never returned.",
+        "operationId": "sync_status_sync_status_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyncStatus"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "503": {
+            "description": "The Sync Center isn't set up yet."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Sync Status",
+        "tags": [
+          "sync"
         ]
       }
     }

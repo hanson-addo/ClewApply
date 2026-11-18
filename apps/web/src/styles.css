@@ -886,6 +886,11 @@ html {
     flex-basis: 100%;
   }
 
+  /* Five links fit one row at 375px. */
+  .app-nav-link {
+    padding: 0 var(--clew-space-2);
+  }
+
   /* Save and Discard share the full width (design: primary actions go full width). */
   .profile-savebar .button {
     flex: 1 1 0;
@@ -3195,4 +3200,98 @@ body:has(.page-band) .app-header[data-at-top] {
   padding-left: var(--clew-space-5);
   color: var(--clew-text-secondary);
   font-size: var(--clew-font-size-sm);
+}
+
+/* --- Sync Center (#130 step 2) ----------------------------------------------------------- */
+
+.sync-page {
+  display: grid;
+  gap: var(--clew-space-6);
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: var(--clew-space-8) var(--clew-space-4) var(--clew-space-12);
+}
+
+.sync-page h1 {
+  margin: 0;
+}
+
+.sync-lede {
+  max-width: 40rem;
+  margin: var(--clew-space-3) 0 0;
+}
+
+.sync-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr));
+  gap: var(--clew-space-5);
+}
+
+.sync-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--clew-space-3);
+  padding: var(--clew-space-6);
+  border: 1px solid var(--app-card-border, var(--clew-border-subtle));
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  box-shadow: var(--app-card-shadow, var(--clew-shadow-raised));
+}
+
+.sync-card-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--clew-space-3);
+}
+
+.sync-card h2 {
+  margin: 0;
+  font-size: var(--clew-font-size-xl);
+}
+
+.sync-card p {
+  margin: 0;
+}
+
+.sync-state {
+  font-weight: var(--clew-font-weight-bold);
+  font-size: var(--clew-font-size-sm);
+  white-space: nowrap;
+}
+
+.sync-behind .sync-state {
+  color: var(--clew-color-coral-700);
+}
+
+.sync-when,
+.sync-hint,
+.sync-note {
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-sm);
+}
+
+.sync-changed-title {
+  margin: 0;
+  font-family: var(--clew-font-family-body);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-bold);
+}
+
+.sync-changed {
+  margin: 0;
+  padding-left: var(--clew-space-5);
+  font-size: var(--clew-font-size-sm);
+}
+
+.sync-open {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  margin-top: auto;
+  text-decoration: none;
+}
+
+.sync-error {
+  color: var(--clew-status-danger-fg);
 }

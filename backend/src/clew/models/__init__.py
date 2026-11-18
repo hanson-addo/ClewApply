@@ -17,6 +17,7 @@ from clew.models.preferences import JobPreferences
 from clew.models.profile import Profile, ProfileVersion
 from clew.models.resume import Resume
 from clew.models.resume_parse import ParseStatus, ResumeParse
+from clew.models.sync import SyncFill
 from clew.models.usage import UsageEvent, UsageKind
 from clew.models.user import User
 
@@ -41,6 +42,7 @@ __all__ = [
     "RemoteType",
     "Resume",
     "ResumeParse",
+    "SyncFill",
     "UsageEvent",
     "UsageKind",
     "User",

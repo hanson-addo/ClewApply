@@ -15,6 +15,7 @@ def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
         "CLEW_CORS_ORIGINS",
         "CLEW_CLERK_ISSUER",
         "CLEW_CLERK_SECRET_KEY",
+        "CLEW_FILL_FINGERPRINT_KEY",
     ):
         monkeypatch.delenv(name, raising=False)
 
@@ -24,6 +25,7 @@ def production_env(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CLEW_CLERK_ISSUER", ISSUER)
     monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
     monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "test-fingerprint-key")
 
 
 def test_env_defaults_to_production(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -106,3 +108,10 @@ def test_listed_cors_origins_are_kept(monkeypatch: pytest.MonkeyPatch) -> None:
 def test_blank_anthropic_key_is_unset(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("CLEW_ANTHROPIC_API_KEY", "")
     assert Settings(env="test", database_url="postgresql+asyncpg://x/y").anthropic_api_key is None
+
+
+def test_production_requires_a_fill_fingerprint_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    production_env(monkeypatch)
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "")
+    with pytest.raises(ValidationError, match="CLEW_FILL_FINGERPRINT_KEY is required"):
+        Settings(_env_file=None)
