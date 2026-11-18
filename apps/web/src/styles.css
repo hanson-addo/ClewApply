@@ -2034,7 +2034,8 @@ input:focus-visible + .upload-choose,
   }
 }
 
-.home-grid > :not(.home-columns),
+.home-grid > :not(.home-columns, .map-stage),
+.map-intro-main > *,
 .home-columns .home-card {
   animation: home-rise 480ms var(--clew-motion-easing) both;
 }
@@ -2372,5 +2373,319 @@ input:focus-visible + .upload-choose,
   .settings-action {
     width: 100%;
     justify-content: center;
+  }
+}
+
+/* --- Home: jobs map (#119 step 6) -------------------------------------------------------- */
+
+/*
+ * The intro (greeting and setup), then a wide "Jobs near you" map. The map is drawn once at its
+ * full size and revealed with one short fade and rise when it scrolls into view: no resizing,
+ * no sticky scroll section, nothing redrawn per frame by the page.
+ */
+.map-stage {
+  display: grid;
+  gap: var(--clew-space-6);
+}
+
+.map-intro-main {
+  display: grid;
+  gap: var(--clew-space-6);
+  min-width: 0;
+}
+
+.map-window {
+  position: relative;
+  height: clamp(26rem, 68svh, 42rem);
+  overflow: hidden;
+  border-radius: var(--clew-radius-xl);
+  background: #f2f2ef;
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 600ms var(--clew-motion-easing),
+    transform 600ms var(--clew-motion-easing);
+}
+
+.map-window.is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+.map-window .jobs-map-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.map-window .map-loading {
+  color: var(--clew-text-secondary);
+}
+
+/* The large top pins fade in with the map's own pins, all together. */
+.map-window .map-top-pin {
+  opacity: 0;
+  transition: opacity 500ms var(--clew-motion-easing);
+}
+
+.map-window.is-revealed .map-top-pin {
+  opacity: 1;
+}
+
+/* The frosted panel: how many jobs, how far, and "near me". */
+.map-glass {
+  position: absolute;
+  top: var(--clew-space-6);
+  left: var(--clew-space-6);
+  z-index: 2;
+  display: grid;
+  gap: var(--clew-space-3);
+  width: min(22rem, calc(100% - 2 * var(--clew-space-6)));
+  padding: var(--clew-space-5);
+  border: 1px solid color-mix(in srgb, var(--clew-text-on-inverse) 18%, transparent);
+  border-radius: var(--clew-radius-xl);
+  background: color-mix(in srgb, var(--clew-bg-inverse) 88%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: var(--clew-shadow-overlay);
+  color: var(--clew-text-on-inverse);
+}
+
+.map-glass p {
+  margin: 0;
+}
+
+.map-glass-eyebrow {
+  color: var(--clew-text-on-inverse-muted);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
+}
+
+.map-glass-count {
+  font-size: var(--clew-font-size-lg);
+  line-height: var(--clew-font-line-height-tight);
+}
+
+.map-glass-number {
+  display: block;
+  color: var(--clew-text-link-on-inverse);
+  font-family: var(--clew-font-family-display);
+  font-size: var(--clew-font-size-4xl);
+  font-weight: var(--clew-font-weight-heavy);
+  font-variant-numeric: tabular-nums;
+}
+
+.map-radius {
+  display: inline-flex;
+  justify-self: start;
+  padding: var(--clew-space-1);
+  border-radius: var(--clew-radius-pill);
+  background: color-mix(in srgb, var(--clew-text-on-inverse) 10%, transparent);
+}
+
+.map-radius-option {
+  min-width: 44px;
+  min-height: 36px;
+  padding: 0 var(--clew-space-3);
+  border: none;
+  border-radius: var(--clew-radius-pill);
+  background: transparent;
+  color: var(--clew-text-on-inverse);
+  font: inherit;
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
+  cursor: pointer;
+  transition: background var(--clew-motion-duration-base) var(--clew-motion-easing);
+}
+
+.map-radius-option[aria-pressed="true"] {
+  background: var(--clew-action-primary-bg);
+  color: var(--clew-text-primary);
+}
+
+.map-radius-option:focus-visible,
+.map-top-pin:focus-visible {
+  outline: 2px solid var(--clew-focus-ring-on-inverse);
+  outline-offset: 2px;
+}
+
+.map-glass-cta {
+  justify-self: start;
+}
+
+.map-glass-empty {
+  display: grid;
+  gap: var(--clew-space-1);
+}
+
+.map-glass-empty-title {
+  font-family: var(--clew-font-family-display);
+  font-size: var(--clew-font-size-lg);
+  font-weight: var(--clew-font-weight-bold);
+  line-height: var(--clew-font-line-height-tight);
+}
+
+.map-glass-note {
+  color: var(--clew-text-on-inverse-muted);
+  font-size: var(--clew-font-size-sm);
+}
+
+/* The card for a picked pin, sliding in from the right (from the bottom on a phone). */
+.map-pin-card {
+  position: absolute;
+  top: var(--clew-space-6);
+  right: var(--clew-space-16);
+  z-index: 3;
+  display: grid;
+  gap: var(--clew-space-2);
+  width: min(22rem, calc(100% - 2 * var(--clew-space-4)));
+  padding: var(--clew-space-5);
+  border-radius: var(--clew-radius-xl);
+  background: var(--clew-bg-surface);
+  box-shadow: var(--clew-shadow-overlay);
+  animation: map-card-in 320ms var(--clew-motion-easing) both;
+}
+
+.map-pin-card p {
+  margin: 0;
+}
+
+.map-pin-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.map-pin-card-title {
+  font-family: var(--clew-font-family-display);
+  font-size: var(--clew-font-size-xl);
+  font-weight: var(--clew-font-weight-bold);
+  line-height: var(--clew-font-line-height-tight);
+}
+
+.map-pin-card-meta {
+  color: var(--clew-text-secondary);
+}
+
+.map-pin-card-cta {
+  justify-self: start;
+  text-decoration: none;
+  margin-top: var(--clew-space-2);
+}
+
+@keyframes map-card-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+}
+
+/*
+ * The large coral pin for a top match, with its fit score.
+ */
+.map-top-pin {
+  position: relative;
+  width: 44px;
+  height: 56px;
+  padding: 0;
+  border: none;
+  border-radius: var(--clew-radius-pill);
+  background: transparent;
+  cursor: pointer;
+}
+
+.map-top-pin-score {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 3px solid var(--clew-color-ink-50);
+  border-radius: 50%;
+  background: var(--clew-color-coral-500);
+  color: var(--clew-color-ink-900);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-heavy);
+  filter: drop-shadow(0 3px 6px rgba(16, 25, 53, 0.3));
+}
+
+.map-top-pin-score::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -7px;
+  border: 7px solid transparent;
+  border-top: 10px solid var(--clew-color-ink-50);
+}
+
+.map-top-pin:hover .map-top-pin-score {
+  background: var(--clew-color-coral-400);
+}
+
+/* "You are here": a still coral dot with a soft halo. */
+.map-beacon {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  border: 3px solid var(--clew-color-ink-50);
+  border-radius: 50%;
+  background: var(--clew-color-coral-500);
+  box-shadow: var(--clew-shadow-glow-coral);
+}
+
+.map-beacon::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: var(--clew-color-coral-500);
+  opacity: 0.2;
+  transform: scale(2.2);
+}
+
+@media (max-width: 47.99rem) {
+  .map-glass {
+    top: auto;
+    left: var(--clew-space-3);
+    right: var(--clew-space-3);
+    bottom: var(--clew-space-8);
+    width: auto;
+    padding: var(--clew-space-4);
+    /* Blur is costly on phones; a solid tint reads the same at this size. */
+    backdrop-filter: none;
+    background: color-mix(in srgb, var(--clew-bg-inverse) 90%, transparent);
+  }
+
+  .map-glass-number {
+    display: inline;
+    font-size: var(--clew-font-size-2xl);
+  }
+
+  .map-pin-card {
+    top: auto;
+    left: var(--clew-space-3);
+    right: var(--clew-space-3);
+    bottom: var(--clew-space-8);
+    width: auto;
+    animation-name: map-card-up;
+  }
+
+  @keyframes map-card-up {
+    from {
+      opacity: 0;
+      transform: translateY(32px);
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-window,
+  .map-window .map-top-pin,
+  .map-pin-card {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    transition: none;
   }
 }

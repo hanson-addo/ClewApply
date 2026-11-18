@@ -163,3 +163,13 @@ async def test_follows_need_a_session(api: AsyncClient) -> None:
     body = {"ats_type": "lever", "board_token": "labyrinth"}
     assert (await api.post("/companies/follow", json=body)).status_code == 401
     assert (await api.delete("/companies/follow/lever/labyrinth")).status_code == 401
+
+
+def test_the_starter_list_has_valid_unique_boards_across_the_us() -> None:
+    from clew.catalog.boards import BOARD_TOKEN
+
+    boards = [(ats, token) for ats, token, _ in STARTER_BOARDS]
+    assert len(boards) == len(set(boards))
+    assert all(BOARD_TOKEN.fullmatch(token) for _, token in boards)
+    # Employers with on-site jobs in many US metros, not only tech hubs and remote roles.
+    assert {"doordashusa", "carvana", "sweetgreen", "toast"} <= {token for _, token in boards}

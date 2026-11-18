@@ -12,6 +12,8 @@ import httpx
 from arq import Retry
 from arq.connections import RedisSettings
 from arq.cron import cron
+from arq.worker import func
+from sqlalchemy import select
 
 from clew.catalog.companies import ensure_starter_boards
 from clew.catalog.geocode import geocode_missing
@@ -21,6 +23,7 @@ from clew.catalog.usajobs import USAJOBS_RUN_TIMEOUT_SECONDS, client_headers, po
 from clew.catalog_cleanup import delete_old_raw_postings
 from clew.config import get_settings
 from clew.db.session import get_sessionmaker
+from clew.models import Job
 from clew.resumes.parser import get_resume_parser
 from clew.resumes.parsing import RetryLater, run_parse
 from clew.scanning import get_malware_scanner
@@ -79,6 +82,22 @@ async def read_usajobs(ctx: dict[str, Any]) -> None:
         await poll_usajobs(get_sessionmaker(), client)
 
 
+async def catalog_is_empty() -> bool:
+    async with get_sessionmaker()() as session:
+        return await session.scalar(select(Job.id).limit(1)) is None
+
+
+async def fill_empty_catalog(ctx: dict[str, Any]) -> None:
+    """On a worker's first start the catalog is empty, so the map and feed would stay blank
+    until the hourly and daily runs come round. Queue one of each straight away instead.
+    The fixed job ids stop several workers starting together from queueing twice."""
+    if not await catalog_is_empty():
+        return
+    logger.info("catalog_empty_fetching_now")
+    await ctx["redis"].enqueue_job("poll_boards", _job_id="first-fill:poll_boards")
+    await ctx["redis"].enqueue_job("read_usajobs", _job_id="first-fill:read_usajobs")
+
+
 def _redis_settings() -> RedisSettings:
     url = get_settings().redis_url
     if url is None:
@@ -87,7 +106,13 @@ def _redis_settings() -> RedisSettings:
 
 
 class WorkerSettings:
-    functions: ClassVar[list[Any]] = [parse_resume]
+    functions: ClassVar[list[Any]] = [
+        parse_resume,
+        # Also queueable, for fill_empty_catalog; same time limits as their scheduled runs.
+        func(poll_boards, timeout=POLL_RUN_TIMEOUT.total_seconds(), max_tries=1),
+        func(read_usajobs, timeout=USAJOBS_RUN_TIMEOUT_SECONDS, max_tries=1),
+    ]
+    on_startup = fill_empty_catalog
     # Daily, at a quiet hour (UTC).
     cron_jobs: ClassVar[list[Any]] = [
         cron(clean_raw_postings, hour=9, minute=0),
@@ -105,8 +130,8 @@ class WorkerSettings:
     redis_settings = _redis_settings() if get_settings().redis_url else RedisSettings()
 
 
-# For the end-to-end tests: queued jobs only, no schedule. The hourly board poll would pull
-# real jobs into the test database mid-run and push the seeded jobs out of the feed.
+# For the end-to-end tests: resume parsing only, no schedule and no first fill. Fetching would
+# pull real jobs into the test database mid-run and push the seeded jobs out of the feed.
 # A copy, not a subclass: arq reads only a settings class's own attributes, so a subclass
 # would silently drop functions, max_tries and the rest.
 EndToEndWorkerSettings = type(
@@ -115,5 +140,7 @@ EndToEndWorkerSettings = type(
     {
         **{key: value for key, value in vars(WorkerSettings).items() if not key.startswith("__")},
         "cron_jobs": [],
+        "functions": [parse_resume],
+        "on_startup": None,
     },
 )
