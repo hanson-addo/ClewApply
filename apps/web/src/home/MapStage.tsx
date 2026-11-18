@@ -45,9 +45,29 @@ function PinRow({ pin, distance }: { pin: MapPin; distance?: number }) {
 }
 
 /** The card that slides in for a picked pin. */
-function PinCard({ pin, distance, onClose }: { pin: MapPin; distance?: number; onClose: () => void }) {
+function PinCard({
+  pin,
+  distance,
+  takeFocus,
+  onClose,
+}: {
+  pin: MapPin;
+  distance?: number;
+  takeFocus: boolean;
+  onClose: () => void;
+}) {
+  const card = useRef<HTMLDivElement>(null);
+  // Opened from the keyboard: move focus into the card, and give it back to the pin on close.
+  useEffect(() => {
+    if (!takeFocus) return;
+    const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    card.current?.focus();
+    return () => {
+      if (previous?.isConnected) previous.focus();
+    };
+  }, [takeFocus, pin.id]);
   return (
-    <div className="map-pin-card" role="group" aria-label={pin.title}>
+    <div ref={card} tabIndex={-1} className="map-pin-card" role="group" aria-label={pin.title}>
       <div className="map-pin-card-top">
         <FitScore score={pin.fit_score} />
         <button type="button" className="map-popup-close" aria-label="Close" onClick={onClose}>
@@ -165,6 +185,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
   const [near, setNear] = useState<Near>({ status: "off" });
   const [radius, setRadius] = useState<Radius>(DEFAULT_RADIUS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [pickedByKeyboard, setPickedByKeyboard] = useState(false);
 
   const pins = useMemo(() => (state.status === "ready" ? state.pins : []), [state]);
   const saved = state.status === "ready" ? (state.center ?? null) : null;
@@ -283,7 +304,10 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
           revealed={shown}
           still={reduced}
           phone={phone}
-          onSelect={setSelectedId}
+          onSelect={(id, fromKeyboard = false) => {
+            setPickedByKeyboard(fromKeyboard);
+            setSelectedId(id);
+          }}
         />
       </Suspense>
       <GlassPanel
@@ -295,7 +319,14 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
         onFindMe={findMe}
         nearest={nearest}
       />
-      {selected && <PinCard pin={selected.pin} distance={selected.distance} onClose={() => setSelectedId(null)} />}
+      {selected && (
+        <PinCard
+          pin={selected.pin}
+          distance={selected.distance}
+          takeFocus={pickedByKeyboard}
+          onClose={() => setSelectedId(null)}
+        />
+      )}
     </div>
   );
 

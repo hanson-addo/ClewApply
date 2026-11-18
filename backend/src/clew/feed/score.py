@@ -58,9 +58,18 @@ class JobFacts:
 
 
 @dataclass(frozen=True)
+class FitPart:
+    """One thing the score weighs, for the "Why it fits you" bars: how well it matched (0-100)."""
+
+    label: str
+    value: int
+
+
+@dataclass(frozen=True)
 class Fit:
     score: int
     reasons: list[str] = field(default_factory=list)
+    parts: list[FitPart] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -200,16 +209,21 @@ def fit(wants: Wants, job: JobFacts, now: datetime, terms: tuple[str, ...] | Non
     scoring many jobs, so they are built once."""
     if terms is None:
         terms = skill_terms(wants.skills)
-    parts = [
-        title_part(wants, job),
-        skills_part(wants, job, terms),
-        location_part(wants, job),
-        recency_part(job, now),
-        seniority_part(wants, job),
-        salary_part(wants, job),
+    named = [
+        ("Title", title_part(wants, job)),
+        ("Skills", skills_part(wants, job, terms)),
+        ("Location", location_part(wants, job)),
+        ("Posted", recency_part(job, now)),
+        ("Level", seniority_part(wants, job)),
+        ("Pay", salary_part(wants, job)),
     ]
+    parts = [part for _, part in named]
     total = sum(p.weight for p in parts)
     score = round(100 * sum(p.weight * p.value for p in parts) / total)
     strong = [p for p in parts if p.reason and p.value >= weights.REASON_THRESHOLD]
     strong.sort(key=lambda p: p.weight * p.value, reverse=True)
-    return Fit(score=score, reasons=[p.reason for p in strong[:3] if p.reason])
+    return Fit(
+        score=score,
+        reasons=[p.reason for p in strong[:3] if p.reason],
+        parts=[FitPart(label, round(100 * part.value)) for label, part in named],
+    )

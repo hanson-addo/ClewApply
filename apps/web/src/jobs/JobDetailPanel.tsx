@@ -19,6 +19,41 @@ import {
 type State = { status: "loading" } | { status: "missing" } | { status: "error" } | { status: "ready"; job: JobDetail };
 
 /** One job in full. A side panel on wide screens, the whole page on phones. */
+/** "Why it fits you": a bar for each part the fit score weighs, then the reasons in words. */
+function FitWhy({ job }: { job: JobDetail }) {
+  if (job.fit_parts.length === 0 && job.reasons.length === 0) return null;
+  return (
+    <section className="fit-why" aria-labelledby="fit-why-title">
+      <h3 id="fit-why-title" className="fit-why-title">
+        Why it fits you
+      </h3>
+      {job.fit_parts.length > 0 && (
+      <ul className="fit-why-bars">
+        {job.fit_parts.map((part) => (
+          <li key={part.label}>
+            <span className="fit-why-label">{part.label}</span>
+            <span className="fit-why-track" aria-hidden="true">
+              <span className="fit-why-fill" style={{ width: `${part.value}%` }} />
+            </span>
+            <span className="fit-why-value">
+              {part.value}
+              <span className="clew-sr-only"> out of 100</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+      )}
+      {job.reasons.length > 0 && (
+        <ul className="fit-why-reasons">
+          {job.reasons.map((reason) => (
+            <li key={reason}>{reason}</li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export function JobDetailPanel({
   jobId,
   backTo,
@@ -166,16 +201,7 @@ export function JobDetailPanel({
         </button>
       </div>
 
-      {job.reasons.length > 0 && (
-        <section aria-labelledby="job-why">
-          <h3 id="job-why">Why this fits</h3>
-          <ul>
-            {job.reasons.map((reason) => (
-              <li key={reason}>{reason}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+      <FitWhy job={job} />
 
       <section aria-labelledby="job-where">
         <h3 id="job-where">Where it&apos;s posted</h3>
