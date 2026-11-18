@@ -91,11 +91,16 @@ async def fill_empty_catalog(ctx: dict[str, Any]) -> None:
     """On a worker's first start the catalog is empty, so the map and feed would stay blank
     until the hourly and daily runs come round. Queue one of each straight away instead.
     The fixed job ids stop several workers starting together from queueing twice."""
-    if not await catalog_is_empty():
-        return
-    logger.info("catalog_empty_fetching_now")
-    await ctx["redis"].enqueue_job("poll_boards", _job_id="first-fill:poll_boards")
-    await ctx["redis"].enqueue_job("read_usajobs", _job_id="first-fill:read_usajobs")
+    try:
+        if not await catalog_is_empty():
+            return
+        logger.info("catalog_empty_fetching_now")
+        await ctx["redis"].enqueue_job("poll_boards", _job_id="first-fill:poll_boards")
+        await ctx["redis"].enqueue_job("read_usajobs", _job_id="first-fill:read_usajobs")
+    except Exception as exc:
+        # A database or Redis blip here must not stop the worker, or resume parsing stops too.
+        # The scheduled runs fill the catalog later. Log only the error's class, never its text.
+        logger.warning("catalog_first_fill_failed", extra={"error": type(exc).__name__})
 
 
 def _redis_settings() -> RedisSettings:

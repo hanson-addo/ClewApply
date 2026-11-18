@@ -96,3 +96,19 @@ async def test_the_worker_role_sees_jobs_when_checking_for_an_empty_catalog(
         await db.execute(delete(Job).where(Job.company_id == company.id))
         await db.execute(delete(Company).where(Company.id == company.id))
         await db.commit()
+
+
+async def test_a_failed_first_fill_does_not_stop_the_worker(
+    monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
+) -> None:
+    async def broken() -> bool:
+        raise ConnectionError("db host secret-host:5432 refused")
+
+    monkeypatch.setattr(worker, "catalog_is_empty", broken)
+    redis = FakeRedis()
+    with caplog.at_level("WARNING", logger=worker.logger.name):
+        await fill_empty_catalog({"redis": redis})
+    assert redis.queued == []
+    record = next(r for r in caplog.records if r.getMessage() == "catalog_first_fill_failed")
+    assert record.__dict__["error"] == "ConnectionError"
+    assert "secret-host" not in caplog.text

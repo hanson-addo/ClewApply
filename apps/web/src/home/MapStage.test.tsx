@@ -18,7 +18,7 @@ type CanvasProps = {
   revealed: boolean;
   still: boolean;
   phone: boolean;
-  onSelect: (id: string) => void;
+  onSelect: (id: string, fromKeyboard?: boolean) => void;
 };
 
 // MapLibre needs WebGL, which tests don't have. The stand-in shows what the map was given.
@@ -32,7 +32,7 @@ vi.mock("./JobsMapCanvas", () => ({
       <span>{props.still ? "still" : "moving"}</span>
       <span>{`top ${props.top.map((pin) => pin.fit_score).join(",")}`}</span>
       {props.pins.map((pin) => (
-        <button key={pin.id} type="button" onClick={() => props.onSelect(pin.id)}>
+        <button key={pin.id} type="button" onClick={(event) => props.onSelect(pin.id, event.detail === 0)}>
           pin {pin.title}
         </button>
       ))}
@@ -223,6 +223,25 @@ describe("MapStage", () => {
     fireEvent.click(screen.getByRole("button", { name: "pin Thread Analyst 1" }));
     fireEvent.keyDown(document, { key: "Escape" });
     expect(screen.queryByRole("group", { name: "Thread Analyst 1" })).not.toBeInTheDocument();
+  });
+
+  it("moves focus into the card when a pin is picked from the keyboard, and back on Escape", async () => {
+    webgl.ok = true;
+    renderStage(ready([pin(1), pin(2)]));
+    const pinButton = await screen.findByRole("button", { name: "pin Thread Analyst 2" });
+    pinButton.focus();
+    fireEvent.click(pinButton, { detail: 0 });
+    expect(screen.getByRole("group", { name: "Thread Analyst 2" })).toHaveFocus();
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("group", { name: "Thread Analyst 2" })).not.toBeInTheDocument();
+    expect(pinButton).toHaveFocus();
+  });
+
+  it("leaves focus alone when a pin is picked with the mouse", async () => {
+    webgl.ok = true;
+    renderStage(ready([pin(1), pin(2)]));
+    fireEvent.click(await screen.findByRole("button", { name: "pin Thread Analyst 2" }), { detail: 1 });
+    expect(screen.getByRole("group", { name: "Thread Analyst 2" })).not.toHaveFocus();
   });
 
   it("switches to the list, which drops the map", async () => {
