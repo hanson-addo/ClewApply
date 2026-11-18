@@ -692,6 +692,18 @@
             ],
             "title": "Enddate"
           },
+          "id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]{1,16}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
           "institution": {
             "anyOf": [
               {
@@ -979,6 +991,34 @@
           "has_more"
         ],
         "title": "FeedPage",
+        "type": "object"
+      },
+      "FillField": {
+        "properties": {
+          "behind": {
+            "title": "Behind",
+            "type": "boolean"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "value": {
+            "title": "Value",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "value",
+          "behind"
+        ],
+        "title": "FillField",
         "type": "object"
       },
       "FillRecord": {
@@ -2523,6 +2563,44 @@
         "title": "ResumeParseOut",
         "type": "object"
       },
+      "SiteFields": {
+        "properties": {
+          "fields": {
+            "items": {
+              "$ref": "#/components/schemas/FillField"
+            },
+            "title": "Fields",
+            "type": "array"
+          },
+          "profile_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Version"
+          },
+          "site": {
+            "enum": [
+              "linkedin",
+              "indeed",
+              "usajobs"
+            ],
+            "title": "Site",
+            "type": "string"
+          }
+        },
+        "required": [
+          "site",
+          "profile_version",
+          "fields"
+        ],
+        "title": "SiteFields",
+        "type": "object"
+      },
       "SiteStatus": {
         "properties": {
           "behind": {
@@ -2871,6 +2949,18 @@
             "title": "Highlights",
             "type": "array"
           },
+          "id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]{1,16}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id"
+          },
           "location": {
             "anyOf": [
               {
@@ -2951,7 +3041,7 @@
     },
     "securitySchemes": {
       "HTTPBearer": {
-        "description": "Clerk session token",
+        "description": "Clew extension token",
         "scheme": "bearer",
         "type": "http"
       }
@@ -4796,6 +4886,65 @@
         "summary": "Restart Parse",
         "tags": [
           "resumes"
+        ]
+      }
+    },
+    "/sync/fields/{site}": {
+      "get": {
+        "description": "The current profile's values for one site's fields, for the extension to fill. Empty\nfields are left out.",
+        "operationId": "site_fields_sync_fields__site__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "site",
+            "required": true,
+            "schema": {
+              "enum": [
+                "linkedin",
+                "indeed",
+                "usajobs"
+              ],
+              "title": "Site",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteFields"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "The extension token is unknown, revoked or expired"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "503": {
+            "description": "The Sync Center isn't set up yet."
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Site Fields",
+        "tags": [
+          "sync"
         ]
       }
     },

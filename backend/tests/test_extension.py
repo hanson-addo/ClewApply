@@ -224,6 +224,7 @@ EXTENSION_ROUTES = {
     ("GET", "/extension/me"),
     ("POST", "/extension/sign-out"),
     ("POST", "/sync/fills"),
+    ("GET", "/sync/fields/{site}"),
 }
 NO_SIGN_IN = {
     ("GET", "/health"),
@@ -232,19 +233,20 @@ NO_SIGN_IN = {
 }
 
 
-def every_route(app: FastAPI) -> list[tuple[str, str]]:
-    routes: list[tuple[str, str]] = []
+def every_route(app: FastAPI) -> list[tuple[str, str, str]]:
+    """Each route as (method, path template, a concrete path to call)."""
+    routes: list[tuple[str, str, str]] = []
     for path, operations in app.openapi()["paths"].items():
         concrete = re.sub(r"\{[^}]+\}", str(uuid.uuid4()), path)
-        routes.extend((method.upper(), concrete) for method in operations)
+        routes.extend((method.upper(), path, concrete) for method in operations)
     return routes
 
 
 async def test_extension_token_is_refused_everywhere_else(app: FastAPI, api: AsyncClient) -> None:
     token = await connect(api, new_sub())
     checked = 0
-    for method, path in every_route(app):
-        if (method, path) in EXTENSION_ROUTES | NO_SIGN_IN:
+    for method, template, path in every_route(app):
+        if (method, template) in EXTENSION_ROUTES | NO_SIGN_IN:
             continue
         response = await api.request(method, path, headers=bearer(token))
         assert response.status_code == 403, (method, path, response.status_code)
@@ -256,12 +258,12 @@ async def test_extension_token_is_refused_everywhere_else(app: FastAPI, api: Asy
 async def test_no_sign_in_routes_are_the_known_ones(app: FastAPI, api: AsyncClient) -> None:
     # A new route that answers without any sign-in must be added here on purpose.
     open_routes = set()
-    for method, path in every_route(app):
-        if (method, path) in EXTENSION_ROUTES:
+    for method, template, path in every_route(app):
+        if (method, template) in EXTENSION_ROUTES:
             continue
         response = await api.request(method, path)
         if response.status_code not in (401, 422):
-            open_routes.add((method, path))
+            open_routes.add((method, template))
     assert open_routes <= NO_SIGN_IN
 
 

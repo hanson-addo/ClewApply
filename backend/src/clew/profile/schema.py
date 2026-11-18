@@ -9,6 +9,7 @@ Left out on purpose:
 """
 
 import re
+import secrets
 from typing import Annotated, Any
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, field_validator
@@ -45,6 +46,10 @@ Email = Annotated[
 Phone = Annotated[
     str, StringConstraints(strip_whitespace=True, max_length=40, pattern=r"^[0-9+()\-. x]*$")
 ]
+
+# A job's or school's own id, given by the server when the entry is first saved, so the Sync
+# Center can follow an entry when the list is reordered. Not part of JSON Resume.
+EntryId = Annotated[str, StringConstraints(pattern=r"^[a-z0-9]{1,16}$")]
 
 Keywords = Annotated[list[ShortText], Field(max_length=50)]
 Highlights = Annotated[list[LongText], Field(max_length=30)]
@@ -86,6 +91,7 @@ class Basics(Strict):
 
 
 class Work(Strict):
+    id: EntryId | None = None
     name: ShortText | None = None
     position: ShortText | None = None
     location: ShortText | None = None
@@ -107,6 +113,7 @@ class Volunteer(Strict):
 
 
 class Education(Strict):
+    id: EntryId | None = None
     institution: ShortText | None = None
     url: Url | None = None
     area: ShortText | None = None
@@ -182,3 +189,35 @@ class ProfileData(Strict):
     languages: Annotated[list[Language], Field(max_length=30)] = []
     interests: Annotated[list[Interest], Field(max_length=30)] = []
     projects: Annotated[list[Project], Field(max_length=50)] = []
+
+
+def assign_entry_ids(data: ProfileData, previous: ProfileData | None = None) -> ProfileData:
+    """Gives every job and school an id that's unique in the profile.
+
+    An entry sent without an id keeps the id of an identical entry in the previous version, so
+    saving unchanged data again changes nothing. Otherwise it gets a new random id, as does an
+    entry whose id is already taken (a copied entry).
+    """
+    seen: set[str] = set()
+    entries: list[tuple[list[Work] | list[Education], list[Work] | list[Education]]] = [
+        (data.work, previous.work if previous else []),
+        (data.education, previous.education if previous else []),
+    ]
+    for section, before in entries:
+        for entry in section:
+            if entry.id is None:
+                entry.id = _matching_id(entry, before, seen)
+            while entry.id is None or entry.id in seen:
+                entry.id = secrets.token_hex(4)
+            seen.add(entry.id)
+    return data
+
+
+def _matching_id(
+    entry: Work | Education, before: list[Work] | list[Education], taken: set[str]
+) -> str | None:
+    content = entry.model_dump(exclude={"id"})
+    for old in before:
+        if old.id and old.id not in taken and old.model_dump(exclude={"id"}) == content:
+            return old.id
+    return None

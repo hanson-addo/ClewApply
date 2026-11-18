@@ -19,7 +19,7 @@ from clew.auth.clerk_admin import ClerkBackendApi, NoClerkAdmin, get_clerk_admin
 from clew.auth.deps import get_token_verifier
 from clew.config import get_settings
 from clew.main import create_app
-from clew.models import Resume, User
+from clew.models import Resume, SyncFill, User
 from clew.scanning import get_malware_scanner
 from clew.storage import get_object_store
 from tests.auth_helpers import SigningKey, make_token
@@ -196,6 +196,18 @@ async def test_delete_removes_files_and_every_row(
     other = await set_up(api, "user_acct_keep")
     user_id = await db.scalar(select(User.id).where(User.auth_provider_id == "user_acct_delete"))
     assert user_id is not None
+    # A Sync Center fill record, so its cascade is exercised too (Security #12).
+    db.add(
+        SyncFill(
+            user_id=user_id,
+            site="linkedin",
+            field_key="headline",
+            fingerprint="0" * 64,
+            profile_version=1,
+        )
+    )
+    await db.commit()
+    assert (await count_rows(db, user_id))["sync_fills"] == 1
     keys = set(await db.scalars(select(Resume.file_key).where(Resume.user_id == user_id)))
     assert keys and keys <= set(store.objects)
     deletions_before = await db.scalar(text("SELECT count(*) FROM account_deletions"))

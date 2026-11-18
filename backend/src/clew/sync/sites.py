@@ -1,8 +1,9 @@
 """The job sites the extension fills, and the profile fields each one has.
 
 A field's key is what the extension reports after filling it, and what the Sync Center names
-when it's behind. Keys for list entries carry the entry's position ("work.0.title"), the same
-order as the profile editor shows them.
+when it's behind. Keys for jobs and schools carry the entry's own id ("work.3f9a01bc.title"), so
+reordering the list doesn't make every entry look changed. A version saved before entries had
+ids falls back to the entry's position ("work.0.title").
 """
 
 from collections.abc import Callable
@@ -52,52 +53,62 @@ def _skills(profile: ProfileData) -> str | None:
     return ", ".join(names) or None
 
 
+def _entry(section: str, entry: Work | Education, i: int) -> str:
+    return f"{section}.{entry.id or i}"
+
+
 def _jobs(profile: ProfileData, *, duties: bool = False) -> list[SiteField]:
     fields: list[SiteField] = []
     for i, job in enumerate(profile.work[:MAX_JOBS]):
-        n = i + 1
-        fields += _job_fields(i, n, job, duties)
+        fields += _job_fields(_entry("work", job, i), i + 1, job, duties)
     return fields
 
 
-def _job_fields(i: int, n: int, job: Work, duties: bool) -> list[SiteField]:
+def _job_fields(key: str, n: int, job: Work, duties: bool) -> list[SiteField]:
     fields = [
-        SiteField(f"work.{i}.title", f"Job {n}: title", job.position),
-        SiteField(f"work.{i}.company", f"Job {n}: company", job.name),
-        SiteField(f"work.{i}.dates", f"Job {n}: dates", _dates(job.startDate, job.endDate)),
+        SiteField(f"{key}.title", f"Job {n}: title", job.position),
+        SiteField(f"{key}.company", f"Job {n}: company", job.name),
+        SiteField(f"{key}.dates", f"Job {n}: dates", _dates(job.startDate, job.endDate)),
     ]
     if duties:
-        fields.append(SiteField(f"work.{i}.duties", f"Job {n}: duties", job.summary))
+        fields.append(SiteField(f"{key}.duties", f"Job {n}: duties", job.summary))
     return fields
 
 
-def _schools(profile: ProfileData) -> list[SiteField]:
+def _schools(profile: ProfileData, *, split_degree: bool = False) -> list[SiteField]:
     fields: list[SiteField] = []
     for i, school in enumerate(profile.education[:MAX_SCHOOLS]):
-        fields += _school_fields(i, i + 1, school)
+        fields += _school_fields(_entry("education", school, i), i + 1, school, split_degree)
     return fields
 
 
-def _school_fields(i: int, n: int, school: Education) -> list[SiteField]:
+def _school_fields(key: str, n: int, school: Education, split_degree: bool) -> list[SiteField]:
+    if split_degree:
+        # Sites with separate boxes for the degree and the field of study.
+        degree = [
+            SiteField(f"{key}.degree", f"School {n}: degree", school.studyType),
+            SiteField(f"{key}.field", f"School {n}: field of study", school.area),
+        ]
+    else:
+        degree = [
+            SiteField(f"{key}.degree", f"School {n}: degree", _join(school.studyType, school.area))
+        ]
     return [
-        SiteField(f"education.{i}.school", f"School {n}: name", school.institution),
-        SiteField(
-            f"education.{i}.degree", f"School {n}: degree", _join(school.studyType, school.area)
-        ),
-        SiteField(
-            f"education.{i}.dates", f"School {n}: dates", _dates(school.startDate, school.endDate)
-        ),
+        SiteField(f"{key}.school", f"School {n}: name", school.institution),
+        *degree,
+        SiteField(f"{key}.dates", f"School {n}: dates", _dates(school.startDate, school.endDate)),
     ]
 
 
 def _linkedin(profile: ProfileData) -> list[SiteField]:
+    # No skills: LinkedIn adds them one at a time through a search box, which the extension
+    # can't fill without choosing for the user.
     return [
         SiteField("headline", "Headline", profile.basics.label),
         SiteField("about", "About", profile.basics.summary),
         SiteField("location", "Location", _location(profile)),
         *_jobs(profile),
-        *_schools(profile),
-        SiteField("skills", "Skills", _skills(profile)),
+        *_schools(profile, split_degree=True),
     ]
 
 

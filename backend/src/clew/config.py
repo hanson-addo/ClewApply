@@ -70,7 +70,8 @@ class Settings(BaseSettings):
     extension_token_attempts_per_minute: int = Field(default=10, ge=1)
     # Key for the Sync Center's fill fingerprints (HMAC-SHA256 of each filled value), so fill
     # records never hold profile content. Required in production; without it, /sync answers 503.
-    # Changing it makes every site show as behind until the next fill.
+    # Changing it makes every site show as behind until the next fill. Running locally without
+    # one, a fixed key that only works on your own machine is used, so /sync works out of the box.
     fill_fingerprint_key: SecretStr | None = None
     # Older profile versions are deleted by `python -m clew.maintenance prune-profile-versions`.
     profile_versions_kept: int = Field(default=200, ge=1)
@@ -149,9 +150,15 @@ class Settings(BaseSettings):
             raise ValueError("CLEW_CLERK_SECRET_KEY is required in production")
         if self.env == "production" and self.fill_fingerprint_key is None:
             raise ValueError("CLEW_FILL_FINGERPRINT_KEY is required in production")
+        if self.env == "local" and self.fill_fingerprint_key is None:
+            self.fill_fingerprint_key = SecretStr(LOCAL_FINGERPRINT_KEY)
         if self.env == "production" and not self.cors_origins:
             raise ValueError("CLEW_CORS_ORIGINS is required in production")
         return self
+
+
+# Not a secret: local fill records only ever hold made-up or your own test data.
+LOCAL_FINGERPRINT_KEY = "clew-local-only-fill-fingerprints"
 
 
 @lru_cache
