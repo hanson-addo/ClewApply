@@ -18,7 +18,6 @@ import {
 
 type State = { status: "loading" } | { status: "missing" } | { status: "error" } | { status: "ready"; job: JobDetail };
 
-/** One job in full. A side panel on wide screens, the whole page on phones. */
 /** "Why it fits you": a bar for each part the fit score weighs, then the reasons in words. */
 function FitWhy({ job }: { job: JobDetail }) {
   if (job.fit_parts.length === 0 && job.reasons.length === 0) return null;
@@ -28,20 +27,27 @@ function FitWhy({ job }: { job: JobDetail }) {
         Why it fits you
       </h3>
       {job.fit_parts.length > 0 && (
-      <ul className="fit-why-bars">
-        {job.fit_parts.map((part) => (
-          <li key={part.label}>
-            <span className="fit-why-label">{part.label}</span>
-            <span className="fit-why-track" aria-hidden="true">
-              <span className="fit-why-fill" style={{ width: `${part.value}%` }} />
-            </span>
-            <span className="fit-why-value">
-              {part.value}
-              <span className="clew-sr-only"> out of 100</span>
-            </span>
-          </li>
-        ))}
-      </ul>
+        <ul className="fit-why-bars">
+          {job.fit_parts.map((part) => (
+            <li key={part.label}>
+              <span className="fit-why-label">{part.label}</span>
+              {part.value === null ? (
+                // Nothing to compare: say so, rather than draw a half-full bar.
+                <span className="fit-why-note">{part.note ?? "Not listed"}</span>
+              ) : (
+                <>
+                  <span className="fit-why-track" aria-hidden="true">
+                    <span className="fit-why-fill" style={{ width: `${part.value}%` }} />
+                  </span>
+                  <span className="fit-why-value">
+                    {part.value}
+                    <span className="clew-sr-only"> out of 100</span>
+                  </span>
+                </>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
       {job.reasons.length > 0 && (
         <ul className="fit-why-reasons">
@@ -54,6 +60,7 @@ function FitWhy({ job }: { job: JobDetail }) {
   );
 }
 
+/** One job in full. A side panel on wide screens, the whole page on phones. */
 export function JobDetailPanel({
   jobId,
   backTo,

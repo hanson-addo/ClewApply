@@ -39,6 +39,7 @@ function detail(base: FeedJob, extra: Partial<JobDetail> = {}): JobDetail {
       { label: "Title", value: 100 },
       { label: "Skills", value: 50 },
       { label: "Location", value: 0 },
+      { label: "Pay", value: null, note: "Not listed" },
     ],
     status: "open",
     dismissed: false,
@@ -240,12 +241,15 @@ describe("job detail", () => {
 
     // Why it fits you: a bar per part the score weighs, then the reasons in words.
     const why = screen.getByRole("region", { name: "Why it fits you" });
-    const bars = within(why).getAllByRole("listitem").slice(0, 3);
+    const bars = within(why).getAllByRole("listitem").slice(0, 4);
     expect(bars.map((bar) => bar.textContent)).toEqual([
       "Title100 out of 100",
       "Skills50 out of 100",
       "Location0 out of 100",
+      // A job with no pay listed says so: no half-full bar, no "50".
+      "PayNot listed",
     ]);
+    expect(bars[3]?.querySelector(".fit-why-fill")).toBeNull();
     expect(within(why).getByText("Remote, as you prefer")).toBeInTheDocument();
 
     const where = screen.getByRole("heading", { name: "Where it's posted" }).parentElement as HTMLElement;

@@ -3155,6 +3155,12 @@ body:has(.page-band) .app-header[data-at-top] {
   color: var(--clew-text-secondary);
 }
 
+.fit-why-note {
+  grid-column: 2 / 4;
+  color: var(--clew-text-secondary);
+  font-style: italic;
+}
+
 .fit-why-reasons {
   margin: var(--clew-space-3) 0 0;
   padding-left: var(--clew-space-5);

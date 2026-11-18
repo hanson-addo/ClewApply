@@ -858,9 +858,27 @@
             "title": "Label",
             "type": "string"
           },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
           "value": {
-            "title": "Value",
-            "type": "integer"
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
           }
         },
         "required": [

@@ -759,8 +759,10 @@ export interface components {
         FitPartOut: {
             /** Label */
             label: string;
+            /** Note */
+            note?: string | null;
             /** Value */
-            value: number;
+            value: number | null;
         };
         /** FollowRequest */
         FollowRequest: {
