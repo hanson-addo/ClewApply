@@ -195,6 +195,19 @@ def _filters(
     return rules
 
 
+MAX_WORDS = 6
+
+
+def _words(q: str | None) -> list[ColumnElement[bool]]:
+    """Each word must appear in the title or the company name. Matched as plain text, so %
+    and _ mean themselves."""
+    words = (q or "").split()[:MAX_WORDS]
+    return [
+        or_(Job.title.icontains(w, autoescape=True), Company.name.icontains(w, autoescape=True))
+        for w in words
+    ]
+
+
 @router.get(
     "/feed",
     responses={
@@ -210,6 +223,9 @@ async def feed(
     min_salary: Annotated[int | None, Query(ge=0, le=2_000_000)] = None,
     posted_within_days: Annotated[int | None, Query(ge=1, le=90)] = None,
     source: Source | None = None,
+    q: Annotated[
+        str | None, Query(max_length=80, description="Words to find in the job title or company")
+    ] = None,
     saved: Annotated[
         bool | None, Query(description="true: only saved jobs; false or omitted: all jobs")
     ] = None,
@@ -224,6 +240,7 @@ async def feed(
         Job.status == JobStatus.OPEN,
         *_dealbreakers(prefs),
         *_filters(remote, region, min_salary, posted_within_days, source, now),
+        *_words(q),
     ]
     if saved is True:
         rules.append(feedback_action(user.id) == FeedbackAction.SAVED)

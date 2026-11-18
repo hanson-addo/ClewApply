@@ -177,8 +177,10 @@ test.describe("job feed", () => {
 
   test("filters narrow the list, live in the address and survive a reload", async ({ page }) => {
     await openFeed(page, "feed-filters");
-    const filters = page.getByRole("complementary", { name: "Filters" });
+    const filters = page.getByRole("complementary", { name: "More filters" });
+    const search = page.getByRole("search", { name: "Jobs" });
 
+    await filters.getByRole("button", { name: "More filters", exact: true }).click();
     await filters.getByLabel("Work type").selectOption("remote");
     await filters.getByRole("button", { name: "Apply filters" }).click();
     await expect(page).toHaveURL(/[?&]work=remote/);
@@ -189,21 +191,36 @@ test.describe("job feed", () => {
     await page.reload();
     await expect(card(page, THREAD.title)).toBeVisible();
     await expect(card(page, ROUTE.title)).toHaveCount(0);
+    await filters.getByRole("button", { name: "More filters, 1 on" }).click();
     await expect(filters.getByLabel("Work type")).toHaveValue("remote");
 
     await filters.getByLabel("Work type").selectOption("");
-    await filters.getByLabel("State").fill("Texas");
     await filters.getByRole("button", { name: "Apply filters" }).click();
+    await search.getByLabel("Where").fill("Texas");
+    await search.getByRole("button", { name: "Search" }).click();
+    await expect(page).toHaveURL(/[?&]state=Texas/);
     await expect(card(page, ROUTE.title)).toBeVisible();
     await expect(card(page, THREAD.title)).toHaveCount(0);
 
-    await filters.getByLabel("State").fill("");
+    // What finds words in the title or company.
+    await search.getByLabel("Where").fill("");
+    await search.getByLabel("What").fill(ROUTE.title);
+    await search.getByRole("button", { name: "Search" }).click();
+    await expect(page).toHaveURL(/[?&]q=/);
+    await expect(card(page, ROUTE.title)).toBeVisible();
+    await expect(card(page, THREAD.title)).toHaveCount(0);
+    await search.getByLabel("What").fill("");
+    await search.getByRole("button", { name: "Search" }).click();
+    await expect(page).not.toHaveURL(/[?&]q=/);
+
+    await filters.getByRole("button", { name: "More filters", exact: true }).click();
     await filters.getByLabel("Source").selectOption("usajobs");
     await filters.getByRole("button", { name: "Apply filters" }).click();
     await expect(page).toHaveURL(/[?&]source=usajobs/);
     await expect(card(page, ROUTE.title)).toBeVisible();
     await expect(card(page, MAZE.title)).toHaveCount(0);
 
+    await filters.getByRole("button", { name: "More filters, 1 on" }).click();
     await filters.getByLabel("Minimum yearly pay").fill("2000000");
     await filters.getByRole("button", { name: "Apply filters" }).click();
     await expect(page.getByRole("heading", { name: "No matches right now" })).toBeVisible();
@@ -313,13 +330,13 @@ test.describe("on a phone", () => {
     await openFeed(page, "phone-feed");
     await expectNoSidewaysScroll(page);
 
-    const toggle = page.getByRole("button", { name: "Filters", exact: true });
+    const toggle = page.getByRole("button", { name: "More filters", exact: true });
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(page.getByLabel("Work type")).toBeHidden();
     await toggle.click();
     await page.getByLabel("Work type").selectOption("remote");
     await page.getByRole("button", { name: "Apply filters" }).click();
-    await expect(page.getByRole("button", { name: "Filters, 1 on" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "More filters, 1 on" })).toBeVisible();
     await expect(card(page, ROUTE.title)).toHaveCount(0);
 
     await card(page, THREAD.title).click();

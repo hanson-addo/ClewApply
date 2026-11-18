@@ -158,6 +158,15 @@ def test_a_strong_match_scores_high_with_three_reasons() -> None:
         "Mentions 2 of your skills",
         "In Austin, TX, where you want to work",
     ]
+    # The bars under "Why it fits you": every part, each 0-100.
+    assert [(p.label, p.value) for p in result.parts] == [
+        ("Title", 100),
+        ("Skills", 100),
+        ("Location", 100),
+        ("Posted", 100),
+        ("Level", 100),
+        ("Pay", 100),
+    ]
 
 
 def test_a_weak_match_scores_low() -> None:
@@ -170,6 +179,28 @@ def test_a_weak_match_scores_low() -> None:
     old = job(posted_at=NOW - timedelta(days=60))
     assert fit(wants, old, NOW).score < 10
     assert fit(wants, old, NOW).reasons == []
+    parts = {p.label: p.value for p in fit(wants, old, NOW).parts}
+    assert parts["Title"] == 0
+    assert parts["Location"] == 0
+    posted = parts["Posted"]
+    assert posted is not None and 0 <= posted < 10
+
+
+def test_nothing_to_compare_is_not_shown_as_a_half_match() -> None:
+    # The job lists no pay or place, and the user set no titles, skills or level.
+    wants = Wants(salary_floor=90_000, locations=(("Austin", "TX"),))
+    result = fit(wants, job(salary_min=None, salary_max=None, region=None, city=None), NOW)
+    parts = {p.label: (p.value, p.note) for p in result.parts}
+    assert parts["Pay"] == (None, "Not listed")
+    assert parts["Location"] == (None, "Not listed")
+    assert parts["Title"] == (None, "No preference")
+    assert parts["Skills"] == (None, "No preference")
+    assert parts["Level"] == (None, "No preference")
+    no_floor = {p.label: (p.value, p.note) for p in fit(Wants(), job(), NOW).parts}
+    assert no_floor["Pay"] == (None, "No preference")
+    assert no_floor["Location"] == (None, "No preference")
+    # The score still counts them as neutral.
+    assert 0 < result.score < 100
 
 
 def test_scores_stay_between_0_and_100() -> None:

@@ -1200,20 +1200,21 @@ h2[tabindex="-1"]:focus {
   }
 }
 
-/* Wide screens: filters, list and a sticky detail panel side by side. */
+/* Wide screens: the list and a sticky detail panel side by side. */
 @media (min-width: 64rem) {
   .jobs-page {
-    grid-template-columns: 15rem minmax(0, 1fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
     align-items: start;
   }
 
-  .jobs-filters-toggle {
-    display: none;
+  .jobs-filters-open .jobs-filters-form {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: end;
   }
 
-  .jobs-filters-form {
-    display: grid;
-    gap: var(--clew-space-4);
+  .jobs-filters-open .jobs-filters-title,
+  .jobs-filters-open .jobs-filters-actions {
+    grid-column: 1 / -1;
   }
 
   .jobs-detail-col {
@@ -2997,4 +2998,172 @@ body:has(.page-band) .app-header[data-at-top] {
 
 .profile-history {
   padding: var(--clew-space-5);
+}
+
+/* Jobs: What and Where in the band, with "More filters" folded under them. */
+.job-search {
+  display: grid;
+  gap: var(--clew-space-3);
+  margin-top: var(--clew-space-5);
+  padding: var(--clew-space-3);
+  border: 1px solid rgba(244, 242, 255, 0.18);
+  border-radius: var(--clew-radius-xl);
+  background: rgba(244, 242, 255, 0.08);
+}
+
+@media (min-width: 48rem) {
+  .job-search {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto;
+    align-items: end;
+  }
+}
+
+.job-search-field {
+  display: grid;
+  gap: var(--clew-space-1);
+}
+
+.job-search-field label {
+  font-size: var(--clew-font-size-xs);
+  font-weight: var(--clew-font-weight-bold);
+  letter-spacing: var(--clew-font-letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--clew-color-ink-300);
+}
+
+.job-search-field input {
+  min-height: var(--clew-size-touch-target);
+  padding: 0 var(--clew-space-3);
+  border: 1px solid transparent;
+  border-radius: var(--clew-radius-md);
+  background: var(--clew-color-white);
+  color: var(--clew-text-primary);
+  font: inherit;
+}
+
+.job-search-field input::placeholder {
+  color: var(--clew-color-ink-600);
+}
+
+.job-search-field input:focus-visible {
+  outline: 3px solid var(--clew-color-coral-400);
+  outline-offset: 2px;
+}
+
+/* Light on indigo: the band's own action, so the coral stays for Apply. */
+.job-search-button {
+  min-height: var(--clew-size-touch-target);
+  background: var(--clew-color-ink-50);
+  color: var(--clew-color-ink-900);
+  border: 0;
+}
+
+.jobs-intro .jobs-filters {
+  margin-top: var(--clew-space-3);
+}
+
+/* A quiet text button on the band, not a second big button. */
+.jobs-filters-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--clew-size-touch-target);
+  padding: 0 var(--clew-space-1);
+  border: 0;
+  background: none;
+  color: var(--clew-color-ink-50);
+  font: inherit;
+  font-weight: var(--clew-font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+
+.jobs-filters-toggle::after {
+  content: "";
+  width: 0.45em;
+  height: 0.45em;
+  margin-left: var(--clew-space-2);
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: translateY(-0.15em) rotate(45deg);
+}
+
+.jobs-filters-open .jobs-filters-toggle::after {
+  transform: translateY(0.1em) rotate(-135deg);
+}
+
+.jobs-filters-toggle:focus-visible {
+  outline: 3px solid var(--clew-color-coral-400);
+  outline-offset: 2px;
+}
+
+.jobs-intro .jobs-filters-form {
+  color: var(--clew-text-primary);
+}
+
+/* Why it fits you: indigo bars, a coral-700 heading, neutral text. */
+.fit-why {
+  margin-top: var(--clew-space-5);
+  padding: var(--clew-space-4);
+  border-radius: var(--clew-radius-lg);
+  background: var(--clew-color-ink-50);
+}
+
+.fit-why-title {
+  margin: 0 0 var(--clew-space-3);
+  font-family: var(--clew-font-family-body);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-bold);
+  letter-spacing: var(--clew-font-letter-spacing-caps);
+  text-transform: uppercase;
+  color: var(--clew-color-coral-700);
+}
+
+.fit-why-bars {
+  display: grid;
+  gap: var(--clew-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fit-why-bars li {
+  display: grid;
+  grid-template-columns: 5.5rem minmax(0, 1fr) 2.5rem;
+  align-items: center;
+  gap: var(--clew-space-3);
+  font-size: var(--clew-font-size-sm);
+}
+
+.fit-why-track {
+  height: 8px;
+  border-radius: var(--clew-radius-pill);
+  background: var(--clew-color-ink-150);
+  overflow: hidden;
+}
+
+.fit-why-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--clew-color-ink-900);
+}
+
+.fit-why-value {
+  text-align: right;
+  font-weight: var(--clew-font-weight-bold);
+  color: var(--clew-text-secondary);
+}
+
+.fit-why-note {
+  grid-column: 2 / 4;
+  color: var(--clew-text-secondary);
+  font-style: italic;
+}
+
+.fit-why-reasons {
+  margin: var(--clew-space-3) 0 0;
+  padding-left: var(--clew-space-5);
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-sm);
 }

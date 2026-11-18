@@ -755,6 +755,15 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** FitPartOut */
+        FitPartOut: {
+            /** Label */
+            label: string;
+            /** Note */
+            note?: string | null;
+            /** Value */
+            value: number | null;
+        };
         /** FollowRequest */
         FollowRequest: {
             /**
@@ -825,6 +834,8 @@ export interface components {
             description: string | null;
             /** Dismissed */
             dismissed: boolean;
+            /** Fit Parts */
+            fit_parts: components["schemas"]["FitPartOut"][];
             /** Fit Score */
             fit_score: number;
             /**
@@ -1745,6 +1756,8 @@ export interface operations {
                 min_salary?: number | null;
                 posted_within_days?: number | null;
                 source?: ("greenhouse" | "lever" | "ashby" | "usajobs" | "email") | null;
+                /** @description Words to find in the job title or company */
+                q?: string | null;
                 /** @description true: only saved jobs; false or omitted: all jobs */
                 saved?: boolean | null;
                 page?: number;

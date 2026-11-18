@@ -196,6 +196,22 @@ async def test_filters(
     assert titles(await get_feed(api, alice, source="usajobs")) == ["Old One"]
 
 
+async def test_search_words_match_title_or_company(
+    api: AsyncClient, alice: dict[str, str], sessions: async_sessionmaker[AsyncSession]
+) -> None:
+    tag = uuid.uuid4().hex[:6]
+    await add(sessions, title=f"Maze Mapper {tag}")
+    await add(sessions, title=f"Thread Winder {tag}", company_name=f"Minotaur Labs {tag}")
+    await add(sessions, title=f"Data Analyst {tag}")
+
+    assert titles(await get_feed(api, alice, q=f"mapper {tag}")) == [f"Maze Mapper {tag}"]
+    assert titles(await get_feed(api, alice, q=f"MINOTAUR {tag}")) == [f"Thread Winder {tag}"]
+    # Every word must match somewhere; % and _ are plain text, not wildcards.
+    assert titles(await get_feed(api, alice, q=f"mapper nurse {tag}")) == []
+    assert titles(await get_feed(api, alice, q=f"% {tag}")) == []
+    assert len(titles(await get_feed(api, alice, q=f"  {tag}  "))) == 3
+
+
 async def test_closed_jobs_leave_the_feed(
     api: AsyncClient, alice: dict[str, str], sessions: async_sessionmaker[AsyncSession]
 ) -> None:
@@ -235,6 +251,7 @@ async def test_pagination(
         {"posted_within_days": 91},
         {"min_salary": -1},
         {"source": "linkedin"},
+        {"q": "x" * 81},
     ],
 )
 async def test_bad_filters(api: AsyncClient, alice: dict[str, str], params: dict[str, Any]) -> None:

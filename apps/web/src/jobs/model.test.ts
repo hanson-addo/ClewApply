@@ -4,6 +4,7 @@ import {
   applyLabel,
   cardName,
   countFilters,
+  countMoreFilters,
   feedQuery,
   readFilters,
   safeUrl,
@@ -44,6 +45,15 @@ describe("filters in the address", () => {
     });
     expect(writeFilters(filters).toString()).toBe(params.toString());
     expect(countFilters(filters)).toBe(5);
+  });
+
+  it("keeps the What words, tidied and capped, and counts only the folded filters as more", () => {
+    const filters = readFilters(new URLSearchParams(`q=${encodeURIComponent("  maze   mapper ")}&state=TX&work=remote`));
+    expect(filters).toEqual({ what: "maze mapper", region: "TX", work: "remote" });
+    expect(writeFilters(filters).toString()).toBe("q=maze+mapper&work=remote&state=TX");
+    expect(countMoreFilters(filters)).toBe(1);
+    expect(feedQuery(filters, 1)).toMatchObject({ q: "maze mapper", region: "TX" });
+    expect(readFilters(new URLSearchParams(`q=${"a".repeat(200)}`)).what).toHaveLength(80);
   });
 
   it("ignores unknown or malformed values", () => {

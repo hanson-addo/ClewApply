@@ -33,6 +33,22 @@ async def test_job_detail_has_everything(
     assert detail["apply_source"] == "greenhouse"
     assert detail["seen_on"] == ["greenhouse", "usajobs"]
     assert 0 <= detail["fit_score"] <= 100
+    assert [part["label"] for part in detail["fit_parts"]] == [
+        "Title",
+        "Skills",
+        "Location",
+        "Posted",
+        "Level",
+        "Pay",
+    ]
+    # The job lists no pay: the Pay bar says so instead of showing a half match.
+    pay = next(part for part in detail["fit_parts"] if part["label"] == "Pay")
+    assert pay["value"] is None and pay["note"] in ("Not listed", "No preference")
+    for part in detail["fit_parts"]:
+        if part["value"] is None:
+            assert part["note"] in ("Not listed", "No preference")
+        else:
+            assert 0 <= part["value"] <= 100
 
 
 async def test_closed_jobs_can_still_be_opened(

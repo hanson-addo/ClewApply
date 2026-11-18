@@ -58,9 +58,24 @@ class JobFacts:
 
 
 @dataclass(frozen=True)
+class FitPart:
+    """One thing the score weighs, for the "Why it fits you" bars: how well it matched (0-100).
+
+    When there was nothing to compare (the job doesn't say, or the user has no preference),
+    `value` is None and `note` says which. The score counts such a part as a neutral half match,
+    but the bars must not show it as one.
+    """
+
+    label: str
+    value: int | None
+    note: str | None = None
+
+
+@dataclass(frozen=True)
 class Fit:
     score: int
     reasons: list[str] = field(default_factory=list)
+    parts: list[FitPart] = field(default_factory=list)
 
 
 @dataclass(frozen=True)
@@ -68,11 +83,21 @@ class _Part:
     weight: float
     value: float
     reason: str | None = None
+    # Set when there was nothing to compare: "Not listed" or "No preference".
+    unknown: str | None = None
+
+
+NOT_LISTED = "Not listed"
+NO_PREFERENCE = "No preference"
+
+
+def _neutral(weight: float, why: str) -> _Part:
+    return _Part(weight, 0.5, unknown=why)
 
 
 def title_part(wants: Wants, job: JobFacts) -> _Part:
     if not wants.titles:
-        return _Part(weights.TITLE, 0.5)
+        return _neutral(weights.TITLE, NO_PREFERENCE)
     job_words = set(job.title_norm.split())
     best, best_title = 0.0, ""
     for title in wants.titles:
@@ -108,7 +133,7 @@ def job_seniority(title_norm: str) -> str | None:
 def seniority_part(wants: Wants, job: JobFacts) -> _Part:
     level = job_seniority(job.title_norm)
     if not wants.seniority:
-        return _Part(weights.SENIORITY, 0.5)
+        return _neutral(weights.SENIORITY, NO_PREFERENCE)
     if level is None:
         # Most mid-level titles carry no level word.
         level = "mid"
@@ -145,7 +170,7 @@ def _mentions(text: str, term: str) -> bool:
 
 def skills_part(wants: Wants, job: JobFacts, terms: tuple[str, ...] | None) -> _Part:
     if not terms:
-        return _Part(weights.SKILLS, 0.5)
+        return _neutral(weights.SKILLS, NO_PREFERENCE)
     text = " ".join(job.text.split())
     found = [term for term in terms if _mentions(text, term)]
     if not found:
@@ -159,9 +184,11 @@ def location_part(wants: Wants, job: JobFacts) -> _Part:
         if wants.remote_ok:
             return _Part(weights.LOCATION, 1.0, "Remote, as you prefer")
         return _Part(weights.LOCATION, 0.0)
-    if not wants.locations or job.region is None:
-        # No places wanted, or one we couldn't read: neutral, since the feed keeps such jobs.
-        return _Part(weights.LOCATION, 0.5)
+    # No places wanted, or one we couldn't read: neutral, since the feed keeps such jobs.
+    if not wants.locations:
+        return _neutral(weights.LOCATION, NO_PREFERENCE)
+    if job.region is None:
+        return _neutral(weights.LOCATION, NOT_LISTED)
     place = f"{job.city}, {job.region}" if job.city else job.region
     for city, region in wants.locations:
         if region != job.region:
@@ -177,9 +204,11 @@ def location_part(wants: Wants, job: JobFacts) -> _Part:
 
 def salary_part(wants: Wants, job: JobFacts) -> _Part:
     top = job.salary_max or job.salary_min
-    if wants.salary_floor is None or top is None:
-        # Not posted, or no floor set: neutral.
-        return _Part(weights.SALARY, 0.5)
+    # No floor set, or no pay posted: neutral.
+    if wants.salary_floor is None:
+        return _neutral(weights.SALARY, NO_PREFERENCE)
+    if top is None:
+        return _neutral(weights.SALARY, NOT_LISTED)
     if top >= wants.salary_floor:
         return _Part(weights.SALARY, 1.0, f"Pays up to ${top:,}")
     return _Part(weights.SALARY, 0.0)
@@ -187,7 +216,7 @@ def salary_part(wants: Wants, job: JobFacts) -> _Part:
 
 def recency_part(job: JobFacts, now: datetime) -> _Part:
     if job.posted_at is None:
-        return _Part(weights.RECENCY, 0.5)
+        return _neutral(weights.RECENCY, NOT_LISTED)
     days = max(0.0, (now - job.posted_at).total_seconds() / 86_400)
     value = 0.5 ** (days / weights.RECENCY_HALF_LIFE_DAYS)
     whole = int(days)
@@ -200,16 +229,26 @@ def fit(wants: Wants, job: JobFacts, now: datetime, terms: tuple[str, ...] | Non
     scoring many jobs, so they are built once."""
     if terms is None:
         terms = skill_terms(wants.skills)
-    parts = [
-        title_part(wants, job),
-        skills_part(wants, job, terms),
-        location_part(wants, job),
-        recency_part(job, now),
-        seniority_part(wants, job),
-        salary_part(wants, job),
+    named = [
+        ("Title", title_part(wants, job)),
+        ("Skills", skills_part(wants, job, terms)),
+        ("Location", location_part(wants, job)),
+        ("Posted", recency_part(job, now)),
+        ("Level", seniority_part(wants, job)),
+        ("Pay", salary_part(wants, job)),
     ]
+    parts = [part for _, part in named]
     total = sum(p.weight for p in parts)
     score = round(100 * sum(p.weight * p.value for p in parts) / total)
     strong = [p for p in parts if p.reason and p.value >= weights.REASON_THRESHOLD]
     strong.sort(key=lambda p: p.weight * p.value, reverse=True)
-    return Fit(score=score, reasons=[p.reason for p in strong[:3] if p.reason])
+    return Fit(
+        score=score,
+        reasons=[p.reason for p in strong[:3] if p.reason],
+        parts=[
+            FitPart(label, None, part.unknown)
+            if part.unknown
+            else FitPart(label, round(100 * part.value))
+            for label, part in named
+        ],
+    )

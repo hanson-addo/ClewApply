@@ -8,12 +8,16 @@ export type JobDetail = components["schemas"]["JobDetail"];
 export type Toast = { message: string; undo?: () => void };
 
 export const PAGE_SIZE = 25;
+/** The API takes up to 80 characters of search words. */
+export const MAX_WHAT = 80;
 export const DESCRIPTION_PREVIEW = 600;
 
 export type WorkType = "remote" | "not-remote";
 export type Source = "greenhouse" | "lever" | "ashby" | "usajobs" | "email";
 
 export type Filters = {
+  /** Words to find in the job title or company, from the What box. */
+  what?: string;
   work?: WorkType;
   region?: string;
   minSalary?: number;
@@ -45,6 +49,8 @@ export function sourceName(source: string): string {
  */
 export function readFilters(params: URLSearchParams): Filters {
   const filters: Filters = {};
+  const what = params.get("q")?.trim().replace(/\s+/g, " ");
+  if (what) filters.what = what.slice(0, MAX_WHAT);
   const work = params.get("work");
   if (work === "remote" || work === "not-remote") filters.work = work;
   const region = params.get("state")?.trim();
@@ -61,6 +67,7 @@ export function readFilters(params: URLSearchParams): Filters {
 
 export function writeFilters(filters: Filters): URLSearchParams {
   const params = new URLSearchParams();
+  if (filters.what) params.set("q", filters.what);
   if (filters.work) params.set("work", filters.work);
   if (filters.region) params.set("state", filters.region);
   if (filters.minSalary) params.set("min_pay", String(filters.minSalary));
@@ -73,9 +80,17 @@ export function countFilters(filters: Filters): number {
   return Object.values(filters).filter((value) => value !== undefined).length;
 }
 
+/** Filters behind "More filters": everything but the What and Where boxes in the band. */
+export function countMoreFilters(filters: Filters): number {
+  return [filters.work, filters.minSalary, filters.postedWithin, filters.source].filter(
+    (value) => value !== undefined,
+  ).length;
+}
+
 /** The feed API's query for these filters and page. */
 export function feedQuery(filters: Filters, page: number) {
   return {
+    q: filters.what,
     remote: filters.work === undefined ? undefined : filters.work === "remote",
     region: filters.region,
     min_salary: filters.minSalary,

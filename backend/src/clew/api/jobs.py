@@ -44,8 +44,18 @@ class Listing(BaseModel):
     last_seen_at: datetime
 
 
+class FitPartOut(BaseModel):
+    label: str
+    # How well this part matched, 0 to 100. Null when there was nothing to compare; `note` then
+    # says "Not listed" (the job doesn't say) or "No preference" (the user set none).
+    value: int | None
+    note: str | None = None
+
+
 class JobDetail(FeedJob):
     description: str | None
+    # Each part the fit score weighs and how well it matched, for the "Why it fits you" bars.
+    fit_parts: list[FitPartOut]
     status: Literal["open", "closed"]
     dismissed: bool
     # Every site listing the job, best first.
@@ -82,6 +92,7 @@ async def get_job(job_id: uuid.UUID, user: CurrentUser, session: Session) -> Job
     return JobDetail(
         **card.model_dump(),
         description=description,
+        fit_parts=[FitPartOut(label=p.label, value=p.value, note=p.note) for p in job_fit.parts],
         status=row.status,
         dismissed=row.feedback == FeedbackAction.DISMISSED,
         listings=[

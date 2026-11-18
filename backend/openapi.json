@@ -852,6 +852,42 @@
         "title": "FeedPage",
         "type": "object"
       },
+      "FitPartOut": {
+        "properties": {
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "label",
+          "value"
+        ],
+        "title": "FitPartOut",
+        "type": "object"
+      },
       "FollowRequest": {
         "additionalProperties": false,
         "properties": {
@@ -1024,6 +1060,13 @@
             "title": "Dismissed",
             "type": "boolean"
           },
+          "fit_parts": {
+            "items": {
+              "$ref": "#/components/schemas/FitPartOut"
+            },
+            "title": "Fit Parts",
+            "type": "array"
+          },
           "fit_score": {
             "title": "Fit Score",
             "type": "integer"
@@ -1153,6 +1196,7 @@
           "fit_score",
           "reasons",
           "description",
+          "fit_parts",
           "status",
           "dismissed",
           "listings"
@@ -3186,6 +3230,25 @@
                 }
               ],
               "title": "Source"
+            }
+          },
+          {
+            "description": "Words to find in the job title or company",
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 80,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Words to find in the job title or company",
+              "title": "Q"
             }
           },
           {
