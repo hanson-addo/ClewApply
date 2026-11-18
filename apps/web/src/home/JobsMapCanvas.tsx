@@ -60,7 +60,8 @@ type Props = {
   still: boolean;
   /** On a phone the panel covers the bottom of the map, so the area is centred above it. */
   phone: boolean;
-  onSelect: (id: string) => void;
+  /** fromKeyboard: the pin was pressed with Enter or Space, so focus should follow the card. */
+  onSelect: (id: string, fromKeyboard?: boolean) => void;
 };
 
 /** On a phone the panel covers the bottom of the map, so the area is centred above it. */
@@ -275,7 +276,8 @@ export default function JobsMapCanvas(props: Props) {
       el.append(badge);
       el.addEventListener("click", (event) => {
         event.stopPropagation();
-        latest.current.onSelect(pin.id);
+        // A click from Enter or Space has no pointer press behind it, so its detail is 0.
+        latest.current.onSelect(pin.id, event.detail === 0);
       });
       return new Marker({ element: el, anchor: "bottom" }).setLngLat([pin.lng, pin.lat]).addTo(instance);
     });
