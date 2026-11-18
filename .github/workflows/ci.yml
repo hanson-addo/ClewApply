@@ -81,6 +81,36 @@ jobs:
       - run: npm test
       - run: npm run build
 
+  extension:
+    name: Chrome extension (lint, types, tests, builds)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/extension
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: apps/extension/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/extension/package-lock.json
+      - run: npm ci
+      - name: API types match the backend spec
+        run: |
+          npm run gen:api
+          git diff --exit-code -- src/api/schema.d.ts || (echo "Run: cd apps/extension && npm run gen:api" && exit 1)
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      # The production build fails if any file in it mentions localhost (vite.config.ts).
+      - name: Production build
+        run: npm run build
+      - name: Production manifest has no dev hosts
+        run: |
+          if grep -rEl 'localhost|127\.0\.0\.1' dist; then echo "Dev host in the production build" && exit 1; fi
+      - name: Development build
+        run: npm run build:dev
+
   e2e:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest

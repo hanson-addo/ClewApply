@@ -2369,6 +2369,35 @@ input:focus-visible + .upload-choose,
   color: var(--clew-status-danger-fg);
 }
 
+.settings-browsers {
+  display: grid;
+  gap: var(--clew-space-3);
+  margin: 0 0 var(--clew-space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.settings-browser {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--clew-space-4);
+  padding: var(--clew-space-3) 0;
+  border-top: 1px solid var(--clew-border-subtle);
+}
+
+.settings-browser > span {
+  display: grid;
+  gap: var(--clew-space-1);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.settings-browser-when {
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-sm);
+}
+
 .settings-confirm-label {
   display: block;
   margin: var(--clew-space-4) 0 var(--clew-space-2);

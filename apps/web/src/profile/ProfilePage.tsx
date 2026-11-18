@@ -1,4 +1,3 @@
-import { useClerk } from "@clerk/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, NavLink, useBlocker, useNavigate, useParams } from "react-router";
 
@@ -26,6 +25,7 @@ import {
 } from "./model";
 import { SectionEditor } from "./SectionEditor";
 import { VersionHistory, VersionView } from "./VersionHistory";
+import { useSignOut } from "../auth/useSignOut";
 
 type Loaded = {
   email: string | null;
@@ -81,7 +81,7 @@ export function ProfilePage() {
 function ProfileEditor({ section, title }: { section: SectionId; title: string }) {
   const api = useApi();
   const navigate = useNavigate();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const [ask, questionDialog] = useQuestion();
 
   const [loaded, setLoaded] = useState<Loaded | null>(null);
@@ -347,7 +347,7 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
     if (!(await readyToLeave())) return;
     leaving.current = true;
     // If signing out fails, the user stays here and later edits still ask before leaving.
-    signOut({ redirectUrl: "/sign-in" }).catch(() => {
+    signOut().catch(() => {
       leaving.current = false;
     });
   };

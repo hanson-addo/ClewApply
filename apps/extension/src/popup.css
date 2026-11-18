@@ -1,0 +1,73 @@
+/* Brand: indigo #101935, coral #FF6B4A (fill only), coral-700 #B23A1E for text, lavender white
+   #F4F2FF. No web fonts: the extension loads nothing remote. */
+:root {
+  color-scheme: light;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: #101935;
+  background: #f4f2ff;
+}
+
+body {
+  margin: 0;
+  width: 18rem;
+}
+
+.popup {
+  padding: 1rem 1.125rem 1.125rem;
+}
+
+.popup-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.popup-status {
+  margin: 0 0 0.75rem;
+  font-size: 0.875rem;
+}
+
+.popup-facts {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.25rem 0.75rem;
+  margin: 0 0 1rem;
+  font-size: 0.8125rem;
+}
+
+.popup-facts dt {
+  color: #4a4f6a;
+}
+
+.popup-facts dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.popup-hint {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #4a4f6a;
+}
+
+.popup-button {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #101935;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  color: #101935;
+  font: inherit;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+.popup-button:focus-visible {
+  outline: 2px solid #b23a1e;
+  outline-offset: 2px;
+}
+
+.popup-button:disabled {
+  opacity: 0.6;
+  cursor: default;
+}

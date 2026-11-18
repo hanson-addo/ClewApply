@@ -1,0 +1,28 @@
+{
+  "name": "@clew/extension",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc -b && vite build",
+    "build:dev": "tsc -b && vite build --mode development",
+    "lint": "eslint .",
+    "typecheck": "tsc -b",
+    "test": "vitest run",
+    "gen:api": "openapi-typescript ../../backend/openapi.json -o src/api/schema.d.ts"
+  },
+  "dependencies": {
+    "openapi-fetch": "^0.17.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.13.0",
+    "globals": "^17.13.0",
+    "jsdom": "^29.1.1",
+    "openapi-typescript": "^7.13.0",
+    "typescript": "~5.9",
+    "typescript-eslint": "^8.71.2",
+    "vite": "^8.3.4",
+    "vitest": "^5.0.5"
+  }
+}

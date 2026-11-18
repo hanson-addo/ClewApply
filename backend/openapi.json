@@ -564,6 +564,60 @@
         "title": "Certificate",
         "type": "object"
       },
+      "Connection": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "last_used_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used At"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "created_at",
+          "last_used_at"
+        ],
+        "title": "Connection",
+        "type": "object"
+      },
+      "Connections": {
+        "properties": {
+          "connections": {
+            "items": {
+              "$ref": "#/components/schemas/Connection"
+            },
+            "title": "Connections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "connections"
+        ],
+        "title": "Connections",
+        "type": "object"
+      },
       "DownloadLink": {
         "properties": {
           "expires_at": {
@@ -683,6 +737,63 @@
           }
         },
         "title": "Education",
+        "type": "object"
+      },
+      "ExtensionMe": {
+        "properties": {
+          "email": {
+            "title": "Email",
+            "type": "string"
+          },
+          "profile_saved_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Saved At"
+          },
+          "profile_version": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Version"
+          }
+        },
+        "required": [
+          "email",
+          "profile_version",
+          "profile_saved_at"
+        ],
+        "title": "ExtensionMe",
+        "type": "object"
+      },
+      "ExtensionTokenOut": {
+        "properties": {
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "token",
+          "expires_at"
+        ],
+        "title": "ExtensionTokenOut",
         "type": "object"
       },
       "FeedJob": {
@@ -1265,6 +1376,25 @@
           }
         },
         "title": "Language",
+        "type": "object"
+      },
+      "LinkCode": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "title": "Expires At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "expires_at"
+        ],
+        "title": "LinkCode",
         "type": "object"
       },
       "Listing": {
@@ -2437,6 +2567,27 @@
         "title": "StatusChange",
         "type": "object"
       },
+      "TokenRequest": {
+        "properties": {
+          "code": {
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Code",
+            "type": "string"
+          },
+          "label": {
+            "default": "Chrome",
+            "maxLength": 80,
+            "title": "Label",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "TokenRequest",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "ctx": {
@@ -2672,7 +2823,7 @@
     },
     "securitySchemes": {
       "HTTPBearer": {
-        "description": "Clerk session token",
+        "description": "Clew extension token",
         "scheme": "bearer",
         "type": "http"
       }
@@ -3128,6 +3279,244 @@
         "summary": "List Follows",
         "tags": [
           "companies"
+        ]
+      }
+    },
+    "/extension/connections": {
+      "get": {
+        "description": "Browsers the extension is connected in, newest first.",
+        "operationId": "list_connections_extension_connections_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Connections"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "List Connections",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/connections/revoke-all": {
+      "post": {
+        "description": "Disconnects every browser. The web app calls this when the user signs out.",
+        "operationId": "disconnect_all_extension_connections_revoke_all_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Disconnect All",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/connections/{connection_id}": {
+      "delete": {
+        "description": "Disconnects one browser: its token stops working at once.",
+        "operationId": "disconnect_extension_connections__connection_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "connection_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Connection Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "404": {
+            "description": "That browser isn't connected."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Disconnect",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/link": {
+      "post": {
+        "description": "A one-time code the web app hands to the extension. Single use, valid 2 minutes.",
+        "operationId": "create_link_code_extension_link_post",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkCode"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "Not signed in"
+          },
+          "403": {
+            "description": "Confirm it's you first: Clerk reverification (a code or passkey in the last 10 minutes). The body is Clerk's reverification hint."
+          },
+          "429": {
+            "description": "Too many link codes this hour"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Create Link Code",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/me": {
+      "get": {
+        "description": "Who the extension is signed in as, and which profile version is current.",
+        "operationId": "extension_me_extension_me_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionMe"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "The extension token is unknown, revoked or expired"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Extension Me",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/sign-out": {
+      "post": {
+        "description": "Revokes the token the extension signed in with.",
+        "operationId": "extension_sign_out_extension_sign_out_post",
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "401": {
+            "description": "The extension token is unknown, revoked or expired"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Extension Sign Out",
+        "tags": [
+          "extension"
+        ]
+      }
+    },
+    "/extension/token": {
+      "post": {
+        "description": "Trades a one-time link code for an extension token (30 days, extended while in use).",
+        "operationId": "create_token_extension_token_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExtensionTokenOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "400": {
+            "description": "That link has expired. Connect again from Clew's Settings."
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          },
+          "429": {
+            "description": "Too many attempts from this address"
+          }
+        },
+        "summary": "Create Token",
+        "tags": [
+          "extension"
         ]
       }
     },

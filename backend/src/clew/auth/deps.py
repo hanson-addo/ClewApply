@@ -10,6 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from clew.auth.extension import is_extension_token
 from clew.auth.tokens import (
     InvalidToken,
     JwksCache,
@@ -27,6 +28,7 @@ logger = logging.getLogger(__name__)
 bearer = HTTPBearer(auto_error=False, description="Clerk session token")
 
 EMAIL_REQUIRED = "email_required"
+EXTENSION_NOT_ALLOWED = "extension_token_not_allowed"
 
 UNAUTHORIZED = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -48,6 +50,9 @@ async def get_session_claims(
     credentials: Annotated[HTTPAuthorizationCredentials | None, Depends(bearer)],
     verifier: Annotated[TokenVerifier | None, Depends(get_token_verifier)],
 ) -> SessionClaims:
+    if credentials is not None and is_extension_token(credentials.credentials):
+        # The extension's token is scoped to its own endpoints (clew.api.extension).
+        raise HTTPException(status.HTTP_403_FORBIDDEN, detail=EXTENSION_NOT_ALLOWED)
     if verifier is None:
         raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Sign-in is not set up yet.")
     if credentials is None or credentials.scheme.lower() != "bearer":

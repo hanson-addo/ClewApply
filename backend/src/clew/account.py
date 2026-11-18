@@ -18,6 +18,8 @@ from clew.models import (
     AiConsentEvent,
     Application,
     CompanyFollow,
+    ExtensionLinkCode,
+    ExtensionToken,
     JobFeedback,
     JobPreferences,
     Profile,
@@ -45,10 +47,13 @@ EXPORTED: dict[str, type[DeclarativeBase]] = {
     "resumes": Resume,
     "resume_drafts": ResumeParse,
     "usage_events": UsageEvent,
+    "connected_browsers": ExtensionToken,
+    "extension_link_codes": ExtensionLinkCode,
 }
 
-# Internal fields that mean nothing outside Clew (a random storage key, our own user id).
-LEFT_OUT = {"file_key", "user_id"}
+# Internal fields that mean nothing outside Clew (a random storage key, our own user id), and
+# the hashes of extension tokens and link codes.
+LEFT_OUT = {"file_key", "user_id", "token_hash", "code_hash"}
 
 # Exports are spooled to disk past this size, so 20 resumes never sit in memory at once.
 IN_MEMORY_BYTES = 8 * 1024 * 1024

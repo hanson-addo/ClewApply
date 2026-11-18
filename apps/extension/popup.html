@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Clew</title>
+    <link rel="stylesheet" href="/src/popup.css" />
+  </head>
+  <body>
+    <main id="popup" class="popup" aria-live="polite">
+      <h1 class="popup-title">Clew</h1>
+      <p id="status" class="popup-status">Checking…</p>
+      <dl id="facts" class="popup-facts" hidden>
+        <dt>Signed in as</dt>
+        <dd id="email"></dd>
+        <dt>Profile</dt>
+        <dd id="profile"></dd>
+      </dl>
+      <p id="hint" class="popup-hint" hidden></p>
+      <button id="sign-out" type="button" class="popup-button" hidden>Sign out of the extension</button>
+    </main>
+    <script type="module" src="/src/popup.ts"></script>
+  </body>
+</html>

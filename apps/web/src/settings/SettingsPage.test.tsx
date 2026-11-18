@@ -32,7 +32,10 @@ beforeEach(() => {
   resetClerk();
   clerkState.isSignedIn = true;
   calls = [];
-  handlers = { "GET /me": () => Response.json({ id: "u1", email: "riley@example.test", plan: "free" }) };
+  handlers = {
+    "GET /me": () => Response.json({ id: "u1", email: "riley@example.test", plan: "free" }),
+    "GET /extension/connections": () => Response.json({ connections: [] }),
+  };
   fetchMock.mockReset();
   fetchMock.mockImplementation(async (request) => {
     const key = `${request.method} ${new URL(request.url).pathname}`;
@@ -48,6 +51,118 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
+});
+
+const CODE = `clk_${"c".repeat(43)}`;
+const LAPTOP = {
+  id: "7d1f4c1e-6c0e-4a52-9a52-6f0f1c2d3e4f",
+  label: "Chrome on macOS",
+  created_at: "2026-11-18T14:04:00Z",
+  last_used_at: "2026-11-18T15:00:00Z",
+};
+
+/** Stands in for Chrome's chrome.runtime as a page sees it when the extension is installed. */
+function installExtension(answer: (id: string, message: unknown) => Promise<unknown>) {
+  const sendMessage = vi.fn(answer);
+  vi.stubGlobal("chrome", { runtime: { sendMessage } });
+  return sendMessage;
+}
+
+describe("Settings: browser extension", () => {
+  it("connects this browser: link code after confirming it's them, handed to the extension", async () => {
+    let tries = 0;
+    handlers["POST /extension/link"] = () =>
+      ++tries === 1 ? Response.json(HINT, { status: 403 }) : Response.json({ code: CODE, expires_at: "x" }, { status: 201 });
+    let connected = false;
+    handlers["GET /extension/connections"] = () => Response.json({ connections: connected ? [LAPTOP] : [] });
+    const sendMessage = installExtension(async () => {
+      connected = true;
+      return { ok: true };
+    });
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    expect(await within(card).findByText("No browsers are connected.")).toBeInTheDocument();
+
+    await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
+
+    expect(await within(card).findByRole("status")).toHaveTextContent("This browser is connected.");
+    expect(clerkState.reverified).toBe(1);
+    expect(sendMessage).toHaveBeenCalledWith("bknomgnbnlknofhndoodlaboaomlhben", { type: "clew/link", code: CODE });
+    const list = await within(card).findByRole("list", { name: "Connected browsers" });
+    expect(list).toHaveTextContent("Chrome on macOS");
+    expect(list).toHaveTextContent(/Connected Nov 18, 2026, last used Nov 18, 2026/);
+  });
+
+  it("says to install the extension when Chrome has no way to reach it", async () => {
+    handlers["POST /extension/link"] = () => Response.json({ code: CODE, expires_at: "x" }, { status: 201 });
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
+    expect(await within(card).findByRole("alert")).toHaveTextContent("Install the Clew extension in Chrome");
+  });
+
+  it("says to install the extension when it isn't the one installed", async () => {
+    handlers["POST /extension/link"] = () => Response.json({ code: CODE, expires_at: "x" }, { status: 201 });
+    installExtension(async () => {
+      throw new Error("Could not establish connection. Receiving end does not exist.");
+    });
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
+    expect(await within(card).findByRole("alert")).toHaveTextContent("Install the Clew extension in Chrome");
+  });
+
+  it("says so when the extension couldn't use the code", async () => {
+    handlers["POST /extension/link"] = () => Response.json({ code: CODE, expires_at: "x" }, { status: 201 });
+    installExtension(async () => ({ ok: false, error: "expired" }));
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
+    expect(await within(card).findByRole("alert")).toHaveTextContent("We couldn't connect the extension.");
+  });
+
+  it("says so when too many link codes were made this hour", async () => {
+    handlers["POST /extension/link"] = () => Response.json({ detail: "x" }, { status: 429 });
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
+    expect(await within(card).findByRole("alert")).toHaveTextContent("several times this hour");
+  });
+
+  it("disconnects a browser", async () => {
+    let listed = [LAPTOP];
+    handlers["GET /extension/connections"] = () => Response.json({ connections: listed });
+    handlers[`DELETE /extension/connections/${LAPTOP.id}`] = () => {
+      listed = [];
+      return new Response(null, { status: 204 });
+    };
+    renderAt("/settings");
+    const card = await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(await within(card).findByRole("button", { name: "Disconnect Chrome on macOS" }));
+    expect(await within(card).findByRole("status")).toHaveTextContent("Disconnected Chrome on macOS.");
+    expect(await within(card).findByText("No browsers are connected.")).toBeInTheDocument();
+  });
+
+  it("signing out disconnects the extension first", async () => {
+    handlers["POST /extension/connections/revoke-all"] = () => new Response(null, { status: 204 });
+    renderAt("/settings");
+    await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() => expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" }));
+    expect(calls).toContain("POST /extension/connections/revoke-all");
+  });
+
+  it("still signs out when Clew can't be reached", async () => {
+    handlers["POST /extension/connections/revoke-all"] = () => {
+      throw new TypeError("offline");
+    };
+    renderAt("/settings");
+    await screen.findByRole("region", { name: "Browser extension" });
+    await userEvent.click(screen.getByRole("button", { name: "Account" }));
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await waitFor(() => expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" }));
+  });
 });
 
 describe("Settings", () => {
