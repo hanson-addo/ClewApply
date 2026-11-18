@@ -30,8 +30,8 @@ FRESH = [2, -1]  # Clerk "fva": first factor 2 minutes ago.
 EXTENSION_ID = "abcdefghijklmnopabcdefghijklmnop"
 
 
-@pytest.fixture
-def app() -> FastAPI:
+def make_app() -> FastAPI:
+    """The API with test sign-in, file storage and Clerk stand-ins."""
     app = create_app()
     test_verifier = verifier(KEY)
     store = MemoryStore()
@@ -40,6 +40,11 @@ def app() -> FastAPI:
     app.dependency_overrides[get_object_store] = lambda: store
     app.dependency_overrides[get_clerk_admin] = lambda: clerk
     return app
+
+
+@pytest.fixture
+def app() -> FastAPI:
+    return make_app()
 
 
 @pytest.fixture
@@ -215,7 +220,11 @@ async def test_label_is_cleaned(api: AsyncClient, db: AsyncSession) -> None:
 
 # --- scope ----------------------------------------------------------------------------------
 
-EXTENSION_ROUTES = {("GET", "/extension/me"), ("POST", "/extension/sign-out")}
+EXTENSION_ROUTES = {
+    ("GET", "/extension/me"),
+    ("POST", "/extension/sign-out"),
+    ("POST", "/sync/fills"),
+}
 NO_SIGN_IN = {
     ("GET", "/health"),
     ("GET", "/ready"),

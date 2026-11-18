@@ -68,6 +68,10 @@ class Settings(BaseSettings):
     extension_links_per_hour: int = Field(default=10, ge=1)
     # Link-code redemptions per caller address per minute, so codes can't be guessed at speed.
     extension_token_attempts_per_minute: int = Field(default=10, ge=1)
+    # Key for the Sync Center's fill fingerprints (HMAC-SHA256 of each filled value), so fill
+    # records never hold profile content. Required in production; without it, /sync answers 503.
+    # Changing it makes every site show as behind until the next fill.
+    fill_fingerprint_key: SecretStr | None = None
     # Older profile versions are deleted by `python -m clew.maintenance prune-profile-versions`.
     profile_versions_kept: int = Field(default=200, ge=1)
 
@@ -125,7 +129,13 @@ class Settings(BaseSettings):
             raise ValueError("CLEW_USAJOBS_EMAIL must be one email address")
         return email
 
-    @field_validator("anthropic_api_key", "usajobs_api_key", "clerk_secret_key", mode="before")
+    @field_validator(
+        "anthropic_api_key",
+        "usajobs_api_key",
+        "clerk_secret_key",
+        "fill_fingerprint_key",
+        mode="before",
+    )
     @classmethod
     def blank_secret_is_unset(cls, value: object) -> object:
         return None if value == "" else value
@@ -137,6 +147,8 @@ class Settings(BaseSettings):
         if self.env == "production" and self.clerk_secret_key is None:
             # Deleting an account promises the sign-in goes too, which needs this key.
             raise ValueError("CLEW_CLERK_SECRET_KEY is required in production")
+        if self.env == "production" and self.fill_fingerprint_key is None:
+            raise ValueError("CLEW_FILL_FINGERPRINT_KEY is required in production")
         if self.env == "production" and not self.cors_origins:
             raise ValueError("CLEW_CORS_ORIGINS is required in production")
         return self

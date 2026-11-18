@@ -20,6 +20,7 @@ from clew.api import (
     profile,
     resume_parse,
     resumes,
+    sync,
 )
 from clew.auth.extension import AttemptLimiter
 from clew.auth.reverify import ReverificationRequired, reverification_handler
@@ -88,6 +89,7 @@ def create_app() -> FastAPI:
     app.include_router(resumes.router)
     app.include_router(resume_parse.router)
     app.include_router(extension.router)
+    app.include_router(sync.router)
     return app
 
 

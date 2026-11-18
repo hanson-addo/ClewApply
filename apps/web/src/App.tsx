@@ -15,6 +15,7 @@ import { SetupNeededPage } from "./pages/SetupNeededPage";
 import { SignInUnavailablePage } from "./pages/StartupProblemPage";
 import { SignInPage } from "./pages/SignInPage";
 import { AccountDeletedPage, SettingsPage } from "./settings/SettingsPage";
+import { SyncPage } from "./sync/SyncPage";
 
 export function AppRoutes() {
   return (
@@ -42,6 +43,14 @@ export function AppRoutes() {
         element={
           <RequireSignIn>
             <ApplicationsPage />
+          </RequireSignIn>
+        }
+      />
+      <Route
+        path="/sync"
+        element={
+          <RequireSignIn>
+            <SyncPage />
           </RequireSignIn>
         }
       />

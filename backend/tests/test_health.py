@@ -43,6 +43,7 @@ async def test_docs_hidden_outside_local(monkeypatch: pytest.MonkeyPatch) -> Non
     monkeypatch.setenv("CLEW_ENV", "production")
     monkeypatch.setenv("CLEW_CLERK_ISSUER", "https://clew-test.clerk.accounts.dev")
     monkeypatch.setenv("CLEW_CLERK_SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "test-fingerprint-key")
     monkeypatch.setenv("CLEW_CORS_ORIGINS", '["https://clewapply.com"]')
     get_settings.cache_clear()
     try:
