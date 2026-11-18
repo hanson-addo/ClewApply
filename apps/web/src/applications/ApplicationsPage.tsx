@@ -1,4 +1,3 @@
-import { useClerk } from "@clerk/react";
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 
@@ -22,6 +21,7 @@ import {
   type Column,
   type Status,
 } from "./model";
+import { useSignOut } from "../auth/useSignOut";
 
 type BoardState =
   | { status: "loading"; attempt: number }
@@ -32,7 +32,7 @@ type BoardState =
  *  phones. Every card has a Status select, so moving one never needs dragging. */
 export function ApplicationsPage() {
   const api = useApi();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const navigate = useNavigate();
   const { applicationId } = useParams();
   const [attempt, setAttempt] = useState(0);
@@ -129,7 +129,7 @@ export function ApplicationsPage() {
     tabs.current.get(next)?.focus();
   };
 
-  const header = <AppHeader email={null} onSignOut={() => void signOut({ redirectUrl: "/sign-in" })} />;
+  const header = <AppHeader email={null} onSignOut={() => void signOut()} />;
   const live = (
     <p className="clew-sr-only" role="status" aria-live="polite">
       {announcement}

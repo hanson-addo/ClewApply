@@ -1,4 +1,3 @@
-import { useClerk } from "@clerk/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router";
 
@@ -23,6 +22,7 @@ import {
 } from "./model";
 import { FilterPanel } from "./FilterPanel";
 import { JobSearch } from "./JobSearch";
+import { useSignOut } from "../auth/useSignOut";
 
 type ListState =
   | { status: "loading" }
@@ -42,7 +42,7 @@ const TOAST_MS = 10_000;
 /** The job feed: filters, the ranked list, and the selected job (FEED-01 to FEED-16). */
 export function JobsPage() {
   const api = useApi();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const navigate = useNavigate();
   const { jobId } = useParams();
   const [params, setParams] = useSearchParams();
@@ -187,7 +187,7 @@ export function JobsPage() {
 
   return (
     <>
-      <AppHeader email={null} onSignOut={() => void signOut({ redirectUrl: "/sign-in" })} />
+      <AppHeader email={null} onSignOut={() => void signOut()} />
       <main id="main" className={`jobs-page${hasDetail ? " jobs-has-detail" : ""}`}>
         <div className="page-intro jobs-intro">
           <PageBand kind="jobs" />

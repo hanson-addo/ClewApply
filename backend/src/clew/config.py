@@ -62,6 +62,12 @@ class Settings(BaseSettings):
     profile_saves_per_hour: int = Field(default=60, ge=1)
     # Each export reads every resume file back from storage.
     data_exports_per_hour: int = Field(default=5, ge=1)
+    # Browser extension (#130). Its Chrome id (32 letters a to p), pinned by the manifest's
+    # "key". The API allows requests from chrome-extension://<id> and no other extension.
+    extension_id: str | None = None
+    extension_links_per_hour: int = Field(default=10, ge=1)
+    # Link-code redemptions per caller address per minute, so codes can't be guessed at speed.
+    extension_token_attempts_per_minute: int = Field(default=10, ge=1)
     # Older profile versions are deleted by `python -m clew.maintenance prune-profile-versions`.
     profile_versions_kept: int = Field(default=200, ge=1)
 
@@ -72,6 +78,22 @@ class Settings(BaseSettings):
         if "*" in origins:
             raise ValueError('"*" is not allowed in CLEW_CORS_ORIGINS; list each origin')
         return origins
+
+    @field_validator("extension_id")
+    @classmethod
+    def extension_id_shape(cls, value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        if not re.fullmatch(r"[a-p]{32}", value):
+            raise ValueError("CLEW_EXTENSION_ID must be a Chrome extension id (32 letters a-p)")
+        return value
+
+    @property
+    def allowed_origins(self) -> list[str]:
+        """The web app's origins plus the pinned extension's, for CORS."""
+        if self.extension_id is None:
+            return list(self.cors_origins)
+        return [*self.cors_origins, f"chrome-extension://{self.extension_id}"]
 
     @field_validator("clerk_issuer")
     @classmethod

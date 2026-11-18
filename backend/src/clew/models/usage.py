@@ -16,6 +16,7 @@ class UsageKind(StrEnum):
     RESUME_UPLOAD = "resume_upload"
     PROFILE_SAVE = "profile_save"
     DATA_EXPORT = "data_export"
+    EXTENSION_LINK = "extension_link"
 
 
 class UsageEvent(Base):

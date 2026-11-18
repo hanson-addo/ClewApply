@@ -11,6 +11,7 @@ from clew.models.catalog import (
     RemoteType,
 )
 from clew.models.consent import AiConsentEvent
+from clew.models.extension import ExtensionLinkCode, ExtensionToken
 from clew.models.feedback import FeedbackAction, JobFeedback
 from clew.models.preferences import JobPreferences
 from clew.models.profile import Profile, ProfileVersion
@@ -25,6 +26,8 @@ __all__ = [
     "ApplicationStatus",
     "Company",
     "CompanyFollow",
+    "ExtensionLinkCode",
+    "ExtensionToken",
     "FeedbackAction",
     "Job",
     "JobFeedback",

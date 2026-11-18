@@ -1,4 +1,3 @@
-import { useClerk } from "@clerk/react";
 import { useEffect, useState } from "react";
 
 import { useApi } from "../auth/useApi";
@@ -6,6 +5,7 @@ import { AppHeader } from "../components/AppHeader";
 import { HomeDashboard } from "../home/HomeDashboard";
 import { useDashboard } from "../home/useDashboard";
 import { useJobMap } from "../home/useJobMap";
+import { useSignOut } from "../auth/useSignOut";
 
 type Me = { id: string; email: string; plan: string };
 type State =
@@ -27,7 +27,7 @@ function errorDetail(error: unknown): string | undefined {
 /** Signed-in landing page. The first visit also creates the Clew account (GET /me). */
 export function HomePage() {
   const api = useApi();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const [state, setState] = useState<State>({ status: "loading" });
   const dashboard = useDashboard(state.status === "ready");
   const jobMap = useJobMap(state.status === "ready");
@@ -60,7 +60,7 @@ export function HomePage() {
     <>
       <AppHeader
         email={state.status === "ready" ? state.me.email : null}
-        onSignOut={() => void signOut({ redirectUrl: "/sign-in" })}
+        onSignOut={() => void signOut()}
       />
       <main id="main" className={state.status === "ready" ? "home home-wide" : "home"}>
         {state.status === "loading" && <p role="status">Loading your account…</p>}

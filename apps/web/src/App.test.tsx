@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider } from "react-router";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -153,7 +153,7 @@ describe("signed-in pages", () => {
     renderAt("/");
     await userEvent.click(screen.getByRole("button", { name: "Account" }));
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
-    expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" });
+    await waitFor(() => expect(clerkState.signOut).toHaveBeenCalledWith({ redirectUrl: "/sign-in" }));
   });
 
   it("redirect unknown paths home", () => {

@@ -1,15 +1,15 @@
-import { useClerk } from "@clerk/react";
 import type { ReactNode } from "react";
 
 import { AppHeader } from "../components/AppHeader";
 import { STEPS } from "./model";
+import { useSignOut } from "../auth/useSignOut";
 
 /** The page around each onboarding step: header, the four-step progress, then the step. */
 export function OnboardingLayout({ step, children }: { step: number; children: ReactNode }) {
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   return (
     <>
-      <AppHeader email={null} onSignOut={() => void signOut({ redirectUrl: "/sign-in" })} />
+      <AppHeader email={null} onSignOut={() => void signOut()} />
       <main id="main" className="onboarding">
         <ol className="stepper" aria-label="Setup progress">
           {STEPS.map((label, index) => (

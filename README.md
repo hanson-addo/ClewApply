@@ -54,6 +54,7 @@ Checks that CI runs on every pull request:
 ```sh
 cd backend  && uv run ruff check . && uv run ruff format --check . && uv run mypy && uv run pytest
 cd apps/web && npm run lint && npm run typecheck && npm test && npm run build
+cd apps/extension && npm run lint && npm run typecheck && npm test && npm run build
 ```
 
 End-to-end tests start the API and web app themselves (Postgres must be running). See [e2e/README.md](e2e/README.md):
@@ -67,6 +68,7 @@ When an API route changes, refresh the shared types so the web app's client stay
 ```sh
 cd backend  && uv run python -m clew.openapi > openapi.json
 cd apps/web && npm run gen:api
+cd apps/extension && npm run gen:api
 ```
 
 ## Stack

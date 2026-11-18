@@ -11,6 +11,7 @@ from clew.api import (
     applications,
     companies,
     consent,
+    extension,
     feed,
     health,
     jobs,
@@ -20,6 +21,7 @@ from clew.api import (
     resume_parse,
     resumes,
 )
+from clew.auth.extension import AttemptLimiter
 from clew.auth.reverify import ReverificationRequired, reverification_handler
 from clew.config import get_settings
 from clew.db.role_check import app_role_problems
@@ -67,11 +69,12 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=settings.cors_origins,
+        allow_origins=settings.allowed_origins,
         allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
         allow_headers=["Authorization", "Content-Type"],
     )
+    app.state.extension_token_limiter = AttemptLimiter(settings.extension_token_attempts_per_minute)
     app.add_exception_handler(ReverificationRequired, reverification_handler)
     app.include_router(health.router)
     app.include_router(me.router)
@@ -84,6 +87,7 @@ def create_app() -> FastAPI:
     app.include_router(applications.router)
     app.include_router(resumes.router)
     app.include_router(resume_parse.router)
+    app.include_router(extension.router)
     return app
 
 

@@ -1,12 +1,13 @@
-import { useAuth, useClerk, useReverification } from "@clerk/react";
-import { isReverificationCancelledError } from "@clerk/react/errors";
+import { useClerk } from "@clerk/react";
 import { useEffect, useId, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 
-import { config } from "../config";
 import { useApi } from "../auth/useApi";
+import { useSignOut } from "../auth/useSignOut";
 import { AppHeader } from "../components/AppHeader";
 import { PageBand } from "../components/PageBand";
+import { isCancelled, useAccountRequest } from "./accountRequest";
+import { ExtensionCard } from "./ExtensionCard";
 
 /** How long a prepared download stays offered before the file is dropped from memory. */
 const DOWNLOAD_MINUTES = 15;
@@ -25,31 +26,6 @@ const DELETE_FAILED = "Your account wasn't deleted. Some resume files may alread
 function sizeLabel(bytes: number): string {
   if (bytes < 1024 * 1024) return `${Math.max(1, Math.round(bytes / 1024))} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-/**
- * Calls an account endpoint that needs a recent sign-in. A 403 comes back as Clerk's
- * reverification hint (JSON), which useReverification spots: it asks the user to confirm it's
- * them, then calls again. Anything else comes back as the Response.
- */
-function useAccountRequest(method: "POST" | "DELETE", path: string) {
-  const { getToken } = useAuth();
-  return useReverification(async (): Promise<Response | unknown> => {
-    const token = await getToken();
-    const response = await globalThis.fetch(
-      new Request(`${config.apiUrl}${path}`, {
-        method,
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      }),
-    );
-    if (response.status === 403) return response.json();
-    return response;
-  });
-}
-
-/** Clerk throws this when the user closes its "confirm it's you" step. */
-function isCancelled(error: unknown): boolean {
-  return isReverificationCancelledError(error);
 }
 
 function DownloadCard() {
@@ -240,7 +216,7 @@ function DeleteCard() {
 /** Settings: the account, a copy of your data, and deleting the account (#31). */
 export function SettingsPage() {
   const api = useApi();
-  const { signOut } = useClerk();
+  const signOut = useSignOut();
   const [account, setAccount] = useState<Account | null>(null);
 
   useEffect(() => {
@@ -264,7 +240,7 @@ export function SettingsPage() {
     <>
       <AppHeader
         email={account?.email ?? null}
-        onSignOut={() => void signOut({ redirectUrl: "/sign-in" })}
+        onSignOut={() => void signOut()}
       />
       <main id="main" className="settings-page">
         <div className="page-intro settings-intro">
@@ -281,6 +257,7 @@ export function SettingsPage() {
           </dl>
           <p className="settings-hint">Change your email in your sign-in settings.</p>
         </section>
+        <ExtensionCard />
         <DownloadCard />
         <DeleteCard />
       </main>
