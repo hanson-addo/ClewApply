@@ -113,13 +113,14 @@ def _linkedin(profile: ProfileData) -> list[SiteField]:
 
 
 def _indeed(profile: ProfileData) -> list[SiteField]:
+    # No skills: Indeed adds them one at a time, each with its own years of experience. Its
+    # education form has a level-of-education list apart from the field of study.
     return [
         SiteField("headline", "Headline", profile.basics.label),
         SiteField("summary", "Summary", profile.basics.summary),
         SiteField("location", "Location", _location(profile)),
-        *_jobs(profile),
-        *_schools(profile),
-        SiteField("skills", "Skills", _skills(profile)),
+        *_jobs(profile, duties=True),
+        *_schools(profile, split_degree=True),
     ]
 
 

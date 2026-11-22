@@ -111,6 +111,21 @@ def test_every_site_lists_fields_with_unique_keys() -> None:
     # The school in PROFILE has no dates, so it has no value; the key is still listed.
     keys = [f.key for f in SITES["linkedin"].fields(profile)]
     assert keys == [*LINKEDIN_KEYS, "education.sch1.dates"]
+    # Indeed: job descriptions, the degree split from the field of study, and no skills.
+    indeed = [f.key for f in SITES["indeed"].fields(profile)]
+    assert indeed == [
+        "headline",
+        "summary",
+        "location",
+        "work.job1.title",
+        "work.job1.company",
+        "work.job1.dates",
+        "work.job1.duties",
+        "education.sch1.school",
+        "education.sch1.degree",
+        "education.sch1.field",
+        "education.sch1.dates",
+    ]
 
 
 def test_a_version_saved_before_entry_ids_falls_back_to_positions() -> None:

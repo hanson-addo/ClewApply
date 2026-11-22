@@ -21,8 +21,10 @@ export type BrowserApi = {
   /** The tab's address; Chrome gives it only for sites the user turned on. */
   tabUrl(tabId: number): Promise<string | undefined>;
   hasPermission(origin: string): Promise<boolean>;
-  inject(tabId: number, file: string): Promise<void>;
-  sendToTab(tabId: number, message: FieldsMessage): Promise<void>;
+  /** Injects the file; returns the id of the document it ran in, if Chrome says. */
+  inject(tabId: number, file: string): Promise<string | undefined>;
+  /** Sends only to that document, so a page the tab moved on to never gets the values. */
+  sendToTab(tabId: number, message: FieldsMessage, documentId: string | undefined): Promise<void>;
 };
 
 export type Deps = {
@@ -104,13 +106,12 @@ async function fillTab(deps: Deps, tabId: number): Promise<FillTabResult> {
     }
     if (!data) return { ok: false, error: "unavailable" };
     if (data.profile_version === null) return { ok: false, error: "no-profile" };
-    await deps.browser.inject(tabId, site.script);
-    await deps.browser.sendToTab(tabId, {
-      type: "clew/fields",
-      site: site.id,
-      profileVersion: data.profile_version,
-      fields: data.fields,
-    });
+    const documentId = await deps.browser.inject(tabId, site.script);
+    await deps.browser.sendToTab(
+      tabId,
+      { type: "clew/fields", site: site.id, profileVersion: data.profile_version, fields: data.fields },
+      documentId,
+    );
     return { ok: true };
   } catch {
     return { ok: false, error: "unavailable" };

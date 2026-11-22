@@ -1,16 +1,11 @@
 // @vitest-environment jsdom
 import { fillMessage, profileLine, start, type PopupBrowser } from "./popup";
+import { SITES } from "./sites";
 
 const HTML = `
   <p id="status"></p>
   <dl id="facts" hidden><dd id="email"></dd><dd id="profile"></dd></dl>
-  <section id="site" hidden>
-    <p id="site-text"></p>
-    <button id="site-fill" hidden>Fill this LinkedIn form</button>
-    <button id="site-on" hidden>Turn on LinkedIn</button>
-    <p id="site-result"></p>
-    <button id="site-off" hidden>Turn off LinkedIn</button>
-  </section>
+  <div id="sites" hidden></div>
   <p id="hint" hidden></p>
   <button id="sign-out" hidden>Sign out of the extension</button>`;
 
@@ -20,8 +15,9 @@ function fakeBrowser(granted = false, url = "https://www.linkedin.com/in/riley-t
   const browser = {
     granted,
     url,
+    // Only LinkedIn is turned on in these tests; Chrome names the tab only for a site that is.
     activeTab: vi.fn(async () => ({ id: 7, url: browser.granted ? browser.url : undefined })),
-    hasPermission: vi.fn(async () => browser.granted),
+    hasPermission: vi.fn(async (origin: string) => browser.granted && origin === SITES.linkedin.origin),
     request: vi.fn(async () => true),
     remove: vi.fn(async () => true),
   };
@@ -42,6 +38,25 @@ beforeEach(() => {
   document.body.replaceChildren();
   document.body.append(document.createRange().createContextualFragment(HTML));
 });
+
+/** A button or line in one site's section, by its text or class. */
+function inSite(site: string, find: { button?: RegExp; className?: string }): HTMLElement {
+  const section = document.querySelector(`[data-site="${site}"]`);
+  if (!section) throw new Error(`no section for ${site}`);
+  const element = find.button
+    ? [...section.querySelectorAll("button")].find((b) => find.button?.test(b.textContent ?? ""))
+    : section.querySelector(`.${find.className}`);
+  if (!(element instanceof HTMLElement)) throw new Error(`missing ${String(find.button ?? find.className)} in ${site}`);
+  return element;
+}
+
+const linkedIn = {
+  on: () => inSite("linkedin", { button: /^Turn on/ }),
+  off: () => inSite("linkedin", { button: /^Turn off/ }),
+  fill: () => inSite("linkedin", { button: /^Fill/ }),
+  text: () => inSite("linkedin", { className: "popup-hint" }),
+  result: () => inSite("linkedin", { className: "popup-result" }),
+};
 
 function $(id: string): HTMLElement {
   const element = document.getElementById(id);
@@ -95,36 +110,36 @@ it("says when the profile hasn't been saved", () => {
 describe("LinkedIn", () => {
   it("is hidden until signed in", async () => {
     await start(document, async () => ({ state: "signed-out" }), fakeBrowser(), trusted);
-    expect($("site").hidden).toBe(true);
+    expect($("sites").hidden).toBe(true);
   });
 
   it("offers to turn LinkedIn on, and asks Chrome only on a real click", async () => {
     const browser = fakeBrowser(false);
     await start(document, async () => SIGNED_IN, browser, trusted);
-    expect($("site").hidden).toBe(false);
-    expect($("site-on").hidden).toBe(false);
-    expect($("site-fill").hidden).toBe(true);
-    expect($("site-text").textContent).toContain("Chrome asks you first");
+    expect($("sites").hidden).toBe(false);
+    expect(linkedIn.on().hidden).toBe(false);
+    expect(linkedIn.fill().hidden).toBe(true);
+    expect(linkedIn.text().textContent).toContain("Chrome asks you first");
 
-    $("site-on").dispatchEvent(new MouseEvent("click"));
+    linkedIn.on().dispatchEvent(new MouseEvent("click"));
     expect(browser.request).not.toHaveBeenCalled();
 
     browser.request.mockImplementation(async () => {
       browser.granted = true;
       return true;
     });
-    realClick($("site-on"));
+    realClick(linkedIn.on());
     await settle();
     expect(browser.request).toHaveBeenCalledWith("https://www.linkedin.com/*");
-    expect($("site-on").hidden).toBe(true);
-    expect($("site-fill").hidden).toBe(false);
+    expect(linkedIn.on().hidden).toBe(true);
+    expect(linkedIn.fill().hidden).toBe(false);
   });
 
   it("offers Fill only on a LinkedIn profile tab", async () => {
     await start(document, async () => SIGNED_IN, fakeBrowser(true, "https://www.linkedin.com/feed/"), trusted);
-    expect($("site-fill").hidden).toBe(true);
-    expect($("site-off").hidden).toBe(false);
-    expect($("site-text").textContent).toContain("press a pencil");
+    expect(linkedIn.fill().hidden).toBe(true);
+    expect(linkedIn.off().hidden).toBe(false);
+    expect(linkedIn.text().textContent).toContain("press a pencil");
   });
 
   it("asks the service worker to open the panel on this tab", async () => {
@@ -132,12 +147,12 @@ describe("LinkedIn", () => {
       (message as { type: string }).type === "clew/fill-tab" ? { ok: true } : SIGNED_IN,
     );
     await start(document, ask, fakeBrowser(true), trusted);
-    $("site-fill").dispatchEvent(new MouseEvent("click"));
+    linkedIn.fill().dispatchEvent(new MouseEvent("click"));
     expect(ask).not.toHaveBeenCalledWith({ type: "clew/fill-tab", tabId: 7 });
-    realClick($("site-fill"));
+    realClick(linkedIn.fill());
     await settle();
     expect(ask).toHaveBeenCalledWith({ type: "clew/fill-tab", tabId: 7 });
-    expect($("site-result").textContent).toBe("The Clew panel is open on the page.");
+    expect(linkedIn.result().textContent).toBe("The Clew panel is open on the page.");
   });
 
   it("turns LinkedIn off", async () => {
@@ -147,15 +162,31 @@ describe("LinkedIn", () => {
       return true;
     });
     await start(document, async () => SIGNED_IN, browser, trusted);
-    realClick($("site-off"));
+    realClick(linkedIn.off());
     await settle();
     expect(browser.remove).toHaveBeenCalledWith("https://www.linkedin.com/*");
-    expect($("site-on").hidden).toBe(false);
+    expect(linkedIn.on().hidden).toBe(false);
   });
 
   it("explains each fill problem", () => {
-    expect(fillMessage({ ok: false, error: "no-profile" })).toBe("Save your profile in Clew first.");
-    expect(fillMessage({ ok: false, error: "not-turned-on" })).toBe("Turn on LinkedIn first.");
-    expect(fillMessage({ ok: false, error: "wrong-page" })).toContain("LinkedIn profile");
+    expect(fillMessage({ ok: false, error: "no-profile" }, SITES.linkedin)).toBe("Save your profile in Clew first.");
+    expect(fillMessage({ ok: false, error: "not-turned-on" }, SITES.linkedin)).toBe("Turn on LinkedIn first.");
+    expect(fillMessage({ ok: false, error: "wrong-page" }, SITES.indeed)).toContain("Indeed profile");
+  });
+});
+
+describe("Indeed", () => {
+  it("has its own switch, off until the user turns it on", async () => {
+    const browser = fakeBrowser(true);
+    await start(document, async () => SIGNED_IN, browser, trusted);
+    const on = inSite("indeed", { button: /^Turn on Indeed$/ });
+    expect(on.hidden).toBe(false);
+    expect(inSite("indeed", { button: /^Fill/ }).hidden).toBe(true);
+
+    browser.request.mockImplementation(async () => true);
+    realClick(on);
+    await settle();
+    expect(browser.request).toHaveBeenCalledWith("https://profile.indeed.com/*");
+    expect(browser.request).not.toHaveBeenCalledWith("https://www.linkedin.com/*");
   });
 });

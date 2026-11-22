@@ -11,7 +11,7 @@
  */
 
 import type { FieldsMessage, FillField } from "../messages";
-import { openForm, type FormSpec, type PartSpec } from "./linkedinForms";
+import { openForm, type FormSpec, type PartSpec, type SiteForms } from "./forms";
 
 export type PanelDeps = {
   /** Sends the filled keys to the service worker. */
@@ -21,7 +21,6 @@ export type PanelDeps = {
 };
 
 const HOST_ID = "clew-fill-panel";
-const SITE_NAME = "LinkedIn";
 
 const CSS = `
 :host { all: initial; }
@@ -102,7 +101,8 @@ function partOf(field: FillField): string {
 }
 
 /** Opens (or reopens) the panel with these values. Returns the shadow root, for tests. */
-export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): ShadowRoot {
+export function showPanel(doc: Document, data: FieldsMessage, site: SiteForms, deps: PanelDeps): ShadowRoot {
+  const SITE_NAME = site.name;
   const trusted = deps.trusted ?? ((event: Event) => event.isTrusted);
   doc.getElementById(HOST_ID)?.remove();
   const host = el(doc, "div");
@@ -150,9 +150,9 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
     const again = el(doc, "button", "Check again");
     again.type = "button";
     onClick(again, render);
-    const ask = `Open one of your profile's edit forms on ${SITE_NAME} (press a pencil, or Add), then press Check again.`;
+    const ask = `Open one of your profile's edit forms on ${SITE_NAME} (${site.howToOpen}), then press Check again.`;
     draw(
-      [header(), el(doc, "p", ask), el(doc, "p", "Clew fills your intro, about, experience and education.", "muted"), again],
+      [header(), el(doc, "p", ask), el(doc, "p", `Clew fills ${site.covers}.`, "muted"), again],
       { announce: `No ${SITE_NAME} edit form is open.` },
     );
   };
@@ -234,7 +234,7 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
   };
 
   const fillTicked = async (spec: FormSpec, ticked: FillField[], parts: Map<string, PartSpec>) => {
-    const open = openForm(doc);
+    const open = openForm(doc, site.forms);
     if (open?.spec.kind !== spec.kind) {
       render();
       return;
@@ -272,7 +272,7 @@ export function showPanel(doc: Document, data: FieldsMessage, deps: PanelDeps): 
   };
 
   function render() {
-    const open = openForm(doc);
+    const open = openForm(doc, site.forms);
     if (!open) {
       showNoForm();
       return;

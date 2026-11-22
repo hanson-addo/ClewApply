@@ -25,7 +25,13 @@ function memoryStore(initial: string | null = null): TokenStore & { value: strin
 
 const PROFILE_TAB = "https://www.linkedin.com/in/riley-testperson/";
 
-type FakeBrowser = BrowserApi & { url: string | undefined; granted: boolean; injected: string[]; sent: unknown[] };
+type FakeBrowser = BrowserApi & {
+  url: string | undefined;
+  granted: boolean;
+  injected: string[];
+  sent: unknown[];
+  sentTo: (string | undefined)[];
+};
 
 function fakeBrowser(): FakeBrowser {
   return {
@@ -33,17 +39,20 @@ function fakeBrowser(): FakeBrowser {
     granted: true,
     injected: [],
     sent: [],
+    sentTo: [],
     async tabUrl() {
       return this.url;
     },
     async hasPermission(origin) {
-      return this.granted && origin === "https://www.linkedin.com/*";
+      return this.granted && (origin === "https://www.linkedin.com/*" || origin === "https://profile.indeed.com/*");
     },
     async inject(_, file) {
       this.injected.push(file);
+      return "doc-1";
     },
-    async sendToTab(_, message) {
+    async sendToTab(_, message, documentId) {
       this.sent.push(message);
+      this.sentTo.push(documentId);
     },
   };
 }
@@ -213,6 +222,18 @@ describe("fill from the popup", () => {
     // The panel gets values only, never the token.
     expect(d.browser.sent).toEqual([{ type: "clew/fields", site: "linkedin", profileVersion: 4, fields: FIELDS }]);
     expect(JSON.stringify(d.browser.sent)).not.toContain(TOKEN);
+    // Only to the document the panel was injected into.
+    expect(d.browser.sentTo).toEqual(["doc-1"]);
+  });
+
+  it("opens Indeed's panel on an Indeed profile page", async () => {
+    fetchMock.mockResolvedValueOnce(json(200, { site: "indeed", profile_version: 4, fields: FIELDS }));
+    const d = deps(memoryStore(TOKEN));
+    d.browser.url = "https://profile.indeed.com/experience/add";
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: true });
+    expect(sentRequest().url).toBe(`${API}/sync/fields/indeed`);
+    expect(d.browser.injected).toEqual(["content/indeed.js"]);
+    expect(d.browser.sent).toEqual([{ type: "clew/fields", site: "indeed", profileVersion: 4, fields: FIELDS }]);
   });
 
   it.each([
@@ -220,6 +241,8 @@ describe("fill from the popup", () => {
     ["another site", "https://www.example.test/in/riley/"],
     ["a look-alike host", "https://www.linkedin.com.evil.example/in/riley/"],
     ["plain http", "http://www.linkedin.com/in/riley/"],
+    ["Indeed's job search", "https://www.indeed.com/jobs?q=analyst"],
+    ["an Indeed look-alike", "https://profile.indeed.com.evil.example/"],
     ["a tab Chrome won't name", undefined],
   ])("refuses %s", async (_, url) => {
     const d = deps(memoryStore(TOKEN));
