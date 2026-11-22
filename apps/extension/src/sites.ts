@@ -4,7 +4,7 @@
  * presses Fill in the popup.
  */
 
-export type SiteId = "linkedin";
+export type SiteId = "linkedin" | "indeed";
 
 export type Site = {
   id: SiteId;
@@ -25,6 +25,14 @@ export const SITES: Record<SiteId, Site> = {
     script: "content/linkedin.js",
     // The member's own profile and its edit forms all live under /in/<name>/.
     isProfilePage: (url) => url.protocol === "https:" && url.host === "www.linkedin.com" && /^\/in\/[^/]+/.test(url.pathname),
+  },
+  indeed: {
+    id: "indeed",
+    name: "Indeed",
+    origin: "https://profile.indeed.com/*",
+    script: "content/indeed.js",
+    // Indeed keeps the profile and its edit forms on their own host.
+    isProfilePage: (url) => url.protocol === "https:" && url.host === "profile.indeed.com",
   },
 };
 

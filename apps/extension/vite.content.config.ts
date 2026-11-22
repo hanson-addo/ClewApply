@@ -24,8 +24,9 @@ export function contentGuard(apiUrls: string[]): Plugin {
 }
 
 /**
- * Builds each site's content script as one self-contained classic script (Chrome can't inject
- * modules), next to the main build in dist/content/.
+ * Builds one site's content script as a self-contained classic script (Chrome can't inject
+ * modules), next to the main build in dist/content/. scripts/build-content.mjs runs it once per
+ * site and supplies the entry.
  */
 export default defineConfig(({ mode }) => {
   const target = targetOf(mode);
@@ -41,7 +42,6 @@ export default defineConfig(({ mode }) => {
       sourcemap: false,
       copyPublicDir: false,
       rollupOptions: {
-        input: { linkedin: "src/content/linkedin.ts" },
         output: { format: "iife", entryFileNames: "[name].js" },
       },
     },

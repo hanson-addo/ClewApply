@@ -46,7 +46,7 @@ declare namespace chrome.tabs {
   }
   function get(tabId: number): Promise<Tab>;
   function query(query: { active: boolean; currentWindow: boolean }): Promise<Tab[]>;
-  function sendMessage(tabId: number, message: unknown): Promise<unknown>;
+  function sendMessage(tabId: number, message: unknown, options?: { documentId?: string }): Promise<unknown>;
 }
 
 declare namespace chrome.permissions {
@@ -59,5 +59,8 @@ declare namespace chrome.permissions {
 }
 
 declare namespace chrome.scripting {
-  function executeScript(injection: { target: { tabId: number }; files: string[] }): Promise<unknown[]>;
+  interface InjectionResult {
+    documentId?: string;
+  }
+  function executeScript(injection: { target: { tabId: number }; files: string[] }): Promise<InjectionResult[]>;
 }

@@ -14,7 +14,7 @@ describe("production manifest", () => {
   });
 
   it("asks for job sites only when the user turns one on, never all sites (Security #10)", () => {
-    expect(manifest.optional_host_permissions).toEqual(["https://www.linkedin.com/*"]);
+    expect(manifest.optional_host_permissions).toEqual(["https://www.linkedin.com/*", "https://profile.indeed.com/*"]);
     expect(JSON.stringify(manifest)).not.toMatch(/<all_urls>|\*:\/\/\*\//);
   });
 

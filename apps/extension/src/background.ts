@@ -18,10 +18,11 @@ const deps: Deps = {
     tabUrl: async (tabId) => (await chrome.tabs.get(tabId)).url,
     hasPermission: (origin) => chrome.permissions.contains({ origins: [origin] }),
     inject: async (tabId, file) => {
-      await chrome.scripting.executeScript({ target: { tabId }, files: [file] });
+      const [result] = await chrome.scripting.executeScript({ target: { tabId }, files: [file] });
+      return result?.documentId;
     },
-    sendToTab: async (tabId, message) => {
-      await chrome.tabs.sendMessage(tabId, message);
+    sendToTab: async (tabId, message, documentId) => {
+      await chrome.tabs.sendMessage(tabId, message, documentId ? { documentId } : undefined);
     },
   },
 };

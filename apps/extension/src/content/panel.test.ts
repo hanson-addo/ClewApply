@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import type { FieldsMessage } from "../messages";
 import { parseDates } from "./fill";
+import { LINKEDIN } from "./linkedinForms";
 import { entriesOf, showPanel } from "./panel";
 
 // Made-up forms shaped like LinkedIn's edit dialogs: a heading and labelled boxes.
@@ -58,7 +59,7 @@ function page(html: string): void {
 }
 
 function open(report = vi.fn(async () => undefined)) {
-  const shadow = showPanel(document, DATA, { report, trusted });
+  const shadow = showPanel(document, DATA, LINKEDIN, { report, trusted });
   return { shadow, report };
 }
 
@@ -210,7 +211,7 @@ it("shows values as text, never as markup", () => {
     ...DATA,
     fields: [{ key: "headline", label: "Headline", value: '<img src=x onerror="alert(1)">', behind: true }],
   };
-  const shadow = showPanel(document, hostile, { report: async () => undefined, trusted });
+  const shadow = showPanel(document, hostile, LINKEDIN, { report: async () => undefined, trusted });
   expect(shadow.querySelector("img")).toBeNull();
   expect(shadow.textContent).toContain('<img src=x onerror="alert(1)">');
 });
