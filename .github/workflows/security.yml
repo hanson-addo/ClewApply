@@ -1,15 +1,12 @@
 name: Security scan
 
-# Dependency audits and static analysis on every PR (threat model R22, R23).
+# Static analysis and workflow lint on every PR (threat model R23). Dependency audits are in
+# deps-audit.yml. Merging to main doesn't re-run this: the PR already did (owner decision,
+# 2026-11-22, to stay inside the free Actions minutes).
 # All tools are free; CodeQL needs GitHub Advanced Security on private repos.
 
 on:
   pull_request:
-  push:
-    branches: [main]
-  schedule:
-    # Weekly, so new advisories against unchanged lock files still show up.
-    - cron: "17 6 * * 1"
 
 permissions:
   contents: read
@@ -19,51 +16,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  python-deps:
-    name: Python dependencies (pip-audit)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
-        with:
-          python-version: "3.12"
-      - name: Audit the locked dependencies
-        run: |
-          uv export --frozen --no-emit-project -q > "$RUNNER_TEMP/requirements.txt"
-          uvx pip-audit@2.10.1 --strict --disable-pip --require-hashes -r "$RUNNER_TEMP/requirements.txt"
-
-  web-deps:
-    name: JS dependencies (npm audit, ${{ matrix.dir }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        dir: [apps/web, apps/extension, e2e]
-    defaults:
-      run:
-        working-directory: ${{ matrix.dir }}
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version-file: ${{ matrix.dir }}/.nvmrc
-      - name: Test the audit script
-        run: node --test "$GITHUB_WORKSPACE/.github/scripts/npm-audit.test.mjs"
-      # Fails on high or critical advisories, except those listed with a reason and an
-      # expiry date in .github/npm-audit-exceptions.json (owner decision, 2026-11-17).
-      - name: Audit the lock file (fails on high or critical)
-        run: node "$GITHUB_WORKSPACE/.github/scripts/npm-audit.mjs"
-
   semgrep:
     name: Static analysis (Semgrep)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -82,6 +38,7 @@ jobs:
   workflow-lint:
     name: Workflow lint (actionlint)
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:

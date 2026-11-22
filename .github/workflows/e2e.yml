@@ -1,119 +1,31 @@
-name: CI
+name: End-to-end
 
+# Playwright end-to-end tests of the web app against the real API. The heaviest job, so
+# it skips PRs that change only the extension, docs or tooling.
+# Runs only on pull requests that touch these paths, to stay inside the free Actions
+# minutes (owner decision, 2026-11-22). Merging to main doesn't re-run it: the PR already did.
 on:
   pull_request:
-  push:
-    branches: [main]
+    paths:
+      - 'backend/**'
+      - 'apps/web/**'
+      - 'packages/design-tokens/**'
+      - 'e2e/**'
+      - '.github/workflows/e2e.yml'
 
 permissions:
   contents: read
 
+# A new push to the same PR cancels the run still going for the old one.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  backend:
-    name: API (lint, types, migrations, tests)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    services:
-      postgres:
-        image: pgvector/pgvector:pg16
-        env:
-          POSTGRES_USER: clew
-          POSTGRES_PASSWORD: clew
-          POSTGRES_DB: clew
-        ports: ["5432:5432"]
-        options: >-
-          --health-cmd "pg_isready -U clew"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-    env:
-      CLEW_ENV: test
-      CLEW_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
-      # Migrations and the test suite's setup run as the owner; the tests switch the API
-      # itself to the clew_app role.
-      CLEW_MIGRATIONS_DATABASE_URL: postgresql+asyncpg://clew:clew@localhost:5432/clew
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
-        with:
-          python-version: "3.12"
-      - run: uv sync --locked
-      - run: uv run ruff check .
-      - run: uv run ruff format --check .
-      - run: uv run mypy
-      - name: Migrations run up, down and up again
-        run: |
-          uv run alembic upgrade head
-          uv run alembic downgrade base
-          uv run alembic upgrade head
-      - run: uv run pytest
-      - name: OpenAPI spec is up to date
-        run: |
-          uv run python -m clew.openapi > openapi.json
-          git diff --exit-code -- openapi.json || (echo "Run: cd backend && uv run python -m clew.openapi > openapi.json" && exit 1)
-
-  web:
-    name: Web app (lint, types, tests, build)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/web
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version-file: apps/web/.nvmrc
-          cache: npm
-          cache-dependency-path: apps/web/package-lock.json
-      - run: npm ci
-      - name: API types match the backend spec
-        run: |
-          npm run gen:api
-          git diff --exit-code -- src/api/schema.d.ts || (echo "Run: cd apps/web && npm run gen:api" && exit 1)
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      - run: npm run build
-
-  extension:
-    name: Chrome extension (lint, types, tests, builds)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/extension
-    steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version-file: apps/extension/.nvmrc
-          cache: npm
-          cache-dependency-path: apps/extension/package-lock.json
-      - run: npm ci
-      - name: API types match the backend spec
-        run: |
-          npm run gen:api
-          git diff --exit-code -- src/api/schema.d.ts || (echo "Run: cd apps/extension && npm run gen:api" && exit 1)
-      - run: npm run lint
-      - run: npm run typecheck
-      - run: npm test
-      # The production build fails if any file in it mentions localhost (vite.config.ts).
-      - name: Production build
-        run: npm run build
-      - name: Production manifest has no dev hosts
-        run: |
-          if grep -rEl 'localhost|127\.0\.0\.1' dist; then echo "Dev host in the production build" && exit 1; fi
-      - name: Development build
-        run: npm run build:dev
-
   e2e:
     name: End-to-end (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     services:
       postgres:
         image: pgvector/pgvector:pg16
