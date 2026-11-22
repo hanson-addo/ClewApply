@@ -254,10 +254,11 @@ function cleanValue(value: Json): Json {
   return value;
 }
 
+// A job's or school's id is bookkeeping, not content: an entry with only an id is empty.
 function isEmptyObject(value: Json): boolean {
   if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
-  return Object.values(value).every(
-    (item) => item === null || item === "" || (Array.isArray(item) && item.length === 0),
+  return Object.entries(value).every(
+    ([key, item]) => key === "id" || item === null || item === "" || (Array.isArray(item) && item.length === 0),
   );
 }
 

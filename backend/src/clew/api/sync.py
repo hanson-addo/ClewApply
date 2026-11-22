@@ -5,6 +5,8 @@
   sent. Clew stores a keyed fingerprint of each value it filled, never the value.
 - `GET /sync/status` (web app): per site, the fields whose current value differs from what was
   last filled there, by name only.
+- `GET /sync/fields/{site}` (extension token): the values the extension may fill on one site,
+  from the current profile. Sensitive answers are never among them.
 """
 
 from datetime import datetime
@@ -68,13 +70,44 @@ class SyncStatus(BaseModel):
     sites: list[SiteStatus]
 
 
-async def _current_profile(session: AsyncSession, user_id: object) -> ProfileData | None:
-    data = await session.scalar(
-        select(ProfileVersion.data)
-        .join(Profile, Profile.current_version_id == ProfileVersion.id)
-        .where(Profile.user_id == user_id, ProfileVersion.user_id == user_id)
-    )
-    return None if data is None else ProfileData.model_validate(data)
+class FillField(BaseModel):
+    key: str
+    label: str
+    value: str
+    # True when the value differs from what was last filled on this site, or was never filled.
+    behind: bool
+
+
+class SiteFields(BaseModel):
+    site: SiteId
+    # The profile version these values come from; the extension reports it back after filling.
+    # None when the profile has never been saved.
+    profile_version: int | None
+    fields: list[FillField]
+
+
+async def _current_version(
+    session: AsyncSession, user_id: object
+) -> tuple[int, ProfileData] | None:
+    row = (
+        await session.execute(
+            select(ProfileVersion.number, ProfileVersion.data)
+            .join(Profile, Profile.current_version_id == ProfileVersion.id)
+            .where(Profile.user_id == user_id, ProfileVersion.user_id == user_id)
+        )
+    ).one_or_none()
+    return None if row is None else (row.number, ProfileData.model_validate(row.data))
+
+
+async def _filled(session: AsyncSession, user_id: object) -> dict[str, dict[str, SyncFill]]:
+    fills: dict[str, dict[str, SyncFill]] = {}
+    for fill in await session.scalars(select(SyncFill).where(SyncFill.user_id == user_id)):
+        fills.setdefault(fill.site, {})[fill.field_key] = fill
+    return fills
+
+
+def _is_behind(key: bytes, filled: dict[str, SyncFill], field_key: str, value: str) -> bool:
+    return field_key not in filled or filled[field_key].fingerprint != fingerprint(key, value)
 
 
 @router.post(
@@ -134,10 +167,9 @@ async def record_fill(body: FillRecord, auth: ExtensionUser, session: Session) -
 async def sync_status(user: CurrentUser, session: Session) -> SyncStatus:
     """Each site's state and the fields it's behind on, by name. Values are never returned."""
     key = _key()
-    profile = await _current_profile(session, user.id) or ProfileData()
-    fills: dict[str, dict[str, SyncFill]] = {}
-    for fill in await session.scalars(select(SyncFill).where(SyncFill.user_id == user.id)):
-        fills.setdefault(fill.site, {})[fill.field_key] = fill
+    current = await _current_version(session, user.id)
+    profile = current[1] if current else ProfileData()
+    fills = await _filled(session, user.id)
     sites = []
     for site in SITES.values():
         filled = fills.get(site.id, {})
@@ -156,8 +188,7 @@ async def sync_status(user: CurrentUser, session: Session) -> SyncStatus:
         behind = [
             BehindField(key=f.key, label=f.label)
             for f in site.fields(profile)
-            if f.value
-            and (f.key not in filled or filled[f.key].fingerprint != fingerprint(key, f.value))
+            if f.value and _is_behind(key, filled, f.key, f.value)
         ]
         sites.append(
             SiteStatus(
@@ -170,3 +201,35 @@ async def sync_status(user: CurrentUser, session: Session) -> SyncStatus:
             )
         )
     return SyncStatus(sites=sites)
+
+
+@router.get(
+    "/fields/{site}",
+    responses={
+        401: {"description": "The extension token is unknown, revoked or expired"},
+        503: {"description": UNAVAILABLE},
+    },
+)
+async def site_fields(site: SiteId, auth: ExtensionUser, session: Session) -> SiteFields:
+    """The current profile's values for one site's fields, for the extension to fill. Empty
+    fields are left out."""
+    key = _key()
+    current = await _current_version(session, auth.user.id)
+    if current is None:
+        return SiteFields(site=site, profile_version=None, fields=[])
+    number, profile = current
+    filled = (await _filled(session, auth.user.id)).get(site, {})
+    return SiteFields(
+        site=site,
+        profile_version=number,
+        fields=[
+            FillField(
+                key=f.key,
+                label=f.label,
+                value=f.value,
+                behind=_is_behind(key, filled, f.key, f.value),
+            )
+            for f in SITES[site].fields(profile)
+            if f.value
+        ],
+    )

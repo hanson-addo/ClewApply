@@ -65,6 +65,13 @@ describe("cleanProfile", () => {
     expect(cleaned.languages).toEqual([{ language: "Spanish" }]);
   });
 
+  it("drops a job whose fields were all cleared, even though it has an id", () => {
+    const cleaned = cleanProfile(
+      profile({ work: [{ id: "ab12cd34", name: " ", position: "" }, { id: "ef56ab78", name: "Cobalt Freight" }] }),
+    );
+    expect(cleaned.work).toEqual([{ id: "ef56ab78", name: "Cobalt Freight" }]);
+  });
+
   it("makes blank differences not count as changes", () => {
     const a = profile({ basics: { name: "Riley Example", profiles: [] } });
     const b = profile({ basics: { name: "Riley Example ", label: "", profiles: [] }, work: [{}] });

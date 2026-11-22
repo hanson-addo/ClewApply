@@ -19,7 +19,7 @@ from clew.auth.deps import CurrentUser
 from clew.config import get_settings
 from clew.db.session import get_session
 from clew.models import Profile, ProfileVersion, UsageEvent, UsageKind
-from clew.profile.schema import ProfileData, reject_control_characters
+from clew.profile.schema import ProfileData, assign_entry_ids, reject_control_characters
 from clew.usage import used_within
 
 router = APIRouter(tags=["profile"])
@@ -163,7 +163,7 @@ async def save_profile(body: ProfileSave, user: CurrentUser, session: Session) -
     if body.base_version_id is not None and body.base_version_id != profile.current_version_id:
         raise HTTPException(status.HTTP_409_CONFLICT, STALE)
 
-    data: dict[str, Any] = body.data.model_dump(mode="json", exclude_none=True)
+    current = None
     if profile.current_version_id is not None:
         current = await session.scalar(
             select(ProfileVersion).where(
@@ -171,9 +171,13 @@ async def save_profile(body: ProfileSave, user: CurrentUser, session: Session) -
                 ProfileVersion.user_id == user.id,
             )
         )
-        if current is not None and current.data == data:
-            await session.commit()
-            return _out(current, current.id)
+    previous = ProfileData.model_validate(current.data) if current is not None else None
+    data: dict[str, Any] = assign_entry_ids(body.data, previous).model_dump(
+        mode="json", exclude_none=True
+    )
+    if current is not None and current.data == data:
+        await session.commit()
+        return _out(current, current.id)
 
     # Counted under the profile row lock, so racing saves can't both pass.
     if (

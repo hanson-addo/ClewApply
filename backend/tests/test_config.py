@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from clew.config import Settings
+from clew.config import LOCAL_FINGERPRINT_KEY, Settings
 
 DB_URL = "postgresql+asyncpg://user:pass@localhost:5432/db"
 ISSUER = "https://clew-test.clerk.accounts.dev"
@@ -115,3 +115,17 @@ def test_production_requires_a_fill_fingerprint_key(monkeypatch: pytest.MonkeyPa
     monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "")
     with pytest.raises(ValidationError, match="CLEW_FILL_FINGERPRINT_KEY is required"):
         Settings(_env_file=None)
+
+
+def test_local_runs_get_a_fixed_fingerprint_key(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("CLEW_ENV", "local")
+    monkeypatch.setenv("CLEW_DATABASE_URL", DB_URL)
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "")
+    settings = Settings(_env_file=None)
+    assert settings.fill_fingerprint_key is not None
+    assert settings.fill_fingerprint_key.get_secret_value() == LOCAL_FINGERPRINT_KEY
+    # Your own key wins.
+    monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "my-own-key")
+    own = Settings(_env_file=None)
+    assert own.fill_fingerprint_key is not None
+    assert own.fill_fingerprint_key.get_secret_value() == "my-own-key"

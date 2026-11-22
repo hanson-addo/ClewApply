@@ -34,24 +34,27 @@ PROFILE: dict[str, Any] = {
     },
     "work": [
         {
+            "id": "job1",
             "name": "Labyrinth Logistics",
             "position": "Thread Analyst",
             "startDate": "2021-03",
         }
     ],
-    "education": [{"institution": "Knossos College", "studyType": "BA", "area": "Geometry"}],
+    "education": [
+        {"id": "sch1", "institution": "Knossos College", "studyType": "BA", "area": "Geometry"}
+    ],
     "skills": [{"name": "Wayfinding"}, {"name": "Knots"}],
 }
 LINKEDIN_KEYS = [
     "headline",
     "about",
     "location",
-    "work.0.title",
-    "work.0.company",
-    "work.0.dates",
-    "education.0.school",
-    "education.0.degree",
-    "skills",
+    "work.job1.title",
+    "work.job1.company",
+    "work.job1.dates",
+    "education.sch1.school",
+    "education.sch1.degree",
+    "education.sch1.field",
 ]
 
 
@@ -107,7 +110,17 @@ def test_every_site_lists_fields_with_unique_keys() -> None:
         assert all(len(k) <= 64 for k in keys)
     # The school in PROFILE has no dates, so it has no value; the key is still listed.
     keys = [f.key for f in SITES["linkedin"].fields(profile)]
-    assert keys == [*LINKEDIN_KEYS[:8], "education.0.dates", "skills"]
+    assert keys == [*LINKEDIN_KEYS, "education.sch1.dates"]
+
+
+def test_a_version_saved_before_entry_ids_falls_back_to_positions() -> None:
+    from clew.profile.schema import ProfileData
+
+    old = json.loads(json.dumps(PROFILE))
+    del old["work"][0]["id"]
+    keys = [f.key for f in SITES["linkedin"].fields(ProfileData.model_validate(old))]
+    assert "work.0.title" in keys
+    assert "education.sch1.school" in keys
 
 
 async def test_a_site_never_filled_is_not_set_up(api: AsyncClient) -> None:
@@ -135,14 +148,27 @@ async def test_filling_everything_is_up_to_date_then_an_edit_is_behind(api: Asyn
 
     edited = json.loads(json.dumps(PROFILE))
     edited["basics"]["label"] = "Senior Thread Analyst"
-    edited["skills"].append({"name": "Minotaur avoidance"})
+    edited["work"][0]["position"] = "Lead Thread Analyst"
     await save(api, sub, edited)
     linkedin = await status_of(api, sub, "linkedin")
     assert linkedin["state"] == "behind"
     assert linkedin["behind"] == [
         {"key": "headline", "label": "Headline"},
-        {"key": "skills", "label": "Skills"},
+        {"key": "work.job1.title", "label": "Job 1: title"},
     ]
+
+
+async def test_adding_a_job_at_the_top_marks_only_the_new_job_behind(api: AsyncClient) -> None:
+    sub = new_sub()
+    version = await save(api, sub, PROFILE)
+    token = await connect(api, sub)
+    await fill(api, token, version, LINKEDIN_KEYS)
+    edited = json.loads(json.dumps(PROFILE))
+    edited["work"].insert(0, {"name": "Ariadne Yarns", "position": "Spinner"})
+    await save(api, sub, edited)
+    behind = (await status_of(api, sub, "linkedin"))["behind"]
+    assert [f["label"] for f in behind] == ["Job 1: title", "Job 1: company"]
+    assert not any(f["key"].startswith("work.job1.") for f in behind)
 
 
 async def test_a_spacing_only_edit_is_not_a_change(api: AsyncClient) -> None:
@@ -195,7 +221,7 @@ async def test_a_fill_record_is_checked(api: AsyncClient) -> None:
     version = await save(api, sub, PROFILE)
     token = await connect(api, sub)
     assert (await fill(api, token, version + 5, ["headline"])).status_code == 404
-    assert (await fill(api, token, version, ["work.7.title"])).status_code == 422
+    assert (await fill(api, token, version, ["work.job7.title"])).status_code == 422
     assert (await fill(api, token, version, ["headline"], site="monster")).status_code == 422
     assert (await fill(api, token, version, [])).status_code == 422
     # USAJobs has no headline field.
@@ -223,6 +249,8 @@ async def test_status_needs_the_key(api: AsyncClient, monkeypatch: pytest.Monkey
     monkeypatch.setenv("CLEW_FILL_FINGERPRINT_KEY", "")
     get_settings.cache_clear()
     assert (await api.get("/sync/status", headers=as_user(new_sub()))).status_code == 503
+    token = await connect(api, new_sub())
+    assert (await api.get("/sync/fields/linkedin", headers=bearer(token))).status_code == 503
 
 
 async def test_export_lists_fills_without_fingerprints(api: AsyncClient) -> None:
@@ -235,3 +263,94 @@ async def test_export_lists_fills_without_fingerprints(api: AsyncClient) -> None
     [record] = data["sync_fills"]
     assert record["site"] == "linkedin" and record["field_key"] == "headline"
     assert "fingerprint" not in record
+
+
+async def test_saving_gives_jobs_and_schools_their_own_ids(api: AsyncClient) -> None:
+    sub = new_sub()
+    data = {
+        "work": [{"name": "Ariadne Yarns"}, {"id": "keepme", "name": "Labyrinth Logistics"}],
+        # A copied entry brings its id along; the copy gets a new one.
+        "education": [{"id": "keepme", "institution": "Knossos College"}],
+    }
+    response = await api.put("/profile", headers=as_user(sub), json={"data": data})
+    saved = response.json()["data"]
+    ids = [e["id"] for e in [*saved["work"], *saved["education"]]]
+    assert ids[1] == "keepme"
+    assert len(set(ids)) == 3
+    assert all(len(i) == 8 for i in (ids[0], ids[2]))
+    # Saving what came back changes nothing, so no new version.
+    again = await api.put("/profile", headers=as_user(sub), json={"data": saved})
+    assert again.json()["number"] == response.json()["number"]
+
+
+@pytest.mark.parametrize("bad", ["", "UPPER", "has space", "x" * 17])
+async def test_an_entry_id_must_be_short_lowercase_letters_and_digits(
+    api: AsyncClient, bad: str
+) -> None:
+    data = {"work": [{"id": bad, "name": "Ariadne Yarns"}]}
+    response = await api.put("/profile", headers=as_user(new_sub()), json={"data": data})
+    assert response.status_code == 422
+
+
+async def site_fields(api: AsyncClient, token: str, site: str = "linkedin") -> dict[str, Any]:
+    response = await api.get(f"/sync/fields/{site}", headers=bearer(token))
+    assert response.status_code == 200, response.text
+    result: dict[str, Any] = response.json()
+    return result
+
+
+async def test_the_extension_reads_a_sites_values_and_what_is_behind(api: AsyncClient) -> None:
+    sub = new_sub()
+    version = await save(api, sub, PROFILE)
+    token = await connect(api, sub)
+    await fill(api, token, version, ["headline"])
+
+    fields = await site_fields(api, token)
+    assert fields["site"] == "linkedin"
+    assert fields["profile_version"] == version
+    by_key = {f["key"]: f for f in fields["fields"]}
+    # Empty fields (the school's dates) are left out.
+    assert list(by_key) == LINKEDIN_KEYS
+    assert by_key["headline"] == {
+        "key": "headline",
+        "label": "Headline",
+        "value": "Thread Analyst",
+        "behind": False,
+    }
+    assert by_key["location"]["value"] == "Austin, TX"
+    assert by_key["work.job1.dates"]["value"] == "2021-03 to present"
+    assert by_key["education.sch1.degree"]["value"] == "BA"
+    assert by_key["education.sch1.field"]["value"] == "Geometry"
+    assert all(f["behind"] for k, f in by_key.items() if k != "headline")
+
+
+async def test_reading_fields_before_any_profile_is_saved(api: AsyncClient) -> None:
+    token = await connect(api, new_sub())
+    assert await site_fields(api, token, "usajobs") == {
+        "site": "usajobs",
+        "profile_version": None,
+        "fields": [],
+    }
+
+
+async def test_reading_fields_is_checked(api: AsyncClient) -> None:
+    sub = new_sub()
+    await save(api, sub, PROFILE)
+    token = await connect(api, sub)
+    assert (await api.get("/sync/fields/monster", headers=bearer(token))).status_code == 422
+    assert (await api.get("/sync/fields/linkedin")).status_code == 401
+    # A Clerk session can't read them; only the extension can.
+    assert (await api.get("/sync/fields/linkedin", headers=as_user(sub))).status_code == 401
+
+
+async def test_an_entry_sent_without_its_id_keeps_the_id_of_the_same_entry(
+    api: AsyncClient,
+) -> None:
+    sub = new_sub()
+    jobs = [{"name": "Ariadne Yarns"}, {"name": "Labyrinth Logistics"}]
+    first = (await api.put("/profile", headers=as_user(sub), json={"data": {"work": jobs}})).json()
+    ids = {job["name"]: job["id"] for job in first["data"]["work"]}
+    # The same jobs, reordered and without ids: each keeps its own id.
+    swapped = {"work": [jobs[1], jobs[0]]}
+    second = (await api.put("/profile", headers=as_user(sub), json={"data": swapped})).json()
+    assert {job["name"]: job["id"] for job in second["data"]["work"]} == ids

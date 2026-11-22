@@ -1,4 +1,4 @@
-import { browserLabel, handleExternal, handlePopup, type Deps } from "./handlers";
+import { browserLabel, handleContent, handleExternal, handlePopup, type BrowserApi, type Deps } from "./handlers";
 import type { TokenStore } from "./tokenStore";
 
 const ID = "bknomgnbnlknofhndoodlaboaomlhben";
@@ -23,8 +23,36 @@ function memoryStore(initial: string | null = null): TokenStore & { value: strin
   };
 }
 
-function deps(store = memoryStore()): Deps & { store: ReturnType<typeof memoryStore> } {
-  return { apiUrl: API, webOrigin: WEB, extensionId: ID, store, label: () => "Chrome on macOS" };
+const PROFILE_TAB = "https://www.linkedin.com/in/riley-testperson/";
+
+type FakeBrowser = BrowserApi & { url: string | undefined; granted: boolean; injected: string[]; sent: unknown[] };
+
+function fakeBrowser(): FakeBrowser {
+  return {
+    url: PROFILE_TAB,
+    granted: true,
+    injected: [],
+    sent: [],
+    async tabUrl() {
+      return this.url;
+    },
+    async hasPermission(origin) {
+      return this.granted && origin === "https://www.linkedin.com/*";
+    },
+    async inject(_, file) {
+      this.injected.push(file);
+    },
+    async sendToTab(_, message) {
+      this.sent.push(message);
+    },
+  };
+}
+
+function deps(
+  store = memoryStore(),
+  browser = fakeBrowser(),
+): Deps & { store: ReturnType<typeof memoryStore>; browser: FakeBrowser } {
+  return { apiUrl: API, webOrigin: WEB, extensionId: ID, store, label: () => "Chrome on macOS", browser };
 }
 
 const fetchMock = vi.fn<(request: Request) => Promise<Response>>();
@@ -165,6 +193,116 @@ describe("popup", () => {
     const d = deps(memoryStore(TOKEN));
     expect(await handlePopup(d, { type: "clew/sign-out" }, POPUP)).toEqual({ ok: true });
     expect(d.store.value).toBeNull();
+  });
+});
+
+describe("fill from the popup", () => {
+  const FIELDS = [{ key: "headline", label: "Headline", value: "Thread Analyst", behind: true }];
+  const fill = { type: "clew/fill-tab", tabId: 7 };
+
+  it("fetches the values, injects the site's panel and hands them over", async () => {
+    fetchMock.mockResolvedValueOnce(json(200, { site: "linkedin", profile_version: 4, fields: FIELDS }));
+    const d = deps(memoryStore(TOKEN));
+
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: true });
+
+    const request = sentRequest();
+    expect(request.url).toBe(`${API}/sync/fields/linkedin`);
+    expect(request.headers.get("Authorization")).toBe(`Bearer ${TOKEN}`);
+    expect(d.browser.injected).toEqual(["content/linkedin.js"]);
+    // The panel gets values only, never the token.
+    expect(d.browser.sent).toEqual([{ type: "clew/fields", site: "linkedin", profileVersion: 4, fields: FIELDS }]);
+    expect(JSON.stringify(d.browser.sent)).not.toContain(TOKEN);
+  });
+
+  it.each([
+    ["a LinkedIn page that isn't a profile", "https://www.linkedin.com/feed/"],
+    ["another site", "https://www.example.test/in/riley/"],
+    ["a look-alike host", "https://www.linkedin.com.evil.example/in/riley/"],
+    ["plain http", "http://www.linkedin.com/in/riley/"],
+    ["a tab Chrome won't name", undefined],
+  ])("refuses %s", async (_, url) => {
+    const d = deps(memoryStore(TOKEN));
+    d.browser.url = url;
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: false, error: "wrong-page" });
+    expect(fetchMock).not.toHaveBeenCalled();
+    expect(d.browser.injected).toEqual([]);
+  });
+
+  it("needs LinkedIn turned on", async () => {
+    const d = deps(memoryStore(TOKEN));
+    d.browser.granted = false;
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: false, error: "not-turned-on" });
+    expect(d.browser.injected).toEqual([]);
+  });
+
+  it("needs a token, and forgets one Clew refuses", async () => {
+    expect(await handlePopup(deps(), fill, POPUP)).toEqual({ ok: false, error: "signed-out" });
+    fetchMock.mockResolvedValueOnce(json(401, { detail: "gone" }));
+    const d = deps(memoryStore(TOKEN));
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: false, error: "signed-out" });
+    expect(d.store.value).toBeNull();
+    expect(d.browser.injected).toEqual([]);
+  });
+
+  it("needs a saved profile", async () => {
+    fetchMock.mockResolvedValueOnce(json(200, { site: "linkedin", profile_version: null, fields: [] }));
+    const d = deps(memoryStore(TOKEN));
+    expect(await handlePopup(d, fill, POPUP)).toEqual({ ok: false, error: "no-profile" });
+    expect(d.browser.injected).toEqual([]);
+  });
+
+  it("says when Clew is down", async () => {
+    fetchMock.mockResolvedValueOnce(json(503, { detail: "down" }));
+    expect(await handlePopup(deps(memoryStore(TOKEN)), fill, POPUP)).toEqual({ ok: false, error: "unavailable" });
+  });
+
+  it("isn't something a content script can ask for", async () => {
+    const sender = { id: ID, url: PROFILE_TAB, tab: { id: 7, url: PROFILE_TAB } };
+    expect(await handlePopup(deps(memoryStore(TOKEN)), fill, sender)).toBeNull();
+    expect(await handleContent(deps(memoryStore(TOKEN)), fill, sender)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe("fill report from the panel", () => {
+  const PANEL = { id: ID, url: `${PROFILE_TAB}edit/intro/`, tab: { id: 7, url: `${PROFILE_TAB}edit/intro/` } };
+  const filled = { type: "clew/filled", site: "linkedin", profileVersion: 4, keys: ["headline", "work.ab12cd34.title"] };
+
+  it("records which keys were filled, never values", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    expect(await handleContent(deps(memoryStore(TOKEN)), filled, PANEL)).toEqual({ ok: true });
+    const request = sentRequest();
+    expect(request.method).toBe("POST");
+    expect(request.url).toBe(`${API}/sync/fills`);
+    expect(request.headers.get("Authorization")).toBe(`Bearer ${TOKEN}`);
+    expect(await request.json()).toEqual({
+      site: "linkedin",
+      profile_version: 4,
+      field_keys: ["headline", "work.ab12cd34.title"],
+    });
+  });
+
+  it.each([
+    ["another extension", { ...PANEL, id: "someotherextensionidaaaaaaaaaaaa" }],
+    ["a page that isn't a LinkedIn profile", { id: ID, url: "https://www.linkedin.com/feed/", tab: { url: "https://www.linkedin.com/feed/" } }],
+    ["another site", { id: ID, url: "https://www.example.test/in/x/", tab: { url: "https://www.example.test/in/x/" } }],
+    ["no tab", { id: ID, url: PANEL.url }],
+  ])("ignores %s", async (_, sender) => {
+    expect(await handleContent(deps(memoryStore(TOKEN)), filled, sender)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { ...filled, keys: [] },
+    { ...filled, keys: ["has space"] },
+    { ...filled, keys: ["x".repeat(65)] },
+    { ...filled, site: "indeed" },
+    { ...filled, profileVersion: "4" },
+    { ...filled, type: "clew/status" },
+  ])("ignores a malformed report: %j", async (message) => {
+    expect(await handleContent(deps(memoryStore(TOKEN)), message, PANEL)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
 
