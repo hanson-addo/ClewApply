@@ -1,0 +1,45 @@
+name: Web app
+
+# Web app lint, types, tests and build.
+# Runs only on pull requests that touch these paths, to stay inside the free Actions
+# minutes (owner decision, 2026-11-22). Merging to main doesn't re-run it: the PR already did.
+on:
+  pull_request:
+    paths:
+      - 'apps/web/**'
+      - 'packages/design-tokens/**'
+      - 'backend/openapi.json'
+      - '.github/workflows/ci-web.yml'
+
+permissions:
+  contents: read
+
+# A new push to the same PR cancels the run still going for the old one.
+concurrency:
+  group: ci-web-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  web:
+    name: Web app (lint, types, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: apps/web/.nvmrc
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - name: API types match the backend spec
+        run: |
+          npm run gen:api
+          git diff --exit-code -- src/api/schema.d.ts || (echo "Run: cd apps/web && npm run gen:api" && exit 1)
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

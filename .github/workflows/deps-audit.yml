@@ -1,0 +1,77 @@
+name: Dependency audit
+
+# Audits the locked dependencies (threat model R22). Runs on pull requests that change a lock
+# file, a manifest or the audit script, and weekly on main so new advisories against
+# unchanged lock files still show up. Path filters keep it inside the free Actions minutes
+# (owner decision, 2026-11-22).
+on:
+  pull_request:
+    paths:
+      - 'backend/pyproject.toml'
+      - 'backend/uv.lock'
+      - 'apps/web/package.json'
+      - 'apps/web/package-lock.json'
+      - 'apps/extension/package.json'
+      - 'apps/extension/package-lock.json'
+      - 'e2e/package.json'
+      - 'e2e/package-lock.json'
+      - '**/.nvmrc'
+      - '.github/scripts/npm-audit*'
+      - '.github/npm-audit-exceptions.json'
+      - '.github/workflows/deps-audit.yml'
+  schedule:
+    - cron: "17 6 * * 1"
+  # Lets the owner run it by hand from the Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deps-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-deps:
+    name: Python dependencies (pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6.8.0
+        with:
+          python-version: "3.12"
+      - name: Audit the locked dependencies
+        run: |
+          uv export --frozen --no-emit-project -q > "$RUNNER_TEMP/requirements.txt"
+          uvx pip-audit@2.10.1 --strict --disable-pip --require-hashes -r "$RUNNER_TEMP/requirements.txt"
+
+  web-deps:
+    name: JS dependencies (npm audit, ${{ matrix.dir }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [apps/web, apps/extension, e2e]
+    defaults:
+      run:
+        working-directory: ${{ matrix.dir }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version-file: ${{ matrix.dir }}/.nvmrc
+      - name: Test the audit script
+        run: node --test "$GITHUB_WORKSPACE/.github/scripts/npm-audit.test.mjs"
+      # Fails on high or critical advisories, except those listed with a reason and an
+      # expiry date in .github/npm-audit-exceptions.json (owner decision, 2026-11-17).
+      - name: Audit the lock file (fails on high or critical)
+        run: node "$GITHUB_WORKSPACE/.github/scripts/npm-audit.mjs"
