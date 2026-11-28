@@ -396,7 +396,7 @@ function ProfileEditor({ section, title }: { section: SectionId; title: string }
           {status}
         </p>
 
-        {!loaded && !loadFailed && <p className="profile-loading">Loading your profile…</p>}
+        {!loaded && !loadFailed && <p className="profile-loading">Loading your profile</p>}
         {loadFailed && (
           <p role="alert" className="home-error">
             We couldn&apos;t load your profile. Check your connection and refresh the page.

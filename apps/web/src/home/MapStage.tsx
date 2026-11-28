@@ -294,7 +294,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
 
   const mapWindow = hasMap && (
     <div ref={win} className={`map-window${shown ? " is-revealed" : ""}`}>
-      <Suspense fallback={<div className="map-loading">Loading the map…</div>}>
+      <Suspense fallback={<div className="map-loading">Loading the map</div>}>
         <JobsMapCanvas
           pins={pins}
           top={top}
@@ -339,7 +339,7 @@ export function MapStage({ state, intro }: { state: JobMapState; intro: ReactNod
 
       {state.status === "loading" && (
         <div className="map-frame map-loading" role="status">
-          Loading the map…
+          Loading the map
         </div>
       )}
       {state.status === "error" && (

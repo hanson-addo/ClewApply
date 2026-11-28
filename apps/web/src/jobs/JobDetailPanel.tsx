@@ -158,7 +158,7 @@ export function JobDetailPanel({
         <FitScore score={job.fit_score} />
         <div>
           <p className="job-detail-fit">
-            FIT {job.fit_score} OF 100
+            Fit score {job.fit_score} of 100
           </p>
           <h2 id="job-detail-title">{job.title}</h2>
           <p className="job-detail-company">

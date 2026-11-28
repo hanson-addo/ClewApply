@@ -25,7 +25,7 @@ const welcome = (page: Page) => page.getByRole("heading", { level: 1, name: /set
 
 async function expectSignInPage(page: Page) {
   await expect(page).toHaveURL(/\/sign-in/);
-  await expect(page.getByRole("heading", { name: "Pick up the thread" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to Clew" })).toBeVisible();
   await expect(emailField(page)).toBeVisible();
 }
 

@@ -64,7 +64,7 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
         </h1>
         <p className="home-hero-lede">
           {data.hasProfile === null
-            ? "We couldn't load your profile just now. Reload the page to try again."
+            ? "We couldn't load your profile just now. Refresh the page to try again."
             : statusLine(data.hasProfile, counts, data.jobs?.total ?? 0)}
         </p>
         {data.hasProfile !== false ? (
