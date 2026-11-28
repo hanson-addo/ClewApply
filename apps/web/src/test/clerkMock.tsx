@@ -31,13 +31,19 @@ function isHint(result: unknown): boolean {
   );
 }
 
+/** Clerk reads a Response the fetcher returns as JSON before anything else sees it. */
+async function resolveResult(result: Promise<unknown>): Promise<unknown> {
+  const value = await result;
+  return value instanceof Response ? value.json() : value;
+}
+
 /** Like Clerk's: on a reverification hint it "confirms it's you" once and calls again. */
 function useReverification<T extends (...args: never[]) => Promise<unknown>>(fetcher: T): T {
   return (async (...args: Parameters<T>) => {
-    const first = await fetcher(...args);
+    const first = await resolveResult(fetcher(...args));
     if (!isHint(first)) return first;
     clerkState.reverified += 1;
-    return fetcher(...args);
+    return resolveResult(fetcher(...args));
   }) as T;
 }
 

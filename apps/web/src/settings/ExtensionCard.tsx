@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useApi } from "../auth/useApi";
 import { config } from "../config";
-import { isCancelled, useAccountRequest } from "./accountRequest";
+import { isCancelled, responseOf, useAccountRequest } from "./accountRequest";
 import { handOffLinkCode } from "./extensionBridge";
 
 type Connection = { id: string; label: string; created_at: string; last_used_at: string | null };
@@ -61,9 +61,9 @@ export function ExtensionCard() {
   async function connect() {
     setState({ status: "connecting" });
     try {
-      const result = await requestLink();
-      if (!(result instanceof Response) || !result.ok) {
-        const tooMany = result instanceof Response && result.status === 429;
+      const result = responseOf(await requestLink());
+      if (!result?.ok) {
+        const tooMany = result?.status === 429;
         setState({ status: "failed", message: tooMany ? TOO_MANY : FAILED });
         return;
       }
