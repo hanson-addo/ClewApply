@@ -111,20 +111,9 @@
 }
 
 .signin-badge {
-  align-self: flex-start;
-  padding: var(--clew-space-1) var(--clew-space-3);
-  border-radius: var(--clew-radius-pill);
-  background: var(--clew-bg-inverse);
-  color: var(--clew-text-on-inverse);
-  font-size: var(--clew-font-size-xs);
-  font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
-}
-
-.signin-title {
-  margin: 0;
-  font-size: var(--clew-font-size-3xl);
+  color: var(--clew-text-secondary);
+  font-size: var(--clew-font-size-sm);
+  font-weight: var(--clew-font-weight-semibold);
 }
 
 .signin-promise {
@@ -279,6 +268,10 @@ html {
 }
 
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--clew-space-2);
   min-height: 44px;
   padding: 0 var(--clew-space-5);
   border-radius: var(--clew-radius-md);
@@ -652,8 +645,11 @@ html {
     grid-template-areas: "nav form" "nav aside";
   }
 
+  /* A card like the form and History, so its top links stay readable where it overlaps the band. */
   .profile-nav {
     display: block;
+    align-self: start;
+    padding: var(--clew-space-2);
   }
 
   .profile-select {
@@ -1112,7 +1108,6 @@ h2[tabindex="-1"]:focus {
   margin: 0;
   font-size: var(--clew-font-size-xs);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
   color: var(--clew-text-secondary);
 }
 
@@ -1348,6 +1343,16 @@ h2[tabindex="-1"]:focus {
   overflow-wrap: anywhere;
 }
 
+.app-card-title a {
+  color: var(--clew-text-primary);
+  text-decoration: none;
+}
+
+.app-card-title a:hover {
+  color: var(--clew-text-primary);
+  text-decoration: underline;
+}
+
 .app-card-company,
 .app-card-meta,
 .app-card-line {
@@ -1363,6 +1368,11 @@ h2[tabindex="-1"]:focus {
 
 .app-card-status {
   margin-top: var(--clew-space-3);
+}
+
+.app-card-status .field-input {
+  width: 100%;
+  min-width: 0;
 }
 
 .app-detail {
@@ -1410,9 +1420,12 @@ h2[tabindex="-1"]:focus {
     display: none;
   }
 
+  /* Five lanes that keep a readable width; narrower screens scroll the board sideways. */
   .apps-board {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(13rem, 1fr));
     align-items: start;
+    overflow-x: auto;
+    padding-bottom: var(--clew-space-2);
   }
 
   .apps-column {
@@ -1495,14 +1508,20 @@ h2[tabindex="-1"]:focus {
   }
 }
 
-/* Under lg the card comes before the privacy points. */
+/* Under lg the card comes before the privacy points, but the title and lede stay on top. */
 @media (max-width: 63.99rem) {
-  .upload-card {
-    order: -1;
+  .upload-intro {
+    display: contents;
   }
 
-  .upload-intro h1 {
-    margin-top: 0;
+  .upload-intro h1,
+  .upload-intro .home-lede {
+    order: -2;
+    margin: 0;
+  }
+
+  .upload-card {
+    order: -1;
   }
 }
 
@@ -1697,14 +1716,6 @@ input:focus-visible + .upload-choose,
     box-shadow var(--clew-motion-duration-base) var(--clew-motion-easing);
 }
 
-.button-lg:hover {
-  transform: translateY(-2px);
-}
-
-.button-primary.button-lg:hover {
-  box-shadow: var(--clew-shadow-glow-coral);
-}
-
 .home-hero {
   position: relative;
   overflow: hidden;
@@ -1715,7 +1726,7 @@ input:focus-visible + .upload-choose,
   gap: var(--clew-space-8);
   padding: var(--clew-space-10) var(--clew-space-6);
   border-radius: var(--clew-radius-2xl);
-  background: var(--clew-gradient-hero);
+  background: var(--clew-bg-inverse);
   box-shadow: var(--clew-shadow-hero);
 }
 
@@ -1736,8 +1747,6 @@ input:focus-visible + .upload-choose,
   margin: 0;
   font-size: var(--clew-font-size-sm);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--clew-text-link-on-inverse);
 }
 
@@ -1784,7 +1793,6 @@ input:focus-visible + .upload-choose,
 
 .home-dropzone:hover {
   border-color: var(--clew-action-primary-bg);
-  transform: translateY(-2px);
 }
 
 .home-dropzone-icon {
@@ -1905,7 +1913,6 @@ input:focus-visible + .upload-choose,
 }
 
 .stat-tile:hover {
-  transform: translateY(-3px);
   box-shadow: var(--clew-shadow-lift);
 }
 
@@ -2561,7 +2568,7 @@ input:focus-visible + .upload-choose,
 }
 
 .map-glass-empty-title {
-  font-family: var(--clew-font-family-display);
+  font-family: var(--clew-font-family-body);
   font-size: var(--clew-font-size-lg);
   font-weight: var(--clew-font-weight-bold);
   line-height: var(--clew-font-line-height-tight);
@@ -2599,7 +2606,7 @@ input:focus-visible + .upload-choose,
 }
 
 .map-pin-card-title {
-  font-family: var(--clew-font-family-display);
+  font-family: var(--clew-font-family-body);
   font-size: var(--clew-font-size-xl);
   font-weight: var(--clew-font-weight-bold);
   line-height: var(--clew-font-line-height-tight);
@@ -2675,7 +2682,7 @@ input:focus-visible + .upload-choose,
   border: 3px solid var(--clew-color-ink-50);
   border-radius: 50%;
   background: var(--clew-color-coral-500);
-  box-shadow: var(--clew-shadow-glow-coral);
+  box-shadow: var(--clew-shadow-raised);
 }
 
 .map-beacon::after {
@@ -2775,6 +2782,15 @@ body:has(.page-band) .app-header[data-at-top] {
   border-bottom-color: transparent;
 }
 
+/* Below desktop a job opens as its own page and the band is hidden, so the header stays solid. */
+@media (max-width: 63.99rem) {
+  body:has(.jobs-has-detail) .app-header[data-at-top] {
+    background: color-mix(in srgb, var(--clew-bg-inverse) 92%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--clew-bg-inverse-raised);
+  }
+}
+
 .app-nav-link {
   border-radius: 0;
   color: var(--clew-color-ink-300);
@@ -2853,30 +2869,6 @@ body:has(.page-band) .app-header[data-at-top] {
   transform: translateX(-75%);
 }
 
-/* The glow: a soft coral light that sits somewhere different on each tab. */
-.page-band-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 900px;
-  height: 680px;
-  background: radial-gradient(closest-side, rgba(255, 107, 74, 0.32), transparent);
-  transform: translate(calc(78vw - 450px), calc(12rem - 340px));
-  transition: transform 300ms ease-out;
-}
-
-.page-band[data-at="jobs"] .page-band-glow {
-  transform: translate(calc(50vw - 450px), calc(14rem - 340px));
-}
-
-.page-band[data-at="applications"] .page-band-glow {
-  transform: translate(calc(20vw - 450px), calc(20rem - 340px));
-}
-
-.page-band[data-at="profile"] .page-band-glow {
-  transform: translate(calc(88vw - 450px), calc(20rem - 340px));
-}
-
 /* The thread: Theseus's line down the left edge, only where there's room beside the page. */
 .page-thread {
   display: none;
@@ -2899,7 +2891,6 @@ body:has(.page-band) .app-header[data-at-top] {
 
 @media (prefers-reduced-motion: reduce) {
   .page-band-maze,
-  .page-band-glow,
   .app-header {
     transition: none;
   }
@@ -2914,6 +2905,7 @@ body:has(.page-band) .app-header[data-at-top] {
 .jobs-filters-form,
 .job-detail,
 .app-card,
+.profile-nav,
 .profile-form,
 .profile-history,
 .settings-card {
@@ -2976,7 +2968,8 @@ body:has(.page-band) .app-header[data-at-top] {
   color: var(--clew-color-ink-300);
 }
 
-@media (min-width: 64rem) {
+/* Lanes get their pale card wherever the board shows all five, so titles never sit on the band. */
+@media (min-width: 48rem) {
   .apps-column {
     padding: var(--clew-space-4);
     border: 1px solid var(--app-card-border);
@@ -3060,8 +3053,6 @@ body:has(.page-band) .app-header[data-at-top] {
 .job-search-field label {
   font-size: var(--clew-font-size-xs);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
   color: var(--clew-color-ink-300);
 }
 
@@ -3148,8 +3139,6 @@ body:has(.page-band) .app-header[data-at-top] {
   font-family: var(--clew-font-family-body);
   font-size: var(--clew-font-size-sm);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
   color: var(--clew-color-coral-700);
 }
 

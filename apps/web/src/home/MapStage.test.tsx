@@ -65,7 +65,7 @@ const ready = (pins: MapPin[], unplaced = 0, center: { lat: number; lng: number 
 function renderStage(state: JobMapState) {
   return render(
     <MemoryRouter>
-      <MapStage state={state} intro={<h1>Welcome back.</h1>} />
+      <MapStage state={state} intro={<h1>Welcome back</h1>} />
     </MemoryRouter>,
   );
 }
@@ -128,7 +128,7 @@ describe("MapStage", () => {
 
   it("puts the intro above the map", () => {
     renderStage(ready([pin(1)]));
-    expect(screen.getByRole("heading", { name: "Welcome back." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Welcome back" })).toBeInTheDocument();
     expect(screen.getByRole("region", { name: "Jobs near you" })).toBeInTheDocument();
   });
 
@@ -314,7 +314,7 @@ describe("MapStage", () => {
 
   it("handles loading, errors and no placed jobs", () => {
     const { rerender } = renderStage({ status: "loading" });
-    expect(screen.getByRole("status")).toHaveTextContent("Loading the map…");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the map");
     rerender(
       <MemoryRouter>
         <MapStage state={{ status: "error" }} intro={null} />

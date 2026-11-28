@@ -159,11 +159,9 @@ export const tokens = {
     "raised": "0 1px 2px rgba(16, 25, 53, 0.08), 0 4px 12px rgba(16, 25, 53, 0.06)",
     "overlay": "0 12px 40px rgba(16, 25, 53, 0.24)",
     "lift": "0 2px 4px rgba(16, 25, 53, 0.06), 0 12px 32px rgba(16, 25, 53, 0.12)",
-    "hero": "0 24px 60px rgba(16, 25, 53, 0.32)",
-    "glow-coral": "0 10px 28px rgba(255, 107, 74, 0.4)"
+    "hero": "0 24px 60px rgba(16, 25, 53, 0.32)"
   },
   "gradient": {
-    "hero": "radial-gradient(60% 90% at 88% 0%, rgba(255, 107, 74, 0.34) 0%, rgba(255, 107, 74, 0) 62%), linear-gradient(135deg, #101935 0%, #1C2750 100%)",
     "glass": "linear-gradient(180deg, rgba(244, 242, 255, 0.10), rgba(244, 242, 255, 0.04))"
   },
   "motion": {

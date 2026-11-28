@@ -29,9 +29,9 @@ const MAZE = [
 let lastShown: BandKind | null = null;
 
 /**
- * The indigo band behind a page's title: the maze, and a coral glow that sits somewhere
- * different on each tab. Purely decorative. The slide is a CSS transition on one transform,
- * so it costs nothing per frame in JavaScript, and reduced motion turns it off.
+ * The indigo band behind a page's title, with a faint maze that slides to each tab. Purely
+ * decorative. The slide is a CSS transition on one transform, so it costs nothing per frame in
+ * JavaScript, and reduced motion turns it off.
  */
 export function PageBand({ kind }: { kind: BandKind }) {
   const [at, setAt] = useState<BandKind>(() => lastShown ?? kind);
@@ -52,7 +52,6 @@ export function PageBand({ kind }: { kind: BandKind }) {
 
   return (
     <div className="page-band" data-band={kind} data-at={at} aria-hidden="true">
-      <div className="page-band-glow" />
       <svg className="page-band-maze" viewBox="0 0 5120 360" preserveAspectRatio="none" focusable="false">
         <path d={MAZE} vectorEffect="non-scaling-stroke" />
       </svg>

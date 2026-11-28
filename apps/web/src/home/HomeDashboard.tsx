@@ -57,14 +57,14 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
         <p className="home-eyebrow">{greetingFor(hour)}</p>
         <h1 id="home-title" className="home-title">
           {name
-            ? `Welcome back, ${name}.`
+            ? `Welcome back, ${name}`
             : data.hasProfile === false
-              ? "Let's get you hired."
-              : "Welcome back."}
+              ? "Set up your profile"
+              : "Welcome back"}
         </h1>
         <p className="home-hero-lede">
           {data.hasProfile === null
-            ? "We couldn't load your profile just now. Reload the page to try again."
+            ? "We couldn't load your profile just now. Refresh the page to try again."
             : statusLine(data.hasProfile, counts, data.jobs?.total ?? 0)}
         </p>
         {data.hasProfile !== false ? (

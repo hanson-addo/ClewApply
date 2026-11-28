@@ -110,7 +110,7 @@ describe("signed-in pages", () => {
     renderAt("/");
 
     expect(await screen.findByText("riley@example.test")).toBeInTheDocument();
-    expect(await screen.findByRole("heading", { name: /let's get you hired/i })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: /set up your profile/i })).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /add your resume/i })[0]).toHaveAttribute("href", "/onboarding/upload");
     const request = fetchMock.mock.calls[0]?.[0];
     expect(request?.url).toMatch(/\/me$/);

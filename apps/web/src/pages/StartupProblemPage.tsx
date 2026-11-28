@@ -41,7 +41,7 @@ export class StartupErrorBoundary extends Component<{ children: ReactNode }, { f
         <Logo variant="onLight" />
         <h1>Clew couldn&apos;t start</h1>
         <p>
-          Reload the page to try again. If it keeps happening, the browser console (F12, then
+          Refresh the page to try again. If it keeps happening, the browser console (F12, then
           Console) says what went wrong.
         </p>
       </main>

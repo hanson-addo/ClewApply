@@ -228,7 +228,7 @@ describe("Settings", () => {
     await userEvent.type(within(dialog).getByLabelText("Type DELETE to confirm"), "DELETE");
     await userEvent.click(within(dialog).getByRole("button", { name: "Delete my account" }));
 
-    expect(await screen.findByRole("heading", { name: "Your account is deleted." })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Your account is deleted" })).toBeInTheDocument();
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
@@ -247,6 +247,6 @@ describe("Settings", () => {
   it("has a public page for after the account is deleted", async () => {
     clerkState.isSignedIn = false;
     renderAt("/account-deleted");
-    expect(await screen.findByRole("heading", { name: "Your account is deleted." })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Your account is deleted" })).toBeInTheDocument();
   });
 });

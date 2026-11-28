@@ -10,7 +10,7 @@ export const COLUMNS: readonly { id: Column; label: string; empty: string }[] = 
   { id: "saved", label: "Saved", empty: "Save a job from your feed to keep it here." },
   { id: "applied", label: "Applied", empty: "Jobs you've applied to show up here." },
   { id: "interview", label: "Interview", empty: "Move a card here when you get an interview." },
-  { id: "offer", label: "Offer", empty: "The way out of the maze. Offers land here." },
+  { id: "offer", label: "Offer", empty: "Move a card here when you get an offer." },
   { id: "closed", label: "Closed", empty: "Rejected and withdrawn applications end up here." },
 ];
 

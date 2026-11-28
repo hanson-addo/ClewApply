@@ -63,7 +63,7 @@ export function HomePage() {
         onSignOut={() => void signOut()}
       />
       <main id="main" className={state.status === "ready" ? "home home-wide" : "home"}>
-        {state.status === "loading" && <p role="status">Loading your account…</p>}
+        {state.status === "loading" && <p role="status">Loading your account</p>}
         {state.status === "error" && (
           <p role="alert" className="home-error">
             We couldn&apos;t load your account. Check your connection and refresh the page.

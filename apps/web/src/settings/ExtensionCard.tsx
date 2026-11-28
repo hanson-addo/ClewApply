@@ -103,9 +103,8 @@ export function ExtensionCard() {
     <section className="settings-card" aria-labelledby="extension-title">
       <h2 id="extension-title">Browser extension</h2>
       <p>
-        The Clew extension for Chrome will fill your LinkedIn, Indeed and USAJobs profiles from your Clew profile.
-        You tick each field, and you press Save on the site yourself. Connect it here first; filling arrives one site
-        at a time.
+        The Clew extension for Chrome fills your LinkedIn and Indeed profiles from your Clew profile. You tick each
+        field, and you press Save on the site yourself. Connect it here first.
       </p>
       {listError && (
         <p role="alert" className="settings-error">

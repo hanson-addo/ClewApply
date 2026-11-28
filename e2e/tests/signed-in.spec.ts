@@ -21,11 +21,11 @@ test.beforeEach(async ({ page }) => {
 
 const emailField = (page: Page) => page.getByLabel(/email address/i);
 const continueButton = (page: Page) => page.getByRole("button", { name: "Continue", exact: true });
-const welcome = (page: Page) => page.getByRole("heading", { level: 1, name: /let's get you hired|welcome back/i });
+const welcome = (page: Page) => page.getByRole("heading", { level: 1, name: /set up your profile|welcome back/i });
 
 async function expectSignInPage(page: Page) {
   await expect(page).toHaveURL(/\/sign-in/);
-  await expect(page.getByRole("heading", { name: "Pick up the thread" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Sign in to Clew" })).toBeVisible();
   await expect(emailField(page)).toBeVisible();
 }
 
