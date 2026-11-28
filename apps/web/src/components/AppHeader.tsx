@@ -50,7 +50,14 @@ function AccountMenu({ email, onSignOut }: { email: string | null; onSignOut: ()
         onClick={() => setOpen((was) => !was)}
       >
         <span className="app-header-avatar" aria-hidden="true">
-          {email ? email.charAt(0).toUpperCase() : "•"}
+          {email ? (
+            email.charAt(0).toUpperCase()
+          ) : (
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" focusable="false">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 21c0-4 3.6-7 8-7s8 3 8 7" />
+            </svg>
+          )}
         </span>
         <span className="clew-sr-only">Account</span>
         <span className="account-menu-caret" aria-hidden="true" />

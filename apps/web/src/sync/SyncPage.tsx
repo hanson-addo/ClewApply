@@ -92,7 +92,7 @@ export function SyncPage() {
             press Save on the site yourself.
           </p>
         </div>
-        {state.status === "loading" && <p role="status">Loading your sites…</p>}
+        {state.status === "loading" && <p role="status">Loading your sites</p>}
         {state.status === "error" && (
           <p role="alert" className="sync-error">
             {state.unavailable

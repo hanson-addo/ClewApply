@@ -93,7 +93,7 @@ test.describe("job feed", () => {
     await card(page, THREAD.title).click();
     await expect(page).toHaveURL(/\/jobs\/[0-9a-f-]{36}/);
     const detail = page.getByRole("article", { name: THREAD.title });
-    await expect(detail.getByText(/^FIT \d+ OF 100$/)).toBeVisible();
+    await expect(detail.getByText(/^Fit score \d+ of 100$/)).toBeVisible();
 
     const apply = detail.getByRole("link", {
       name: `Apply on ${THREAD.company}'s site (opens in a new tab)`,
@@ -397,7 +397,7 @@ test("feed, job detail and board have no serious accessibility issues @phone", a
 
 async function expectNoSideScrollAndAxe(page: Page, open: () => Promise<void>) {
   await open();
-  await expect(page.getByText(/^FIT \d+ OF 100$/)).toBeVisible();
+  await expect(page.getByText(/^Fit score \d+ of 100$/)).toBeVisible();
   await expectNoSeriousAxeIssues(page);
   await expectNoSidewaysScroll(page);
 }

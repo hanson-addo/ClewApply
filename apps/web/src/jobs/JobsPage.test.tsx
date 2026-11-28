@@ -230,7 +230,7 @@ describe("job detail", () => {
     });
     renderAt(`/jobs/${one.id}`);
     expect(await screen.findByRole("heading", { level: 2, name: "Maze Mapper 1" })).toBeInTheDocument();
-    expect(screen.getByText("FIT 89 OF 100")).toBeInTheDocument();
+    expect(screen.getByText("Fit score 89 of 100")).toBeInTheDocument();
     const apply = screen.getByRole("link", {
       name: "Apply on Labyrinth Logistics's site (opens in a new tab)",
     });

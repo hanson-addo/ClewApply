@@ -314,7 +314,7 @@ describe("MapStage", () => {
 
   it("handles loading, errors and no placed jobs", () => {
     const { rerender } = renderStage({ status: "loading" });
-    expect(screen.getByRole("status")).toHaveTextContent("Loading the map…");
+    expect(screen.getByRole("status")).toHaveTextContent("Loading the map");
     rerender(
       <MemoryRouter>
         <MapStage state={{ status: "error" }} intro={null} />
