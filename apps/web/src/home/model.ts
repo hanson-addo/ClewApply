@@ -16,7 +16,7 @@ export type Progress = { steps: Step[]; doneCount: number; complete: boolean };
 
 /** The part of the day, for the greeting. */
 export function greetingFor(hour: number): string {
-  if (hour < 5) return "Burning the midnight oil";
+  if (hour < 5) return "Up late";
   if (hour < 12) return "Good morning";
   if (hour < 18) return "Good afternoon";
   return "Good evening";
@@ -84,9 +84,9 @@ export function activeCount(counts: PipelineCounts): number {
 
 /** A short line under the greeting that reflects where the user is. */
 export function statusLine(hasProfile: boolean, counts: PipelineCounts, matches: number): string {
-  if (!hasProfile) return "Two minutes from now your profile can be ready. Start with your resume.";
+  if (!hasProfile) return "Add your resume and Clew turns it into your profile.";
   if (counts.interview > 0)
-    return `You have ${counts.interview} ${counts.interview === 1 ? "interview" : "interviews"} in play. Go get it.`;
+    return `You have ${counts.interview} ${counts.interview === 1 ? "interview" : "interviews"} in progress.`;
   if (matches > 0) return `${matches} ${matches === 1 ? "job matches" : "jobs match"} you right now.`;
   return "Your profile is ready. New jobs land here as they're posted.";
 }

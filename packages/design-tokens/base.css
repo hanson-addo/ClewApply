@@ -18,10 +18,17 @@ body {
   line-height: var(--clew-font-line-height-normal);
 }
 
-h1, h2 {
+/* Syne is for page titles only. Section and card titles are Figtree 700 (docs/design/README.md, Type). */
+h1 {
   font-family: var(--clew-font-family-display);
   font-weight: var(--clew-font-weight-heavy);
   letter-spacing: var(--clew-font-letter-spacing-display);
+  line-height: var(--clew-font-line-height-snug);
+}
+
+h2 {
+  font-family: var(--clew-font-family-body);
+  font-weight: var(--clew-font-weight-bold);
   line-height: var(--clew-font-line-height-snug);
 }
 

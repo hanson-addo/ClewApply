@@ -27,7 +27,7 @@ const app = (status: Application["status"]) => ({ status }) as Application;
 
 describe("greetingFor", () => {
   it("follows the hour", () => {
-    expect(greetingFor(3)).toMatch(/midnight/);
+    expect(greetingFor(3)).toBe("Up late");
     expect(greetingFor(9)).toBe("Good morning");
     expect(greetingFor(14)).toBe("Good afternoon");
     expect(greetingFor(20)).toBe("Good evening");
@@ -80,7 +80,7 @@ describe("statusLine", () => {
     expect(statusLine(false, none, 0)).toMatch(/resume/i);
   });
   it("puts interviews first", () => {
-    expect(statusLine(true, pipelineCounts([app("interview")]), 9)).toMatch(/1 interview in play/);
+    expect(statusLine(true, pipelineCounts([app("interview")]), 9)).toMatch(/1 interview in progress/);
   });
   it("uses singular and plural for matches", () => {
     expect(statusLine(true, none, 1)).toBe("1 job matches you right now.");

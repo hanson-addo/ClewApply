@@ -118,8 +118,6 @@
   color: var(--clew-text-on-inverse);
   font-size: var(--clew-font-size-xs);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
 }
 
 .signin-title {
@@ -1112,7 +1110,6 @@ h2[tabindex="-1"]:focus {
   margin: 0;
   font-size: var(--clew-font-size-xs);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
   color: var(--clew-text-secondary);
 }
 
@@ -1701,10 +1698,6 @@ input:focus-visible + .upload-choose,
   transform: translateY(-2px);
 }
 
-.button-primary.button-lg:hover {
-  box-shadow: var(--clew-shadow-glow-coral);
-}
-
 .home-hero {
   position: relative;
   overflow: hidden;
@@ -1715,7 +1708,7 @@ input:focus-visible + .upload-choose,
   gap: var(--clew-space-8);
   padding: var(--clew-space-10) var(--clew-space-6);
   border-radius: var(--clew-radius-2xl);
-  background: var(--clew-gradient-hero);
+  background: var(--clew-bg-inverse);
   box-shadow: var(--clew-shadow-hero);
 }
 
@@ -1736,8 +1729,6 @@ input:focus-visible + .upload-choose,
   margin: 0;
   font-size: var(--clew-font-size-sm);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--clew-text-link-on-inverse);
 }
 
@@ -2675,7 +2666,7 @@ input:focus-visible + .upload-choose,
   border: 3px solid var(--clew-color-ink-50);
   border-radius: 50%;
   background: var(--clew-color-coral-500);
-  box-shadow: var(--clew-shadow-glow-coral);
+  box-shadow: 0 2px 6px rgba(16, 25, 53, 0.3);
 }
 
 .map-beacon::after {
@@ -2853,30 +2844,6 @@ body:has(.page-band) .app-header[data-at-top] {
   transform: translateX(-75%);
 }
 
-/* The glow: a soft coral light that sits somewhere different on each tab. */
-.page-band-glow {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 900px;
-  height: 680px;
-  background: radial-gradient(closest-side, rgba(255, 107, 74, 0.32), transparent);
-  transform: translate(calc(78vw - 450px), calc(12rem - 340px));
-  transition: transform 300ms ease-out;
-}
-
-.page-band[data-at="jobs"] .page-band-glow {
-  transform: translate(calc(50vw - 450px), calc(14rem - 340px));
-}
-
-.page-band[data-at="applications"] .page-band-glow {
-  transform: translate(calc(20vw - 450px), calc(20rem - 340px));
-}
-
-.page-band[data-at="profile"] .page-band-glow {
-  transform: translate(calc(88vw - 450px), calc(20rem - 340px));
-}
-
 /* The thread: Theseus's line down the left edge, only where there's room beside the page. */
 .page-thread {
   display: none;
@@ -2899,7 +2866,6 @@ body:has(.page-band) .app-header[data-at-top] {
 
 @media (prefers-reduced-motion: reduce) {
   .page-band-maze,
-  .page-band-glow,
   .app-header {
     transition: none;
   }
@@ -3060,8 +3026,6 @@ body:has(.page-band) .app-header[data-at-top] {
 .job-search-field label {
   font-size: var(--clew-font-size-xs);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
   color: var(--clew-color-ink-300);
 }
 
@@ -3148,8 +3112,6 @@ body:has(.page-band) .app-header[data-at-top] {
   font-family: var(--clew-font-family-body);
   font-size: var(--clew-font-size-sm);
   font-weight: var(--clew-font-weight-bold);
-  letter-spacing: var(--clew-font-letter-spacing-caps);
-  text-transform: uppercase;
   color: var(--clew-color-coral-700);
 }
 

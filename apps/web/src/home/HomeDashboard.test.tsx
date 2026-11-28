@@ -43,14 +43,14 @@ function renderHome(data: Dashboard, hour = 9) {
 describe("HomeDashboard", () => {
   it("greets a returning user by first name and time of day", () => {
     renderHome(base, 9);
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Welcome back, Riley.");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Welcome back, Riley");
     expect(screen.getByText("Good morning")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "See your matches" })).toHaveAttribute("href", "/jobs");
   });
 
   it("shows the big resume prompt to a new user and no numbers", () => {
     renderHome({ name: null, hasProfile: false, prefs: null, jobs: null, apps: null });
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Let's get you hired.");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Set up your profile");
     expect(screen.getAllByRole("link", { name: /add your resume/i })[0]).toHaveAttribute(
       "href",
       "/onboarding/upload",
@@ -60,7 +60,7 @@ describe("HomeDashboard", () => {
 
   it("shows a neutral hero, not the new-user one, when the profile couldn't load", () => {
     renderHome({ ...base, name: null, hasProfile: null });
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Welcome back.");
+    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Welcome back");
     expect(screen.getByText(/couldn't load your profile/i)).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: /add your resume/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("region", { name: "Your numbers" })).not.toBeInTheDocument();

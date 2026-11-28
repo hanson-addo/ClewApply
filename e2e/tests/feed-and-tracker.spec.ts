@@ -196,6 +196,8 @@ test.describe("job feed", () => {
 
     await filters.getByLabel("Work type").selectOption("");
     await filters.getByRole("button", { name: "Apply filters" }).click();
+    // The search box starts over when the address changes, so wait for that before typing in it.
+    await expect(page).not.toHaveURL(/[?&]work=/);
     await search.getByLabel("Where").fill("Texas");
     await search.getByRole("button", { name: "Search" }).click();
     await expect(page).toHaveURL(/[?&]state=Texas/);
