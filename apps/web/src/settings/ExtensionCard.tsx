@@ -13,6 +13,9 @@ type State =
 
 const NOT_INSTALLED = "Install the Clew extension in Chrome, then press Connect again.";
 const FAILED = "We couldn't connect the extension. Try again.";
+const EXPIRED = "The connect code ran out before the extension used it. Press Connect again.";
+const UNREACHABLE =
+  "The extension couldn't reach Clew. Check that Clew is running, then press Connect again.";
 const TOO_MANY = "You've connected a browser several times this hour. Try again later.";
 const LIST_FAILED = "We couldn't load your connected browsers. Refresh the page to try again.";
 
@@ -71,7 +74,8 @@ export function ExtensionCard() {
         await reload();
         return;
       }
-      setState({ status: "failed", message: handOff === "not-installed" ? NOT_INSTALLED : FAILED });
+      const messages = { "not-installed": NOT_INSTALLED, expired: EXPIRED, unavailable: UNREACHABLE };
+      setState({ status: "failed", message: messages[handOff] });
     } catch (error) {
       setState(isCancelled(error) ? { status: "idle" } : { status: "failed", message: FAILED });
     }

@@ -112,13 +112,16 @@ describe("Settings: browser extension", () => {
     expect(await within(card).findByRole("alert")).toHaveTextContent("Install the Clew extension in Chrome");
   });
 
-  it("says so when the extension couldn't use the code", async () => {
+  it.each([
+    ["expired", "The connect code ran out"],
+    ["unavailable", "The extension couldn't reach Clew"],
+  ])("says what went wrong when the extension couldn't use the code (%s)", async (error, text) => {
     handlers["POST /extension/link"] = () => Response.json({ code: CODE, expires_at: "x" }, { status: 201 });
-    installExtension(async () => ({ ok: false, error: "expired" }));
+    installExtension(async () => ({ ok: false, error }));
     renderAt("/settings");
     const card = await screen.findByRole("region", { name: "Browser extension" });
     await userEvent.click(within(card).getByRole("button", { name: "Connect this browser" }));
-    expect(await within(card).findByRole("alert")).toHaveTextContent("We couldn't connect the extension.");
+    expect(await within(card).findByRole("alert")).toHaveTextContent(text);
   });
 
   it("says so when too many link codes were made this hour", async () => {
