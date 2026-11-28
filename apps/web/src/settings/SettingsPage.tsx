@@ -272,7 +272,7 @@ export function AccountDeletedPage() {
   }, []);
   return (
     <main id="main" className="settings-page settings-deleted">
-      <h1>Your account is deleted.</h1>
+      <h1>Your account is deleted</h1>
       <p>
         <a href="/">Go to the home page</a>
       </p>

@@ -57,10 +57,10 @@ function Hero({ data, progress, hour }: { data: Dashboard; progress: Progress; h
         <p className="home-eyebrow">{greetingFor(hour)}</p>
         <h1 id="home-title" className="home-title">
           {name
-            ? `Welcome back, ${name}.`
+            ? `Welcome back, ${name}`
             : data.hasProfile === false
-              ? "Let's get you hired."
-              : "Welcome back."}
+              ? "Set up your profile"
+              : "Welcome back"}
         </h1>
         <p className="home-hero-lede">
           {data.hasProfile === null
