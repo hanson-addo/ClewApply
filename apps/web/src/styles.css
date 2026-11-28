@@ -650,8 +650,11 @@ html {
     grid-template-areas: "nav form" "nav aside";
   }
 
+  /* A card like the form and History, so its top links stay readable where it overlaps the band. */
   .profile-nav {
     display: block;
+    align-self: start;
+    padding: var(--clew-space-2);
   }
 
   .profile-select {
@@ -1372,6 +1375,11 @@ h2[tabindex="-1"]:focus {
   margin-top: var(--clew-space-3);
 }
 
+.app-card-status .field-input {
+  width: 100%;
+  min-width: 0;
+}
+
 .app-detail {
   max-width: var(--clew-size-reading);
 }
@@ -1417,9 +1425,12 @@ h2[tabindex="-1"]:focus {
     display: none;
   }
 
+  /* Five lanes that keep a readable width; narrower screens scroll the board sideways. */
   .apps-board {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(13rem, 1fr));
     align-items: start;
+    overflow-x: auto;
+    padding-bottom: var(--clew-space-2);
   }
 
   .apps-column {
@@ -1502,14 +1513,20 @@ h2[tabindex="-1"]:focus {
   }
 }
 
-/* Under lg the card comes before the privacy points. */
+/* Under lg the card comes before the privacy points, but the title and lede stay on top. */
 @media (max-width: 63.99rem) {
-  .upload-card {
-    order: -1;
+  .upload-intro {
+    display: contents;
   }
 
-  .upload-intro h1 {
-    margin-top: 0;
+  .upload-intro h1,
+  .upload-intro .home-lede {
+    order: -2;
+    margin: 0;
+  }
+
+  .upload-card {
+    order: -1;
   }
 }
 
@@ -2770,6 +2787,15 @@ body:has(.page-band) .app-header[data-at-top] {
   border-bottom-color: transparent;
 }
 
+/* Below desktop a job opens as its own page and the band is hidden, so the header stays solid. */
+@media (max-width: 63.99rem) {
+  body:has(.jobs-has-detail) .app-header[data-at-top] {
+    background: color-mix(in srgb, var(--clew-bg-inverse) 92%, transparent);
+    backdrop-filter: blur(12px);
+    border-bottom-color: var(--clew-bg-inverse-raised);
+  }
+}
+
 .app-nav-link {
   border-radius: 0;
   color: var(--clew-color-ink-300);
@@ -2884,6 +2910,7 @@ body:has(.page-band) .app-header[data-at-top] {
 .jobs-filters-form,
 .job-detail,
 .app-card,
+.profile-nav,
 .profile-form,
 .profile-history,
 .settings-card {
@@ -2946,7 +2973,8 @@ body:has(.page-band) .app-header[data-at-top] {
   color: var(--clew-color-ink-300);
 }
 
-@media (min-width: 64rem) {
+/* Lanes get their pale card wherever the board shows all five, so titles never sit on the band. */
+@media (min-width: 48rem) {
   .apps-column {
     padding: var(--clew-space-4);
     border: 1px solid var(--app-card-border);
