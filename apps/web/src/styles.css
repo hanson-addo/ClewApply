@@ -116,11 +116,6 @@
   font-weight: var(--clew-font-weight-semibold);
 }
 
-.signin-title {
-  margin: 0;
-  font-size: var(--clew-font-size-3xl);
-}
-
 .signin-promise {
   margin: 0;
   font-size: var(--clew-font-size-sm);

@@ -32,7 +32,7 @@ export function SignInPage({ mode }: { mode: Mode }) {
             <Logo variant="onLight" size={36} />
           </span>
           <span className="signin-badge">Free to join · US only for now</span>
-          <h2 className="signin-title">{mode === "sign-in" ? "Sign in to Clew" : "Create your Clew account"}</h2>
+          {/* Clerk's widget brings its own heading ("Sign in to Clew"), so the panel doesn't add a second one. */}
           {mode === "sign-in" ? (
             <SignIn
               routing="path"
