@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import { useApi } from "../auth/useApi";
 import { config } from "../config";
-import { isCancelled, useAccountRequest } from "./accountRequest";
+import { isCancelled, responseOf, useAccountRequest } from "./accountRequest";
 import { handOffLinkCode } from "./extensionBridge";
 
 type Connection = { id: string; label: string; created_at: string; last_used_at: string | null };
@@ -13,6 +13,9 @@ type State =
 
 const NOT_INSTALLED = "Install the Clew extension in Chrome, then press Connect again.";
 const FAILED = "We couldn't connect the extension. Try again.";
+const EXPIRED = "The connect code ran out before the extension used it. Press Connect again.";
+const UNREACHABLE =
+  "The extension couldn't reach Clew. Check that Clew is running, then press Connect again.";
 const TOO_MANY = "You've connected a browser several times this hour. Try again later.";
 const LIST_FAILED = "We couldn't load your connected browsers. Refresh the page to try again.";
 
@@ -58,9 +61,9 @@ export function ExtensionCard() {
   async function connect() {
     setState({ status: "connecting" });
     try {
-      const result = await requestLink();
-      if (!(result instanceof Response) || !result.ok) {
-        const tooMany = result instanceof Response && result.status === 429;
+      const result = responseOf(await requestLink());
+      if (!result?.ok) {
+        const tooMany = result?.status === 429;
         setState({ status: "failed", message: tooMany ? TOO_MANY : FAILED });
         return;
       }
@@ -71,7 +74,8 @@ export function ExtensionCard() {
         await reload();
         return;
       }
-      setState({ status: "failed", message: handOff === "not-installed" ? NOT_INSTALLED : FAILED });
+      const messages = { "not-installed": NOT_INSTALLED, expired: EXPIRED, unavailable: UNREACHABLE };
+      setState({ status: "failed", message: messages[handOff] });
     } catch (error) {
       setState(isCancelled(error) ? { status: "idle" } : { status: "failed", message: FAILED });
     }

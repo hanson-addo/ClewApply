@@ -59,8 +59,12 @@ export async function handleExternal(
       await deps.store.set(data.token);
       return { ok: true };
     }
-    return { ok: false, error: response.status === 400 ? "expired" : "unavailable" };
-  } catch {
+    if (response.status === 400) return { ok: false, error: "expired" };
+    // Shows in the service worker's console; never the code or a token.
+    console.warn(`Clew: the API answered ${response.status} when connecting.`);
+    return { ok: false, error: "unavailable" };
+  } catch (error) {
+    console.warn(`Clew: couldn't reach the API at ${deps.apiUrl} to connect.`, error);
     return { ok: false, error: "unavailable" };
   }
 }

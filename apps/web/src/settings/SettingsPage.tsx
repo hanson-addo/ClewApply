@@ -6,7 +6,7 @@ import { useApi } from "../auth/useApi";
 import { useSignOut } from "../auth/useSignOut";
 import { AppHeader } from "../components/AppHeader";
 import { PageBand } from "../components/PageBand";
-import { isCancelled, useAccountRequest } from "./accountRequest";
+import { isCancelled, responseOf, useAccountRequest } from "./accountRequest";
 import { ExtensionCard } from "./ExtensionCard";
 
 /** How long a prepared download stays offered before the file is dropped from memory. */
@@ -46,9 +46,9 @@ function DownloadCard() {
   async function prepare() {
     setState({ status: "preparing" });
     try {
-      const result = await requestExport();
-      if (!(result instanceof Response) || !result.ok) {
-        const tooMany = result instanceof Response && result.status === 429;
+      const result = responseOf(await requestExport());
+      if (!result?.ok) {
+        const tooMany = result?.status === 429;
         setState({
           status: "failed",
           message: tooMany ? "You've downloaded your data several times this hour. Try again later." : EXPORT_FAILED,
@@ -118,8 +118,8 @@ function DeleteDialog({ onClose }: { onClose: () => void }) {
     setDeleting(true);
     setError(null);
     try {
-      const result = await requestDelete();
-      if (result instanceof Response && result.status === 204) {
+      const result = responseOf(await requestDelete());
+      if (result?.status === 204) {
         // The account is gone. Clerk may already have ended the session, so signing out can
         // fail; that changes nothing for the user, who goes to the "deleted" page either way.
         try {
